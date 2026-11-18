@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-Schema::create('user_profiles', function (Blueprint $table) {
+        Schema::create('user_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('username')->unique()->nullable();
@@ -37,38 +37,38 @@ Schema::create('user_profiles', function (Blueprint $table) {
             $table->timestamps();
             $table->softDeletes();
         });
-Schema::create('member_profiles', function (Blueprint $table) {
+        Schema::create('member_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('status')->default('active');
             $table->timestamps();
         });
-Schema::create('skills', function (Blueprint $table) {
+        Schema::create('skills', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->timestamps();
         });
-Schema::create('interests', function (Blueprint $table) {
+        Schema::create('interests', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->timestamps();
         });
-Schema::create('member_social_links', function (Blueprint $table) {
+        Schema::create('member_social_links', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('platform');
             $table->string('url');
             $table->timestamps();
         });
-Schema::create('technology_areas', function (Blueprint $table) {
+        Schema::create('technology_areas', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->timestamps();
         });
-Schema::create('hubs', function (Blueprint $table) {
+        Schema::create('hubs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
@@ -101,7 +101,7 @@ Schema::create('hubs', function (Blueprint $table) {
             $table->timestamps();
             $table->softDeletes();
         });
-Schema::create('hub_applications', function (Blueprint $table) {
+        Schema::create('hub_applications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hub_id')->constrained()->cascadeOnDelete();
             $table->string('status')->default('pending');
@@ -110,7 +110,7 @@ Schema::create('hub_applications', function (Blueprint $table) {
             $table->timestamp('reviewed_at')->nullable();
             $table->timestamps();
         });
-Schema::create('hub_team_members', function (Blueprint $table) {
+        Schema::create('hub_team_members', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hub_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -118,7 +118,7 @@ Schema::create('hub_team_members', function (Blueprint $table) {
             $table->timestamps();
             $table->unique(['hub_id', 'user_id']);
         });
-Schema::create('chapters', function (Blueprint $table) {
+        Schema::create('chapters', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
@@ -130,20 +130,20 @@ Schema::create('chapters', function (Blueprint $table) {
             $table->timestamps();
             $table->softDeletes();
         });
-Schema::create('chapter_members', function (Blueprint $table) {
+        Schema::create('chapter_members', function (Blueprint $table) {
             $table->id();
             $table->foreignId('chapter_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
             $table->unique(['chapter_id', 'user_id']);
         });
-Schema::create('event_categories', function (Blueprint $table) {
+        Schema::create('event_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->timestamps();
         });
-Schema::create('events', function (Blueprint $table) {
+        Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
@@ -171,7 +171,7 @@ Schema::create('events', function (Blueprint $table) {
             $table->timestamps();
             $table->softDeletes();
         });
-Schema::create('event_registrations', function (Blueprint $table) {
+        Schema::create('event_registrations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -180,13 +180,13 @@ Schema::create('event_registrations', function (Blueprint $table) {
             $table->timestamps();
             $table->unique(['event_id', 'user_id']);
         });
-Schema::create('opportunity_categories', function (Blueprint $table) {
+        Schema::create('opportunity_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->timestamps();
         });
-Schema::create('opportunities', function (Blueprint $table) {
+        Schema::create('opportunities', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
@@ -205,7 +205,7 @@ Schema::create('opportunities', function (Blueprint $table) {
             $table->timestamps();
             $table->softDeletes();
         });
-Schema::create('announcements', function (Blueprint $table) {
+        Schema::create('announcements', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->text('body');
@@ -215,13 +215,13 @@ Schema::create('announcements', function (Blueprint $table) {
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });
-Schema::create('newsletter_subscribers', function (Blueprint $table) {
+        Schema::create('newsletter_subscribers', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
             $table->string('email')->unique();
             $table->timestamps();
         });
-Schema::create('pages', function (Blueprint $table) {
+        Schema::create('pages', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
@@ -230,13 +230,13 @@ Schema::create('pages', function (Blueprint $table) {
             $table->text('meta_description')->nullable();
             $table->timestamps();
         });
-Schema::create('settings', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
             $table->text('value')->nullable();
             $table->timestamps();
         });
-Schema::create('audit_logs', function (Blueprint $table) {
+        Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('action');
@@ -246,33 +246,33 @@ Schema::create('audit_logs', function (Blueprint $table) {
             $table->string('ip_address')->nullable();
             $table->timestamps();
         });
-Schema::create('member_skills', function (Blueprint $table) {
+        Schema::create('member_skills', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('skill_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
             $table->unique(['user_id', 'skill_id']);
         });
-Schema::create('member_interests', function (Blueprint $table) {
+        Schema::create('member_interests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('interest_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
             $table->unique(['user_id', 'interest_id']);
         });
-Schema::create('hub_technology_areas', function (Blueprint $table) {
+        Schema::create('hub_technology_areas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hub_id')->constrained()->cascadeOnDelete();
             $table->foreignId('technology_area_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
             $table->unique(['hub_id', 'technology_area_id']);
         });
-Schema::table('user_profiles', function (Blueprint $table) {
+        Schema::table('user_profiles', function (Blueprint $table) {
             $table->string('facebook')->nullable()->after('linkedin');
             $table->string('twitter')->nullable()->after('facebook');
             $table->string('tiktok')->nullable()->after('twitter');
         });
-Schema::create('work_experiences', function (Blueprint $table) {
+        Schema::create('work_experiences', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('title');
@@ -284,7 +284,7 @@ Schema::create('work_experiences', function (Blueprint $table) {
             $table->text('description')->nullable();
             $table->timestamps();
         });
-Schema::create('projects', function (Blueprint $table) {
+        Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('title');
@@ -293,10 +293,10 @@ Schema::create('projects', function (Blueprint $table) {
             $table->string('technologies')->nullable();
             $table->timestamps();
         });
-Schema::table('user_profiles', function (Blueprint $table) {
+        Schema::table('user_profiles', function (Blueprint $table) {
             $table->text('likes')->nullable();
         });
-Schema::table('user_profiles', function (Blueprint $table) {
+        Schema::table('user_profiles', function (Blueprint $table) {
             $table->text('certifications')->nullable();
             $table->text('languages')->nullable();
             $table->string('availability')->nullable();
@@ -306,6 +306,31 @@ Schema::table('user_profiles', function (Blueprint $table) {
 
     public function down(): void
     {
-        //
+        Schema::dropIfExists('hub_technology_areas');
+        Schema::dropIfExists('member_interests');
+        Schema::dropIfExists('member_skills');
+        Schema::dropIfExists('projects');
+        Schema::dropIfExists('work_experiences');
+        Schema::dropIfExists('audit_logs');
+        Schema::dropIfExists('settings');
+        Schema::dropIfExists('pages');
+        Schema::dropIfExists('newsletter_subscribers');
+        Schema::dropIfExists('announcements');
+        Schema::dropIfExists('opportunities');
+        Schema::dropIfExists('opportunity_categories');
+        Schema::dropIfExists('event_registrations');
+        Schema::dropIfExists('events');
+        Schema::dropIfExists('event_categories');
+        Schema::dropIfExists('chapter_members');
+        Schema::dropIfExists('chapters');
+        Schema::dropIfExists('hub_team_members');
+        Schema::dropIfExists('hub_applications');
+        Schema::dropIfExists('hubs');
+        Schema::dropIfExists('member_social_links');
+        Schema::dropIfExists('technology_areas');
+        Schema::dropIfExists('interests');
+        Schema::dropIfExists('skills');
+        Schema::dropIfExists('member_profiles');
+        Schema::dropIfExists('user_profiles');
     }
 };

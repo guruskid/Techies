@@ -13,7 +13,10 @@ class MemberController extends Controller
         $q = User::where('role', 'member')->with('profile');
         if ($request->filled('search')) {
             $s = $request->search;
-            $q->where('name', 'like', "%$s%")->orWhere('email', 'like', "%$s%");
+            $q->where(function ($w) use ($s) {
+                $w->where('name', 'like', "%$s%")
+                    ->orWhere('email', 'like', "%$s%");
+            });
         }
         if ($request->filled('status')) {
             $q->where('status', $request->status);
@@ -32,6 +35,10 @@ class MemberController extends Controller
 
     public function suspend(User $user)
     {
+        if ($user->id === auth()->id() || $user->hasRole('super_admin')) {
+            return back()->with('error', 'You cannot suspend this account.');
+        }
+
         $user->update(['status' => 'suspended']);
 
         return back()->with('success', 'Member suspended.');

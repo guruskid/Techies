@@ -53,7 +53,7 @@
       <a href="/events/{{ $e->slug }}" class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition block">
         <div class="h-36 bg-gradient-to-br from-[#101E33] to-[#FF5C3D] flex items-center justify-center text-white text-4xl font-bold">{{ strtoupper(substr($e->title,0,1)) }}</div>
         <div class="p-5">
-          <div class="text-xs text-[#FF5C3D] font-medium">{{ $e->start_date }} @if($e->is_online)· Online @else· {{ $e->city }} @endif</div>
+          <div class="text-xs text-[#FF5C3D] font-medium">{{ $e->start_date->format('M j, Y') }} @if($e->is_online)· Online @else· {{ $e->city }} @endif</div>
           <h3 class="mt-2 font-semibold text-[#101E33]">{{ $e->title }}</h3>
           @if($e->category)<div class="mt-1 text-xs text-slate-400">{{ $e->category->name }}</div>@endif
         </div>

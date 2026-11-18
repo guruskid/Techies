@@ -48,8 +48,9 @@
         <div class="mt-3 flex items-center gap-2 text-xs text-slate-400">
           <span>{{ $o->location ?? ($o->is_remote ? 'Remote' : '') }}</span>
           @if($o->is_remote)<span class="px-2 py-0.5 rounded-full bg-green-50 text-green-600">Remote</span>@endif
+          @if($o->is_member_only)<span class="px-2 py-0.5 rounded-full bg-[#101E33] text-white">Members only</span>@endif
         </div>
-        @if($o->deadline)<div class="mt-2 text-xs text-slate-400">Deadline: {{ $o->deadline }}</div>@endif
+        @if($o->deadline)<div class="mt-2 text-xs text-slate-400">Deadline: {{ $o->deadline->format('M j, Y') }}</div>@endif
       </a>
     @empty
       <p class="text-slate-500 col-span-3">No opportunities found.</p>

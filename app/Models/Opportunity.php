@@ -9,9 +9,9 @@ class Opportunity extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['title', 'slug', 'description', 'category_id', 'organization', 'hub_id', 'location', 'is_remote', 'application_link', 'deadline', 'eligibility', 'cover_image', 'status', 'submitted_by'];
+    protected $fillable = ['title', 'slug', 'description', 'category_id', 'organization', 'hub_id', 'location', 'is_remote', 'is_member_only', 'application_link', 'deadline', 'eligibility', 'cover_image', 'status', 'submitted_by'];
 
-    protected $casts = ['is_remote' => 'boolean', 'deadline' => 'date'];
+    protected $casts = ['is_remote' => 'boolean', 'is_member_only' => 'boolean', 'deadline' => 'date'];
 
     public function category()
     {
@@ -26,5 +26,10 @@ class Opportunity extends Model
     public function submitter()
     {
         return $this->belongsTo(User::class, 'submitted_by');
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(OpportunityApplication::class);
     }
 }

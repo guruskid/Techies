@@ -19,9 +19,10 @@ class RolePermissionSeeder extends Seeder
         foreach ($permissions as $p) {
             Permission::firstOrCreate(['name' => $p]);
         }
+        $adminPermissions = array_values(array_diff($permissions, ['roles.manage', 'settings.manage']));
         $roles = [
             'super_admin' => $permissions,
-            'admin' => $permissions,
+            'admin' => $adminPermissions,
             'content_manager' => ['content.manage'],
             'membership_manager' => ['members.view', 'members.update', 'members.suspend'],
             'events_manager' => ['events.create', 'events.publish', 'events.manage'],

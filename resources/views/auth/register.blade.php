@@ -21,17 +21,29 @@
       <p class="mt-1 text-slate-500 text-sm">Join MWTT in less than a minute.</p>
       <form method="POST" action="{{ route('register') }}" class="mt-6 space-y-4">
         @csrf
+        @if($errors->any())
+          <div class="rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-700">
+            <ul class="list-disc list-inside">
+              @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
         <div>
           <label class="block text-xs font-medium text-slate-500 mb-1">Full Name</label>
-          <input name="name" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
+          <input name="name" value="{{ old('name') }}" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
+          @error('name')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-500 mb-1">Email Address</label>
-          <input name="email" type="email" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
+          <input name="email" type="email" value="{{ old('email') }}" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
+          @error('email')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-500 mb-1">Password</label>
           <input name="password" type="password" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
+          @error('password')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-500 mb-1">Confirm Password</label>

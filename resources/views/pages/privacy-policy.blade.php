@@ -16,7 +16,7 @@
     <ul class="list-disc pl-6 space-y-1">
       <li><strong>Account information:</strong> name, email address, password, role and account status.</li>
       <li><strong>Profile information:</strong> phone number, photo, location (country, state, city), professional title, technology category, skills, experience level, organization, education, biography.</li>
-      <li><strong>Professional links:</strong> LinkedIn, GitHub, portfolio and personal website URLs.</li>
+      <li><strong>Professional links:</strong> LinkedIn, GitHub and social profile URLs.</li>
       <li><strong>Community information:</strong> areas of interest, preferred participation, membership type.</li>
       <li><strong>Hub information:</strong> organization details, contact person, address, technology areas, social media links, documents.</li>
       <li><strong>Usage data:</strong> pages visited, actions taken, device and browser information for security and analytics.</li>

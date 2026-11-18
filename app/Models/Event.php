@@ -9,7 +9,7 @@ class Event extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['title', 'slug', 'description', 'cover_image', 'category_id', 'organizer_id', 'hub_id', 'chapter_id', 'start_date', 'end_date', 'start_time', 'end_time', 'venue', 'city', 'state', 'country', 'is_online', 'meeting_url', 'registration_deadline', 'max_attendees', 'registration_type', 'fee', 'status'];
+    protected $fillable = ['title', 'slug', 'description', 'cover_image', 'category_id', 'organizer_id', 'host', 'key_speakers', 'agenda', 'requirements', 'contact_email', 'contact_phone', 'hub_id', 'chapter_id', 'start_date', 'end_date', 'start_time', 'end_time', 'venue', 'city', 'state', 'country', 'is_online', 'meeting_url', 'registration_deadline', 'max_attendees', 'registration_type', 'fee', 'status'];
 
     protected $casts = ['is_online' => 'boolean', 'start_date' => 'date', 'end_date' => 'date', 'registration_deadline' => 'date'];
 

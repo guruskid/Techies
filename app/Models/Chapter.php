@@ -9,7 +9,7 @@ class Chapter extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name', 'slug', 'location', 'description', 'logo', 'coordinator_id', 'status'];
+    protected $fillable = ['name', 'slug', 'location', 'country', 'state', 'description', 'logo', 'coordinator_id', 'status'];
 
     public function coordinator()
     {

@@ -4,39 +4,59 @@ namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\Article;
 use App\Models\Event;
 use App\Models\Hub;
 use App\Models\Opportunity;
 use App\Models\User;
+use App\Models\UserProfile;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         $user = auth()->user();
+
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('super-admin.dashboard');
+        }
+
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $profile = $user->profile;
         $completion = 0;
         $missing = [];
         if ($profile) {
-            $labels = ['first_name' => 'First name', 'last_name' => 'Last name', 'phone' => 'Phone', 'professional_title' => 'Professional title', 'technology_category' => 'Technology category', 'experience_level' => 'Experience level', 'current_organization' => 'Current organization', 'education' => 'Education', 'bio' => 'Bio', 'country' => 'Country', 'state' => 'State', 'city' => 'City', 'linkedin' => 'LinkedIn', 'github' => 'GitHub', 'portfolio' => 'Portfolio', 'website' => 'Website'];
-            $filled = 0;
-            foreach ($labels as $f => $label) {
-                if (! empty($profile->$f)) {
-                    $filled++;
-                } else {
-                    $missing[] = $label;
-                }
-            }
-            $completion = (int) round(($filled / count($labels)) * 100);
+            $completion = $profile->completionPercentage();
+            $missing = $profile->missingCompletionFields();
         } else {
-            $missing = array_values(['First name', 'Last name', 'Phone', 'Professional title', 'Technology category', 'Experience level', 'Current organization', 'Education', 'Bio', 'Country', 'State', 'City', 'LinkedIn', 'GitHub', 'Portfolio', 'Website']);
+            $missing = array_values(UserProfile::completionFields());
         }
         $upcomingEvents = Event::where('status', 'published')->where('start_date', '>=', now()->toDateString())->latest()->take(5)->get();
         $recommendedHubs = Hub::where('is_verified', true)->latest()->take(4)->get();
-        $recentMembers = User::where('role', 'member')->where('id', '!=', $user->id)->latest()->take(5)->get();
+        $recentMembers = User::where('status', 'active')
+            ->whereHas('profile', fn ($q) => $q->where('is_public', true))
+            ->where('id', '!=', $user->id)
+            ->latest()
+            ->take(5)
+            ->get();
         $opportunities = Opportunity::where('status', 'published')->latest()->take(5)->get();
         $announcements = Announcement::where('is_published', true)->latest()->take(5)->get();
+        $registeredEvents = $user->eventRegistrations()->where('status', 'registered')->count();
 
-        return view('member.dashboard', compact('user', 'profile', 'completion', 'missing', 'upcomingEvents', 'recommendedHubs', 'recentMembers', 'opportunities', 'announcements'));
+        $applicationCount = $user->opportunityApplications()->count();
+
+        $contentStats = [
+            'total' => $user->articles()->count(),
+            'drafts' => $user->articles()->where('status', Article::STATUS_DRAFT)->count(),
+            'pending' => $user->articles()->where('status', Article::STATUS_PENDING)->count(),
+            'approved' => $user->articles()->where('status', Article::STATUS_APPROVED)->count(),
+            'rejected' => $user->articles()->where('status', Article::STATUS_REJECTED)->count(),
+        ];
+        $latestArticles = $user->articles()->latest()->take(4)->get();
+
+        return view('member.dashboard', compact('user', 'profile', 'completion', 'missing', 'upcomingEvents', 'recommendedHubs', 'recentMembers', 'opportunities', 'announcements', 'registeredEvents', 'contentStats', 'latestArticles', 'applicationCount'));
     }
 }

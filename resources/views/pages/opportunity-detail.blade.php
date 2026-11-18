@@ -10,8 +10,8 @@
     <h1 class="mt-4 text-3xl md:text-4xl font-bold leading-tight">{{ $o->title }}</h1>
     <p class="mt-2 text-slate-300 text-lg">{{ $o->organization }} · {{ $o->location ?? ($o->is_remote ? 'Remote' : '') }}</p>
     <div class="mt-4 flex flex-wrap gap-2">
-      @if($o->is_remote)<span class="text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-300">Remote</span>@endif
-      @if($o->deadline)<span class="text-xs px-3 py-1 rounded-full bg-white/10">Deadline: {{ $o->deadline }}</span>@endif
+      @if($o->is_member_only)<span class="text-xs px-3 py-1 rounded-full bg-[#101E33] text-white">Members only</span>@endif
+      @if($o->deadline)<span class="text-xs px-3 py-1 rounded-full bg-white/10">Deadline: {{ $o->deadline->format('M j, Y') }}</span>@endif
     </div>
   </div>
 </section>
@@ -70,12 +70,25 @@
         </div>
         <div class="flex justify-between gap-3">
           <dt class="text-slate-500">Deadline</dt>
-          <dd class="font-medium text-[#101E33] text-right">{{ $o->deadline ?? 'Open' }}</dd>
+          <dd class="font-medium text-[#101E33] text-right">{{ $o->deadline?->format('M j, Y') ?? 'Open' }}</dd>
         </div>
       </dl>
       <div class="mt-6 space-y-2">
+        @auth
+          @if($hasApplied)
+            <div class="block w-full text-center px-6 py-3 bg-green-50 text-green-700 rounded-lg font-semibold">Applied</div>
+          @else
+            <form method="POST" action="{{ route('opportunities.apply', $o) }}">
+              @csrf
+              <textarea name="cover_letter" rows="3" placeholder="Optional cover note" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-2"></textarea>
+              <button class="block w-full text-center px-6 py-3 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition">Apply on MWTT</button>
+            </form>
+          @endif
+        @else
+          <a href="{{ route('login') }}" class="block w-full text-center px-6 py-3 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition">Log in to apply</a>
+        @endauth
         @if($o->application_link)
-          <a href="{{ $o->application_link }}" target="_blank" class="block w-full text-center px-6 py-3 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition">Apply Now</a>
+          <a href="{{ $o->application_link }}" target="_blank" class="block w-full text-center px-6 py-3 border border-slate-200 rounded-lg font-medium hover:bg-slate-50 transition">External application link</a>
         @endif
         <a href="/opportunities" class="block w-full text-center px-6 py-3 border border-slate-200 rounded-lg font-medium hover:bg-slate-50 transition">Back to Opportunities</a>
       </div>

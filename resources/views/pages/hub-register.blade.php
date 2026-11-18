@@ -20,11 +20,20 @@
     <div class="p-10 max-h-[85vh] overflow-y-auto">
       <h1 class="text-2xl font-bold text-[#101E33]">Register Your Hub</h1>
       <p class="mt-1 text-slate-500 text-sm">Fill out the form. Your application will be reviewed.</p>
-      @if(session('success'))
-        <div class="mt-4 p-3 rounded-lg bg-green-50 text-green-600 text-sm">{{ session('success') }}</div>
-      @endif
+      @guest
+        <div class="mt-4 p-3 rounded-lg bg-yellow-50 text-yellow-700 text-sm">
+          You need an account before submitting a hub. <a href="{{ route('login') }}" class="font-medium underline">Log in</a> or <a href="{{ route('register') }}" class="font-medium underline">create one</a>.
+        </div>
+      @endguest
       @if(session('status'))
         <div class="mt-4 p-3 rounded-lg bg-yellow-50 text-yellow-700 text-sm">{{ session('status') }}</div>
+      @endif
+      @if($errors->any())
+        <div class="mt-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+          <ul class="list-disc list-inside">
+            @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+          </ul>
+        </div>
       @endif
       <form method="POST" action="{{ route('hubs.register.store') }}" class="mt-6 space-y-4">
         @csrf

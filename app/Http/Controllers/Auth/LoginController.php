@@ -19,10 +19,22 @@ class LoginController extends Controller
         if (Auth::attempt($creds, $request->boolean('remember'))) {
             $request->session()->regenerate();
             $user = Auth::user();
-            if ($user->hasRole('super_admin') || $user->hasRole('admin')) {
+
+            if ($user->status !== 'active') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors(['email' => 'Your account has been suspended. Please contact support.'])->onlyInput('email');
+            }
+
+            if ($user->isSuperAdmin()) {
+                return redirect()->route('super-admin.dashboard');
+            }
+            if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
             }
-            if ($user->hasRole('hub_owner')) {
+            if ($user->hasRole('hub_owner') || $user->hub()->exists()) {
                 return redirect()->route('hub.dashboard');
             }
 

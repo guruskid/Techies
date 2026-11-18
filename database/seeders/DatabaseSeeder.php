@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RolePermissionSeeder::class);
+        $this->call(AdminUserSeeder::class);
         // seed categories
         foreach (['Meetups', 'Conferences', 'Workshops', 'Hackathons', 'Networking', 'Webinars', 'Training', 'Career Events', 'Community Events'] as $c) {
             EventCategory::firstOrCreate(['name' => $c], ['slug' => Str::slug($c)]);
