@@ -289,13 +289,14 @@
 
           <div class="grid md:grid-cols-2 gap-4">
             <div>
-              <label for="chapter_id" class="{{ $labelClass }}">My chapter</label>
+              <label for="chapter_id" class="{{ $labelClass }}">Add me to a chapter</label>
               <select id="chapter_id" name="chapter_id" class="{{ $inputClass }}">
-                <option value="">No chapter</option>
+                <option value="">Leave my chapters unchanged</option>
                 @foreach($chapters as $ch)
                   <option value="{{ $ch->id }}" @selected(old('chapter_id', $selectedChapter?->id)==$ch->id)>{{ $ch->name }}</option>
                 @endforeach
               </select>
+              <p class="{{ $hintClass }}">Saving adds you to the selected chapter. It never removes your other chapters — leave a chapter from its page.</p>
             </div>
             <div>
               <label for="availability" class="{{ $labelClass }}">Availability</label>

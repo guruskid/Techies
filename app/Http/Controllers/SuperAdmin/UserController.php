@@ -51,9 +51,19 @@ class UserController extends Controller
             return back()->with('error', 'The last super administrator must keep that role.');
         }
 
-        $previousRole = $user->roles->first()?->name;
+        $previousRole = $user->role;
 
-        $user->syncRoles([$data['role']]);
+        // users.role holds the primary staff role. Extra Spatie roles (such as
+        // hub_owner) are capabilities, so changing the primary role must not
+        // silently strip them.
+        $extraRoles = $user->roles
+            ->pluck('name')
+            ->reject(fn (string $name) => in_array($name, ['member', 'admin', 'super_admin'], true))
+            ->unique()
+            ->values()
+            ->all();
+
+        $user->syncRoles(array_values(array_unique(array_merge([$data['role']], $extraRoles))));
         $user->update(['role' => $data['role']]);
 
         AuditLogger::log('user.role_changed', $user, [

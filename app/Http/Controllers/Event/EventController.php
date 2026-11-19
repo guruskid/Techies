@@ -24,8 +24,9 @@ class EventController extends Controller
 
         $registeredCount = $event->registrations()->where('status', 'registered')->count();
         $spotsLeft = $event->max_attendees ? max(0, $event->max_attendees - $registeredCount) : null;
+        $canViewMeetingLink = $event->canAccessMeetingLink(auth()->user());
 
-        return view('pages.event-detail', compact('event', 'registration', 'registeredCount', 'spotsLeft'));
+        return view('pages.event-detail', compact('event', 'registration', 'registeredCount', 'spotsLeft', 'canViewMeetingLink'));
     }
 
     public function register(Event $event)
@@ -54,12 +55,17 @@ class EventController extends Controller
             }
 
             if ($existing) {
-                $existing->update(['status' => EventRegistration::STATUS_WAITLISTED, 'waitlisted_at' => now()]);
+                $existing->update([
+                    'status' => EventRegistration::STATUS_WAITLISTED,
+                    'payment_status' => EventRegistration::PAYMENT_NOT_REQUIRED,
+                    'waitlisted_at' => now(),
+                ]);
             } else {
                 EventRegistration::create([
                     'event_id' => $event->id,
                     'user_id' => $user->id,
                     'status' => EventRegistration::STATUS_WAITLISTED,
+                    'payment_status' => EventRegistration::PAYMENT_NOT_REQUIRED,
                     'waitlisted_at' => now(),
                 ]);
             }
@@ -71,12 +77,25 @@ class EventController extends Controller
 
         $registration = EventRegistration::firstOrCreate(
             ['event_id' => $event->id, 'user_id' => $user->id],
-            ['status' => EventRegistration::STATUS_REGISTERED]
+            [
+                'status' => EventRegistration::STATUS_REGISTERED,
+                'payment_status' => $event->requiresPayment()
+                    ? EventRegistration::PAYMENT_UNPAID
+                    : EventRegistration::PAYMENT_NOT_REQUIRED,
+            ]
         );
 
         $reenlisted = false;
         if (! $registration->wasRecentlyCreated && $registration->status !== EventRegistration::STATUS_REGISTERED) {
-            $registration->update(['status' => EventRegistration::STATUS_REGISTERED, 'waitlisted_at' => null]);
+            $paymentStatus = $event->requiresPayment()
+                ? ($registration->isPaid() ? EventRegistration::PAYMENT_PAID : EventRegistration::PAYMENT_UNPAID)
+                : EventRegistration::PAYMENT_NOT_REQUIRED;
+
+            $registration->update([
+                'status' => EventRegistration::STATUS_REGISTERED,
+                'payment_status' => $paymentStatus,
+                'waitlisted_at' => null,
+            ]);
             $reenlisted = true;
         }
 
@@ -109,7 +128,13 @@ class EventController extends Controller
                 ->first();
 
             if ($next) {
-                $next->update(['status' => EventRegistration::STATUS_REGISTERED, 'waitlisted_at' => null]);
+                $next->update([
+                    'status' => EventRegistration::STATUS_REGISTERED,
+                    'payment_status' => $event->requiresPayment()
+                        ? EventRegistration::PAYMENT_UNPAID
+                        : EventRegistration::PAYMENT_NOT_REQUIRED,
+                    'waitlisted_at' => null,
+                ]);
                 $next->user?->notify(new EventRegistrationPromoted($event));
             }
         }
@@ -133,13 +158,15 @@ class EventController extends Controller
             $end = $start->copy()->addHours(2);
         }
 
+        $meetingUrl = $event->canAccessMeetingLink(auth()->user()) ? $event->meeting_url : null;
+
         $location = $event->is_online
-            ? 'Online'.($event->meeting_url ? ' - '.$event->meeting_url : '')
+            ? 'Online'.($meetingUrl ? ' - '.$meetingUrl : '')
             : collect([$event->venue, $event->city, $event->state, $event->country])->filter()->implode(', ');
 
         $description = collect([
             strip_tags((string) $event->description),
-            $event->is_online && $event->meeting_url ? 'Join online: '.$event->meeting_url : null,
+            $event->is_online && $meetingUrl ? 'Join online: '.$meetingUrl : null,
         ])->filter()->implode("\n\n");
 
         $lines = [

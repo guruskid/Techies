@@ -105,11 +105,10 @@ class MyProfileController extends Controller
         $profile->profile_completion = $profile->completionPercentage();
         $profile->save();
 
-        // Sync chapter membership.
+        // Chapter membership is additive: choosing a chapter joins it without
+        // removing memberships gained from the chapter pages.
         if ($request->filled('chapter_id')) {
-            $user->chapters()->sync([$request->input('chapter_id')]);
-        } else {
-            $user->chapters()->detach();
+            $user->chapters()->syncWithoutDetaching([$request->input('chapter_id')]);
         }
 
         $user->skills()->sync($request->input('skills', []));

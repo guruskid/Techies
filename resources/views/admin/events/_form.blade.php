@@ -228,12 +228,24 @@
         <input id="fee" name="fee" type="number" step="0.01" min="0" :disabled="!paid" value="{{ old('fee', $event->fee) }}" class="{{ $inputClass }}">
         {!! $err('fee') !!}
       </div>
+      <div x-show="paid" x-cloak>
+        <label for="payment_url" class="{{ $labelClass }}">Payment link</label>
+        <input id="payment_url" name="payment_url" type="url" :disabled="!paid" value="{{ old('payment_url', $event->payment_url) }}" class="{{ $inputClass }}" placeholder="https://paystack.com/pay/...">
+        <p class="{{ $hintClass }}">External checkout or bank-transfer page. Attendees are marked unpaid until an admin confirms payment.</p>
+        {!! $err('payment_url') !!}
+      </div>
       <div>
         <label for="registration_deadline" class="{{ $labelClass }}">Registration deadline</label>
         <input id="registration_deadline" name="registration_deadline" type="date" value="{{ old('registration_deadline', optional($event->registration_deadline)->format('Y-m-d')) }}" class="{{ $inputClass }}">
         <p class="{{ $hintClass }}">Optional. The last day people can register.</p>
         {!! $err('registration_deadline') !!}
       </div>
+    </div>
+
+    <div x-show="paid" x-cloak>
+      <label for="payment_instructions" class="{{ $labelClass }}">Payment instructions</label>
+      <textarea id="payment_instructions" name="payment_instructions" rows="3" :disabled="!paid" class="{{ $inputClass }}" placeholder="Bank name, account number, reference format, or anything attendees need to pay.">{{ old('payment_instructions', $event->payment_instructions) }}</textarea>
+      {!! $err('payment_instructions') !!}
     </div>
 
     <div>

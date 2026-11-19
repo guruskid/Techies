@@ -10,3 +10,5 @@ Artisan::command('inspire', function () {
 
 Schedule::command('events:send-reminders')->dailyAt('08:00');
 Schedule::command('community:send-digest')->weeklyOn(1, '08:00');
+Schedule::command('mail:sync')->everyTenMinutes()->withoutOverlapping();
+Schedule::command('mail:broadcasts:send-due')->everyMinute()->withoutOverlapping();

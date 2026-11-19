@@ -13,7 +13,6 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, HasRoles, Notifiable {
         HasRoles::hasRole as traitHasRole;
-        HasRoles::hasAnyRole as traitHasAnyRole;
     }
 
     protected $fillable = [
@@ -127,26 +126,46 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return static::query()
             ->where('status', 'active')
-            ->where(function ($query) use ($roles): void {
-                $query->whereIn('role', $roles)
-                    ->orWhereHas('roles', fn ($roleQuery) => $roleQuery->whereIn('name', $roles));
-            });
+            ->whereIn('role', $roles);
     }
+
+    /**
+     * The roles whose authority lives in the users.role column.
+     *
+     * Spatie roles are still used for functional capabilities such as hub
+     * ownership, but staff access always follows users.role so a stale pivot
+     * row can never keep someone signed in with more access than they were
+     * granted.
+     *
+     * @var array<int, string>
+     */
+    private const PRIMARY_ROLES = ['member', 'admin', 'super_admin'];
 
     public function hasRole($roles, ?string $guard = null): bool
     {
-        if ($this->traitHasRole($roles, $guard)) {
+        if (is_string($roles) && str_contains($roles, '|')) {
+            $roles = explode('|', $roles);
+        }
+
+        $names = is_array($roles) ? $roles : [$roles];
+        $primary = array_values(array_filter(
+            $names,
+            fn ($role) => is_string($role) && in_array($role, self::PRIMARY_ROLES, true),
+        ));
+
+        if ($primary !== [] && in_array((string) $this->role, $primary, true)) {
             return true;
         }
 
-        $current = (string) $this->role;
+        $secondary = array_values(array_filter(
+            $names,
+            fn ($role) => ! (is_string($role) && in_array($role, self::PRIMARY_ROLES, true)),
+        ));
 
-        if (is_string($roles)) {
-            return $current === $roles;
-        }
-
-        if (is_array($roles)) {
-            return in_array($current, $roles, true);
+        foreach ($secondary as $role) {
+            if ($this->traitHasRole($role, $guard)) {
+                return true;
+            }
         }
 
         return false;
@@ -154,17 +173,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasAnyRole(...$roles): bool
     {
-        if ($this->traitHasAnyRole(...$roles)) {
-            return true;
-        }
-
-        $current = (string) $this->role;
-
         foreach ($roles as $role) {
-            if (is_array($role) && in_array($current, $role, true)) {
-                return true;
-            }
-            if (is_string($role) && $current === $role) {
+            if ($this->hasRole($role)) {
                 return true;
             }
         }
@@ -174,11 +184,25 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'super_admin' || $this->hasRole('super_admin');
+        return $this->hasRole('super_admin');
     }
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' || $this->hasRole('admin');
+        return $this->hasRole('admin');
+    }
+
+    /**
+     * Fingerprint of the access a session was granted. Any change to the
+     * primary role, status or assigned roles invalidates old sessions.
+     */
+    public function accessSignature(): string
+    {
+        return hash('sha256', implode('|', [
+            (string) $this->getKey(),
+            (string) $this->role,
+            (string) $this->status,
+            $this->roles()->orderBy('name')->pluck('name')->implode(','),
+        ]));
     }
 }

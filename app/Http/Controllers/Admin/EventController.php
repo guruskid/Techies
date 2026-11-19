@@ -83,8 +83,42 @@ class EventController extends Controller
                 'waitlisted' => $event->registrations()->where('status', EventRegistration::STATUS_WAITLISTED)->count(),
                 'cancelled' => $event->registrations()->where('status', EventRegistration::STATUS_CANCELLED)->count(),
                 'checked_in' => $event->registrations()->whereNotNull('checked_in_at')->count(),
+                'unpaid' => $event->registrations()->where('payment_status', EventRegistration::PAYMENT_UNPAID)->count(),
+                'paid' => $event->registrations()->where('payment_status', EventRegistration::PAYMENT_PAID)->count(),
             ],
         ]);
+    }
+
+    /**
+     * Record an offline payment or refund for an attendee.
+     */
+    public function updatePayment(Request $request, Event $event, EventRegistration $registration): RedirectResponse
+    {
+        abort_unless($registration->event_id === $event->id, 404);
+
+        $data = $request->validate([
+            'payment_status' => ['required', Rule::in(array_keys(EventRegistration::paymentStatuses()))],
+            'payment_reference' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $paymentStatus = $data['payment_status'];
+
+        $registration->update([
+            'payment_status' => $paymentStatus,
+            'payment_reference' => $data['payment_reference'] ?? null,
+            'paid_at' => $paymentStatus === EventRegistration::PAYMENT_PAID
+                ? ($registration->paid_at ?? now())
+                : null,
+            'refunded_at' => $paymentStatus === EventRegistration::PAYMENT_REFUNDED ? now() : null,
+        ]);
+
+        AuditLogger::log('event.registration.payment_updated', $registration, [
+            'event' => $event->title,
+            'payment_status' => $paymentStatus,
+            'payment_reference' => $data['payment_reference'] ?? null,
+        ]);
+
+        return back()->with('success', $registration->user?->name.' is now marked '.str_replace('_', ' ', $paymentStatus).'.');
     }
 
     /**
@@ -120,7 +154,7 @@ class EventController extends Controller
 
         return response()->streamDownload(function () use ($registrations): void {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['Name', 'Email', 'Phone', 'Status', 'Registered at', 'Waitlisted at', 'Checked in at'], ',', '"', '');
+            fputcsv($handle, ['Name', 'Email', 'Phone', 'Status', 'Payment status', 'Payment reference', 'Paid at', 'Registered at', 'Waitlisted at', 'Checked in at'], ',', '"', '');
 
             foreach ($registrations as $registration) {
                 fputcsv($handle, [
@@ -128,6 +162,9 @@ class EventController extends Controller
                     $registration->user?->email,
                     $registration->user?->profile?->phone,
                     $registration->status,
+                    $registration->payment_status,
+                    $registration->payment_reference,
+                    $registration->paid_at?->toDateTimeString(),
                     $registration->created_at?->toDateTimeString(),
                     $registration->waitlisted_at?->toDateTimeString(),
                     $registration->checked_in_at?->toDateTimeString(),
@@ -183,6 +220,8 @@ class EventController extends Controller
             'max_attendees' => $data['max_attendees'] ?? null,
             'registration_type' => $data['registration_type'],
             'fee' => $data['fee'] ?? null,
+            'payment_url' => $data['payment_url'] ?? null,
+            'payment_instructions' => $data['payment_instructions'] ?? null,
             'status' => $data['status'],
             'organizer_id' => auth()->id(),
         ]);
@@ -236,6 +275,8 @@ class EventController extends Controller
             'max_attendees' => $data['max_attendees'] ?? null,
             'registration_type' => $data['registration_type'],
             'fee' => $data['fee'] ?? null,
+            'payment_url' => $data['payment_url'] ?? null,
+            'payment_instructions' => $data['payment_instructions'] ?? null,
             'status' => $data['status'],
         ]);
 
@@ -284,6 +325,8 @@ class EventController extends Controller
             'max_attendees' => ['nullable', 'integer', 'min:1'],
             'registration_type' => ['required', Rule::in(['free', 'paid'])],
             'fee' => ['nullable', 'numeric', 'min:0'],
+            'payment_url' => ['nullable', 'url', 'max:2048'],
+            'payment_instructions' => ['nullable', 'string', 'max:2000'],
             'status' => ['required', Rule::in(['draft', 'published', 'cancelled'])],
         ]);
     }

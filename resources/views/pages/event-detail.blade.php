@@ -92,10 +92,46 @@
     </div>
     @endif
 
-    @if($e->meeting_url)
+    @if($e->is_online && $e->meeting_url && $canViewMeetingLink)
     <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
       <h2 class="text-2xl font-bold text-[#101E33] mb-2">Join Online</h2>
-      <a href="{{ $e->meeting_url }}" target="_blank" class="text-[#FF5C3D] hover:underline break-all">{{ $e->meeting_url }}</a>
+      <a href="{{ $e->meeting_url }}" target="_blank" rel="noopener" class="text-[#FF5C3D] hover:underline break-all">{{ $e->meeting_url }}</a>
+      <p class="mt-2 text-xs text-slate-500">This link is shared with confirmed attendees only. Please do not forward it.</p>
+    </div>
+    @elseif($e->is_online && $e->meeting_url)
+    <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
+      <h2 class="text-2xl font-bold text-[#101E33] mb-2">Join Online</h2>
+      <p class="text-slate-600">The meeting link is shared with confirmed attendees. {{ auth()->check() ? 'Register for this event to see it here.' : 'Log in and register for this event to see it here.' }}</p>
+    </div>
+    @endif
+
+    @if($e->requiresPayment() && $registration && $registration->status === 'registered')
+    <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
+      <h2 class="text-2xl font-bold text-[#101E33] mb-2">Payment</h2>
+      @php
+        $paymentLabels = [
+          'not_required' => ['Not required', 'bg-slate-100 text-slate-700'],
+          'unpaid' => ['Payment pending', 'bg-amber-50 text-amber-800'],
+          'paid' => ['Paid', 'bg-green-50 text-green-700'],
+          'refunded' => ['Refunded', 'bg-slate-100 text-slate-600'],
+        ];
+        [$paymentLabel, $paymentClasses] = $paymentLabels[$registration->payment_status] ?? ['Unknown', 'bg-slate-100 text-slate-600'];
+      @endphp
+      <p class="text-slate-600">Registration fee: <strong class="text-[#101E33]">₦{{ number_format((float) $e->fee, 2) }}</strong></p>
+      <p class="mt-2">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold {{ $paymentClasses }}">{{ $paymentLabel }}</span>
+        @if($registration->paid_at)<span class="ml-2 text-xs text-slate-500">Confirmed {{ $registration->paid_at->format('M j, Y') }}</span>@endif
+      </p>
+
+      @if(in_array($registration->payment_status, ['unpaid', 'not_required'], true))
+        @if($e->payment_url)
+          <a href="{{ $e->payment_url }}" target="_blank" rel="noopener" class="mt-4 inline-block px-5 py-2.5 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition">Pay now</a>
+        @endif
+        @if($e->payment_instructions)
+          <div class="mt-4 text-sm text-slate-600 whitespace-pre-line">{{ $e->payment_instructions }}</div>
+        @endif
+        <p class="mt-3 text-xs text-slate-500">After paying, keep your receipt. An admin confirms payments and the status above updates.</p>
+      @endif
     </div>
     @endif
   </div>
@@ -125,7 +161,14 @@
         @endphp
 
         @if($isRegistered)
-          <div class="p-3 rounded-lg bg-green-50 text-green-700 text-sm text-center">You are registered for this event.</div>
+          <div class="p-3 rounded-lg bg-green-50 text-green-700 text-sm text-center">
+            You are registered for this event.
+            @if($e->requiresPayment())
+              <span class="mt-1 block text-xs {{ $registration->isPaid() ? 'text-green-700' : 'text-amber-800' }}">
+                {{ $registration->isPaid() ? 'Payment confirmed.' : 'Payment is still pending.' }}
+              </span>
+            @endif
+          </div>
           <form method="POST" action="{{ route('events.cancel', $e) }}">
             @csrf
             <button class="w-full px-6 py-3 border border-red-200 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition">Cancel Registration</button>

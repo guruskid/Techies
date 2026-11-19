@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Hub;
 use App\Notifications\HubApplicationReviewed;
+use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 
 class HubController extends Controller
@@ -42,6 +43,8 @@ class HubController extends Controller
 
         $hub->owner?->notify(new HubApplicationReviewed($hub, 'approved'));
 
+        AuditLogger::log('hub.approved', $hub, ['name' => $hub->name]);
+
         return back()->with('success', 'Hub approved.');
     }
 
@@ -56,12 +59,16 @@ class HubController extends Controller
 
         $hub->owner?->notify(new HubApplicationReviewed($hub, 'rejected'));
 
+        AuditLogger::log('hub.rejected', $hub, ['name' => $hub->name]);
+
         return back()->with('success', 'Hub rejected.');
     }
 
     public function suspend(Hub $hub)
     {
         $hub->update(['status' => 'suspended', 'is_public' => false]);
+
+        AuditLogger::log('hub.suspended', $hub, ['name' => $hub->name]);
 
         return back()->with('success', 'Hub suspended.');
     }

@@ -20,9 +20,16 @@
       'title' => 'Community content',
       'items' => [
         ['key' => 'content',       'title' => 'Content review',  'description' => 'Review and approve member articles.',          'url' => route('admin.content.index'), 'badge' => 'to review'],
+        ['key' => 'announcements', 'title' => 'Announcements',   'description' => 'Publish community updates and news.',          'url' => route('admin.announcements.index')],
         ['key' => 'events',        'title' => 'Events',          'description' => 'Create and manage community events.',          'url' => route('admin.events.index')],
         ['key' => 'opportunities', 'title' => 'Opportunities',   'description' => 'Post and manage jobs and opportunities.',      'url' => route('admin.opportunities.index')],
         ['key' => 'categories',    'title' => 'Categories',      'description' => 'Manage event and opportunity categories.',     'url' => route('admin.categories.index')],
+      ],
+    ],
+    [
+      'title' => 'Communication',
+      'items' => [
+        ['key' => 'mail', 'title' => 'Mail center', 'description' => 'Connect mailboxes, send and receive email, manage templates and broadcasts.', 'url' => route('admin.mail.index')],
       ],
     ],
   ];

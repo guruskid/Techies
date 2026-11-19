@@ -88,6 +88,36 @@ class ApplicationStatusTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_admins_can_download_the_applicant_csv(): void
+    {
+        $admin = $this->admin();
+        $applicant = User::factory()->create([
+            'role' => 'member',
+            'status' => 'active',
+            'name' => 'Ada Applicant',
+            'email' => 'ada@example.com',
+        ]);
+        $opportunity = $this->opportunity();
+        OpportunityApplication::create([
+            'opportunity_id' => $opportunity->id,
+            'user_id' => $applicant->id,
+            'status' => 'shortlisted',
+            'applied_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.opportunities.applications.export', $opportunity));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $this->assertStringContainsString('opportunity-'.$opportunity->slug.'-applicants.csv', (string) $response->headers->get('content-disposition'));
+
+        $csv = $response->streamedContent();
+        $this->assertStringContainsString('Name,Email,Phone,Status', $csv);
+        $this->assertStringContainsString('Ada Applicant', $csv);
+        $this->assertStringContainsString('ada@example.com', $csv);
+        $this->assertStringContainsString('shortlisted', $csv);
+    }
+
     private function admin(): User
     {
         $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);

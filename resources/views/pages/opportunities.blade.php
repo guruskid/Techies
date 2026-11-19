@@ -1,61 +1,129 @@
 @extends('layouts.app')
 @section('content')
-<section class="bg-[#101E33] text-white py-12">
+@php
+  $search   = $search ?? '';
+  $category = (string) ($category ?? '');
+  $remote   = (string) ($remote ?? '');   // "0" (onsite) is a real filter, so compare as strings, not truthiness
+
+  $labelClass = 'block text-sm font-medium text-slate-700 mb-1';
+  $fieldClass = 'w-full border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]';
+  $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';
+
+  $categoryName = $category !== '' ? optional($categories->firstWhere('id', $category))->name : null;
+  $modeLabel = ['1' => 'Remote', '0' => 'Onsite'][$remote] ?? null;
+
+  // Active filters, each with the URL that removes only that filter
+  $active = collect([
+    'search'   => $search !== '' ? 'Search: '.$search : null,
+    'category' => $categoryName,
+    'remote'   => $modeLabel,
+  ])->filter();
+  $without = fn ($key) => '/opportunities'.(($q = http_build_query(array_filter(
+      ['search' => $search, 'category' => $category, 'remote' => $remote],
+      fn ($v, $k) => $v !== '' && $k !== $key, ARRAY_FILTER_USE_BOTH))) ? '?'.$q : '');
+@endphp
+
+<section class="bg-[#101E33] text-white py-10 md:py-12">
   <div class="max-w-7xl mx-auto px-4">
     <h1 class="text-3xl font-bold">Opportunities</h1>
     <p class="mt-2 text-slate-300">Jobs, internships, scholarships, grants and more.</p>
   </div>
 </section>
+
 <div class="max-w-7xl mx-auto px-4 py-8">
-  <form method="GET" class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-    <div class="grid md:grid-cols-12 gap-3 items-end">
-      <div class="md:col-span-5">
-        <label class="block text-xs font-medium text-slate-500 mb-1">Search</label>
-        <input name="search" value="{{ $search ?? '' }}" placeholder="Title, organization, location..." class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+
+  <form method="GET" action="/opportunities" role="search" aria-label="Search opportunities" class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-100 shadow-sm space-y-4">
+    <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
+      <div class="flex-1">
+        <label for="search" class="{{ $labelClass }}">Search</label>
+        <input id="search" type="search" name="search" value="{{ $search }}" placeholder="Title, organization, location..." class="{{ $fieldClass }} px-4">
       </div>
-      <div class="md:col-span-4">
-        <label class="block text-xs font-medium text-slate-500 mb-1">Category</label>
-        <select name="category" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+      <button type="submit" class="px-6 py-2.5 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition {{ $focus }}">Search</button>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <div>
+        <label for="category" class="{{ $labelClass }}">Category</label>
+        <select id="category" name="category" onchange="this.form.submit()" class="{{ $fieldClass }}">
           <option value="">All categories</option>
           @foreach($categories as $c)
-            <option value="{{ $c->id }}" @selected(($category ?? '')==$c->id)>{{ $c->name }}</option>
+            <option value="{{ $c->id }}" @selected($category === (string) $c->id)>{{ $c->name }}</option>
           @endforeach
         </select>
       </div>
-      <div class="md:col-span-2">
-        <label class="block text-xs font-medium text-slate-500 mb-1">Work mode</label>
-        <select name="remote" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+      <div>
+        <label for="remote" class="{{ $labelClass }}">Work mode</label>
+        <select id="remote" name="remote" onchange="this.form.submit()" class="{{ $fieldClass }}">
           <option value="">All</option>
-          <option value="1" @selected(($remote ?? '')==='1')>Remote</option>
-          <option value="0" @selected(($remote ?? '')==='0')>Onsite</option>
+          <option value="1" @selected($remote === '1')>Remote</option>
+          <option value="0" @selected($remote === '0')>Onsite</option>
         </select>
       </div>
-      <div class="md:col-span-1 flex gap-2">
-        <button class="flex-1 px-4 py-2.5 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition">Go</button>
-      </div>
     </div>
-    @if(($search ?? '') || ($category ?? '') || ($remote ?? ''))
-      <div class="mt-3 text-sm text-slate-500">Showing results. <a href="/opportunities" class="text-[#FF5C3D] hover:underline">Clear filters</a></div>
-    @endif
   </form>
 
-  <div class="grid md:grid-cols-3 gap-4 mt-8">
+  {{-- Active filters --}}
+  @if($active->isNotEmpty())
+    <div class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+      @foreach($active as $key => $label)
+        <a href="{{ $without($key) }}" class="inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full bg-[#FF5C3D]/10 text-[#C23A1F] text-sm hover:bg-[#FF5C3D]/20 {{ $focus }}">
+          {{ $label }}
+          <span aria-hidden="true">&times;</span>
+          <span class="sr-only">Remove filter</span>
+        </a>
+      @endforeach
+      @if($active->count() > 1)
+        <a href="/opportunities" class="text-sm font-medium text-[#FF5C3D] hover:underline {{ $focus }} rounded">Clear all</a>
+      @endif
+    </div>
+  @endif
+
+  <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
     @forelse($opportunities as $o)
-      <a href="/opportunities/{{ $o->slug }}" class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition block">
-        <span class="text-xs px-2 py-1 rounded-full bg-[#FF5C3D]/10 text-[#FF5C3D] font-medium">{{ $o->category?->name ?? 'Opportunity' }}</span>
-        <h3 class="mt-3 font-semibold text-[#101E33]">{{ $o->title }}</h3>
-        <p class="mt-1 text-sm text-slate-500">{{ $o->organization }}</p>
-        <div class="mt-3 flex items-center gap-2 text-xs text-slate-400">
-          <span>{{ $o->location ?? ($o->is_remote ? 'Remote' : '') }}</span>
-          @if($o->is_remote)<span class="px-2 py-0.5 rounded-full bg-green-50 text-green-600">Remote</span>@endif
-          @if($o->is_member_only)<span class="px-2 py-0.5 rounded-full bg-[#101E33] text-white">Members only</span>@endif
-        </div>
-        @if($o->deadline)<div class="mt-2 text-xs text-slate-400">Deadline: {{ $o->deadline->format('M j, Y') }}</div>@endif
-      </a>
+      @php
+        $deadline = $o->deadline;
+        $closed = $deadline && $deadline->copy()->endOfDay()->isPast();
+        $soon = $deadline && ! $closed && now()->diffInDays($deadline) <= 7;
+      @endphp
+      <li>
+        <a href="/opportunities/{{ $o->slug }}" class="h-full flex flex-col bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition {{ $focus }} {{ $closed ? 'opacity-75' : '' }}">
+          <span class="self-start text-xs px-2 py-1 rounded-full bg-[#FF5C3D]/10 text-[#C23A1F] font-medium">{{ $o->category?->name ?? 'Opportunity' }}</span>
+          <h2 class="mt-3 font-semibold text-[#101E33]">{{ $o->title }}</h2>
+          @if($o->organization)<p class="mt-1 text-sm text-slate-600">{{ $o->organization }}</p>@endif
+
+          <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+            @if($o->location)<span>{{ $o->location }}</span>@endif
+            @if($o->is_remote)<span class="px-2 py-0.5 rounded-full bg-green-50 text-green-700">Remote</span>@endif
+            @if($o->is_member_only)<span class="px-2 py-0.5 rounded-full bg-[#101E33] text-white">Members only</span>@endif
+          </div>
+
+          @if($deadline)
+            <div class="mt-auto pt-3 text-xs">
+              @if($closed)
+                <span class="text-slate-500">Closed on {{ $deadline->format('M j, Y') }}</span>
+              @else
+                <span class="{{ $soon ? 'text-[#C23A1F] font-medium' : 'text-slate-600' }}">
+                  {{ $soon ? 'Closing soon: ' : 'Deadline: ' }}{{ $deadline->format('M j, Y') }}
+                </span>
+              @endif
+            </div>
+          @endif
+        </a>
+      </li>
     @empty
-      <p class="text-slate-500 col-span-3">No opportunities found.</p>
+      <li class="sm:col-span-2 lg:col-span-3 bg-white rounded-2xl border border-slate-100 p-10 text-center">
+        <p class="font-medium text-[#101E33]">No opportunities found</p>
+        <p class="mt-1 text-sm text-slate-600">
+          @if($active->isNotEmpty())
+            Try removing a filter or searching with different words.
+            <a href="/opportunities" class="text-[#FF5C3D] hover:underline">Clear all filters</a>
+          @else
+            New jobs, internships and grants will be listed here.
+          @endif
+        </p>
+      </li>
     @endforelse
-  </div>
-  <div class="mt-8">{{ $opportunities->links() }}</div>
+  </ul>
+
+  <nav class="mt-8" aria-label="Pagination">{{ $opportunities->withQueryString()->links() }}</nav>
 </div>
 @endsection

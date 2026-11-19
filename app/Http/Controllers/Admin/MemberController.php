@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 
 class MemberController extends Controller
@@ -41,12 +42,16 @@ class MemberController extends Controller
 
         $user->update(['status' => 'suspended']);
 
+        AuditLogger::log('member.suspended', $user, ['name' => $user->name]);
+
         return back()->with('success', 'Member suspended.');
     }
 
     public function restore(User $user)
     {
         $user->update(['status' => 'active']);
+
+        AuditLogger::log('member.restored', $user, ['name' => $user->name]);
 
         return back()->with('success', 'Member restored.');
     }

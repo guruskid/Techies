@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use App\Models\EventRegistration;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -43,7 +45,7 @@ class EventCalendarTest extends TestCase
         $this->assertStringContainsString('END:VCALENDAR', $body);
     }
 
-    public function test_online_event_calendar_includes_the_meeting_link(): void
+    public function test_online_event_calendar_includes_the_meeting_link_for_attendees(): void
     {
         $event = Event::create([
             'title' => 'Remote Testing Workshop',
@@ -56,7 +58,16 @@ class EventCalendarTest extends TestCase
             'registration_type' => 'free',
         ]);
 
-        $body = $this->get(route('events.calendar', $event->slug))->getContent();
+        $attendee = User::factory()->create(['role' => 'member', 'status' => 'active']);
+        EventRegistration::create([
+            'event_id' => $event->id,
+            'user_id' => $attendee->id,
+            'status' => EventRegistration::STATUS_REGISTERED,
+        ]);
+
+        $body = $this->actingAs($attendee)
+            ->get(route('events.calendar', $event->slug))
+            ->getContent();
 
         $this->assertStringContainsString('LOCATION:Online - https://meet.example.com/testing', $body);
         $this->assertStringContainsString('Join online: https://meet.example.com/testing', $body);

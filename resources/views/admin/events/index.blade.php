@@ -89,9 +89,13 @@
             <td class="p-3">
               <a href="{{ route('admin.events.edit', $event) }}" class="font-medium text-[#101E33] hover:text-[#FF5C3D] hover:underline {{ $focus }} rounded">{{ $event->title }}</a>
               <div class="mt-0.5 text-xs text-slate-500 break-all">/events/{{ $event->slug }}</div>
-              @isset($event->registrations_count)
-                <div class="mt-1 text-xs text-slate-600">{{ $event->registrations_count }} {{ \Illuminate\Support\Str::plural('registration', $event->registrations_count) }}</div>
-              @endisset
+              <div class="mt-1 text-xs text-slate-600">
+                <a href="{{ route('admin.events.registrations', $event) }}" class="text-[#FF5C3D] hover:underline {{ $focus }} rounded">
+                  {{ $event->registrations_count }} {{ \Illuminate\Support\Str::plural('registration', $event->registrations_count) }}
+                  @if($event->waitlisted_count) · {{ $event->waitlisted_count }} waitlisted @endif
+                  · manage
+                </a>
+              </div>
             </td>
 
             <td class="p-3 text-slate-700">{{ $event->category?->name ?? 'Uncategorised' }}</td>

@@ -1,10 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
 use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 use App\Http\Controllers\Admin\ContentController as AdminContentController;
 use App\Http\Controllers\Admin\EventCategoryController as AdminEventCategoryController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
+use App\Http\Controllers\Admin\Mail\AccountController as MailAccountController;
+use App\Http\Controllers\Admin\Mail\BroadcastController as MailBroadcastController;
+use App\Http\Controllers\Admin\Mail\MessageController as MailMessageController;
+use App\Http\Controllers\Admin\Mail\TemplateController as MailTemplateController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\OpportunityCategoryController as AdminOpportunityCategoryController;
 use App\Http\Controllers\Admin\OpportunityController as AdminOpportunityController;
@@ -19,6 +24,7 @@ use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Hub\HubController;
 use App\Http\Controllers\Hub\HubDashboardController;
+use App\Http\Controllers\InboundMailController;
 use App\Http\Controllers\Member\ContentController as MemberContentController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboard;
 use App\Http\Controllers\Member\MyProfileController;
@@ -83,6 +89,7 @@ Route::get('/robots.txt', function () {
         'Content-Type' => 'text/plain; charset=utf-8',
     ]);
 })->name('robots');
+Route::post('/mail/inbound/{token}', [InboundMailController::class, 'store'])->name('mail.inbound');
 Route::post('/newsletter', function (Request $r) {
     $data = $r->validate([
         'email' => 'required|email|max:255',
@@ -160,6 +167,45 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/manage', function () {
             return view('admin.manage');
         })->name('admin.manage');
+
+        Route::prefix('admin/mail')->name('admin.mail.')->group(function () {
+            Route::get('/', [MailMessageController::class, 'index'])->name('index');
+            Route::get('/inbox', [MailMessageController::class, 'inbox'])->name('inbox');
+            Route::get('/inbox/{message}', [MailMessageController::class, 'showMessage'])->name('inbox.show');
+            Route::get('/sent', [MailMessageController::class, 'sent'])->name('sent');
+            Route::get('/sent/{message}', [MailMessageController::class, 'showMessage'])->name('sent.show');
+            Route::get('/attachments/{attachment}', [MailMessageController::class, 'downloadAttachment'])->name('attachments.download');
+            Route::get('/compose', [MailMessageController::class, 'compose'])->name('compose');
+            Route::post('/compose', [MailMessageController::class, 'send'])->name('send');
+            Route::post('/compose/draft', [MailMessageController::class, 'saveDraft'])->name('drafts.save');
+            Route::delete('/compose/draft', [MailMessageController::class, 'discardDraft'])->name('drafts.discard');
+
+            Route::get('/accounts', [MailAccountController::class, 'index'])->name('accounts.index');
+            Route::get('/accounts/create', [MailAccountController::class, 'create'])->name('accounts.create');
+            Route::post('/accounts', [MailAccountController::class, 'store'])->name('accounts.store');
+            Route::get('/accounts/{account}/edit', [MailAccountController::class, 'edit'])->name('accounts.edit');
+            Route::patch('/accounts/{account}', [MailAccountController::class, 'update'])->name('accounts.update');
+            Route::delete('/accounts/{account}', [MailAccountController::class, 'destroy'])->name('accounts.destroy');
+            Route::post('/accounts/{account}/default', [MailAccountController::class, 'makeDefault'])->name('accounts.default');
+            Route::post('/accounts/{account}/test', [MailAccountController::class, 'test'])->name('accounts.test');
+            Route::post('/accounts/{account}/test-imap', [MailAccountController::class, 'testImap'])->name('accounts.test-imap');
+            Route::post('/accounts/{account}/sync', [MailAccountController::class, 'sync'])->name('accounts.sync');
+            Route::post('/accounts/{account}/rotate-inbound', [MailAccountController::class, 'rotateInbound'])->name('accounts.rotate-inbound');
+
+            Route::get('/templates', [MailTemplateController::class, 'index'])->name('templates.index');
+            Route::get('/templates/create', [MailTemplateController::class, 'create'])->name('templates.create');
+            Route::post('/templates', [MailTemplateController::class, 'store'])->name('templates.store');
+            Route::get('/templates/{template}/edit', [MailTemplateController::class, 'edit'])->name('templates.edit');
+            Route::patch('/templates/{template}', [MailTemplateController::class, 'update'])->name('templates.update');
+            Route::delete('/templates/{template}', [MailTemplateController::class, 'destroy'])->name('templates.destroy');
+
+            Route::get('/broadcasts', [MailBroadcastController::class, 'index'])->name('broadcasts.index');
+            Route::get('/broadcasts/create', [MailBroadcastController::class, 'create'])->name('broadcasts.create');
+            Route::post('/broadcasts', [MailBroadcastController::class, 'store'])->name('broadcasts.store');
+            Route::get('/broadcasts/{broadcast}', [MailBroadcastController::class, 'show'])->name('broadcasts.show');
+            Route::post('/broadcasts/{broadcast}/send', [MailBroadcastController::class, 'send'])->name('broadcasts.send');
+            Route::delete('/broadcasts/{broadcast}', [MailBroadcastController::class, 'destroy'])->name('broadcasts.destroy');
+        });
         Route::get('/admin/members', [MemberController::class, 'index'])->name('admin.members.index');
         Route::get('/admin/members/{user}', [MemberController::class, 'show'])->name('admin.members.show');
         Route::post('/admin/members/{user}/suspend', [MemberController::class, 'suspend'])->name('admin.members.suspend');
@@ -177,6 +223,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/events/create', [AdminEventController::class, 'create'])->name('admin.events.create');
         Route::post('/admin/events', [AdminEventController::class, 'store'])->name('admin.events.store');
         Route::get('/admin/events/{event}/edit', [AdminEventController::class, 'edit'])->name('admin.events.edit');
+        Route::get('/admin/events/{event}/registrations', [AdminEventController::class, 'registrations'])->name('admin.events.registrations');
+        Route::get('/admin/events/{event}/registrations/export', [AdminEventController::class, 'exportRegistrations'])->name('admin.events.registrations.export');
+        Route::post('/admin/events/{event}/registrations/{registration}/check-in', [AdminEventController::class, 'checkIn'])->name('admin.events.registrations.check-in');
+        Route::post('/admin/events/{event}/registrations/{registration}/payment', [AdminEventController::class, 'updatePayment'])->name('admin.events.registrations.payment');
         Route::patch('/admin/events/{event}', [AdminEventController::class, 'update'])->name('admin.events.update');
         Route::delete('/admin/events/{event}', [AdminEventController::class, 'destroy'])->name('admin.events.destroy');
 
@@ -200,6 +250,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/opportunities/{opportunity}/edit', [AdminOpportunityController::class, 'edit'])->name('admin.opportunities.edit');
         Route::patch('/admin/opportunities/{opportunity}', [AdminOpportunityController::class, 'update'])->name('admin.opportunities.update');
         Route::post('/admin/opportunities/{opportunity}/applications/{application}', [AdminOpportunityController::class, 'updateApplication'])->name('admin.opportunities.applications.update');
+        Route::get('/admin/opportunities/{opportunity}/applications/export', [AdminOpportunityController::class, 'exportApplications'])->name('admin.opportunities.applications.export');
         Route::delete('/admin/opportunities/{opportunity}', [AdminOpportunityController::class, 'destroy'])->name('admin.opportunities.destroy');
 
         Route::get('/admin/chapters', [AdminChapterController::class, 'index'])->name('admin.chapters.index');
@@ -208,6 +259,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/chapters/{chapter}/edit', [AdminChapterController::class, 'edit'])->name('admin.chapters.edit');
         Route::patch('/admin/chapters/{chapter}', [AdminChapterController::class, 'update'])->name('admin.chapters.update');
         Route::delete('/admin/chapters/{chapter}', [AdminChapterController::class, 'destroy'])->name('admin.chapters.destroy');
+
+        Route::get('/admin/announcements', [AdminAnnouncementController::class, 'index'])->name('admin.announcements.index');
+        Route::get('/admin/announcements/create', [AdminAnnouncementController::class, 'create'])->name('admin.announcements.create');
+        Route::post('/admin/announcements', [AdminAnnouncementController::class, 'store'])->name('admin.announcements.store');
+        Route::get('/admin/announcements/{announcement}/edit', [AdminAnnouncementController::class, 'edit'])->name('admin.announcements.edit');
+        Route::patch('/admin/announcements/{announcement}', [AdminAnnouncementController::class, 'update'])->name('admin.announcements.update');
+        Route::delete('/admin/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy'])->name('admin.announcements.destroy');
 
         Route::get('/admin/content', [AdminContentController::class, 'index'])->name('admin.content.index');
         Route::get('/admin/content/{article}', [AdminContentController::class, 'show'])->name('admin.content.show');

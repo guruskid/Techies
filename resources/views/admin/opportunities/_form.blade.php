@@ -92,7 +92,13 @@
 
   @if($editing && $opportunity->applications->count())
     <div class="rounded-lg border border-slate-200 p-4">
-      <h3 class="font-semibold text-[#101E33] mb-1">Applicants ({{ $opportunity->applications->count() }})</h3>
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+        <h3 class="font-semibold text-[#101E33]">Applicants ({{ $opportunity->applications->count() }})</h3>
+        <a href="{{ route('admin.opportunities.applications.export', $opportunity) }}"
+           class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#101E33] bg-[#101E33] text-white hover:opacity-90 transition">
+          Export CSV<span class="sr-only"> of applicants for {{ $opportunity->title }}</span>
+        </a>
+      </div>
       <p class="mb-3 text-xs text-slate-500">Changing a status emails the applicant immediately.</p>
       <ul class="space-y-3 text-sm">
         @foreach($opportunity->applications as $application)
