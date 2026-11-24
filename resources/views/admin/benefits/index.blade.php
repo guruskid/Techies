@@ -16,6 +16,7 @@
           <th class="p-3 text-left">Benefit</th>
           <th class="p-3 text-left">Category</th>
           <th class="p-3 text-left">Offer</th>
+          <th class="p-3 text-left">Redeemed</th>
           <th class="p-3 text-left">Status</th>
           <th class="p-3"></th>
         </tr>
@@ -29,6 +30,7 @@
             </td>
             <td class="p-3 text-slate-600">{{ $benefit->category }}</td>
             <td class="p-3 text-slate-600">{{ $benefit->discount_label ?: '—' }}</td>
+            <td class="p-3 text-slate-600">{{ $benefit->redemptions_count }}</td>
             <td class="p-3">
               <span class="rounded-full px-2 py-0.5 text-xs {{ $benefit->is_active ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600' }}">{{ $benefit->is_active ? 'Active' : 'Hidden' }}</span>
             </td>
@@ -41,7 +43,7 @@
             </td>
           </tr>
         @empty
-          <tr><td colspan="5" class="p-8 text-center text-slate-500">No benefits yet.</td></tr>
+          <tr><td colspan="6" class="p-8 text-center text-slate-500">No benefits yet.</td></tr>
         @endforelse
       </tbody>
     </table>

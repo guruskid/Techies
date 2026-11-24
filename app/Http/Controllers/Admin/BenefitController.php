@@ -14,7 +14,7 @@ class BenefitController extends Controller
     public function index(): View
     {
         return view('admin.benefits.index', [
-            'benefits' => MemberBenefit::orderBy('sort_order')->orderBy('title')->paginate(30),
+            'benefits' => MemberBenefit::withCount('redemptions')->orderBy('sort_order')->orderBy('title')->paginate(30),
         ]);
     }
 
