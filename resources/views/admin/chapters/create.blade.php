@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-8">
   <div class="mb-6">

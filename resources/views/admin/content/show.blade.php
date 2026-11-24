@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('content')
 @php
   $canReview = $article->canBeApprovedBy(auth()->user());

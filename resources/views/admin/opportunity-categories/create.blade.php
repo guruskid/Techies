@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('content')
 <div class="max-w-md mx-auto px-4 py-8">
   <a href="{{ route('admin.opportunity-categories.index') }}" class="text-sm text-[#FF5C3D] hover:underline">← Back</a>

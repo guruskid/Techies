@@ -17,7 +17,7 @@
     </div>
     <div class="p-10 text-center">
       <div class="w-20 h-20 mx-auto rounded-full bg-[#FF5C3D]/10 text-[#FF5C3D] flex items-center justify-center text-4xl font-bold">@</div>
-      <h1 class="mt-6 text-2xl font-bold text-[#101E33]">Verify your email address</h1>
+      <h1 class="mt-6 font-display text-2xl font-extrabold text-[#101E33]">Verify your email address</h1>
       <p class="mt-3 text-slate-500 text-sm leading-relaxed">We've sent a verification link to your email. Please check your inbox (and spam folder) and click the link to activate your account.</p>
       @if (session('status') == 'verification-link-sent')
         <div class="mt-4 p-3 rounded-lg bg-green-50 text-green-600 text-sm">A new verification link has been sent to your email.</div>

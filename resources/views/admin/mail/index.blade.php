@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('content')
 @php
   $card = 'bg-white rounded-2xl border border-slate-100 shadow-sm p-5';

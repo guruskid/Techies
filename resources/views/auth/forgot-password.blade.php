@@ -11,7 +11,7 @@
       <div class="text-sm text-slate-400">© {{ date('Y') }} Meet with the Techies</div>
     </div>
     <div class="p-10">
-      <h1 class="text-2xl font-bold text-[#101E33]">Reset your password</h1>
+      <h1 class="font-display text-2xl font-extrabold text-[#101E33]">Reset your password</h1>
       <p class="mt-1 text-slate-500 text-sm">We'll email you a secure link to set a new password.</p>
       @if (session('status'))
         <div class="mt-4 p-3 rounded-lg bg-green-50 text-green-600 text-sm">{{ session('status') }}</div>

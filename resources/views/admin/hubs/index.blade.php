@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('content')
 @php
   $statuses = ['pending', 'approved', 'rejected', 'suspended'];

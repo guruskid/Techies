@@ -11,7 +11,7 @@
       <div class="text-sm text-slate-400">© {{ date('Y') }} Meet with the Techies</div>
     </div>
     <div class="p-10">
-      <h1 class="text-2xl font-bold text-[#101E33]">Login to your account</h1>
+      <h1 class="font-display text-2xl font-extrabold text-[#101E33]">Login to your account</h1>
       <p class="mt-1 text-slate-500 text-sm">Enter your credentials to continue.</p>
       <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-4">
         @csrf

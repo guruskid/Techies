@@ -2,7 +2,7 @@
 @section('content')
 <div class="min-h-[70vh] flex items-center justify-center py-12 px-4">
   <div class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 p-10">
-    <h1 class="text-2xl font-bold text-[#101E33]">Reset your password</h1>
+    <h1 class="font-display text-2xl font-extrabold text-[#101E33]">Reset your password</h1>
     <p class="mt-1 text-slate-500 text-sm">Choose a new password for your account.</p>
     <form method="POST" action="{{ route('password.update') }}" class="mt-6 space-y-4">
       @csrf
