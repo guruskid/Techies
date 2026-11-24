@@ -13,24 +13,23 @@
   $withSearch = fn (array $params) => route('articles', $params + ($search ? ['search' => $search] : []));
 @endphp
 
-<section class="bg-[#101E33] text-white py-12 md:py-16">
-  <div class="max-w-7xl mx-auto px-4">
-    <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-white/10 border border-white/20">Community articles</span>
-    <h1 class="mt-5 text-4xl font-bold max-w-3xl">Practical knowledge, written by the community.</h1>
-    <p class="mt-4 text-slate-300 max-w-2xl">Members share tutorials, career lessons and stories. Every article is reviewed before it is published.</p>
-    <div class="mt-8 flex flex-col sm:flex-row gap-3">
-      <form method="GET" action="{{ route('articles') }}" role="search" class="flex-1 flex gap-2">
-        @if($activeTopic)<input type="hidden" name="topic" value="{{ $activeTopic }}">@endif
-        <label for="article-search" class="sr-only">Search articles</label>
-        <input id="article-search" type="search" name="search" value="{{ $search }}" placeholder="Search articles"
-               class="w-full rounded-lg px-4 py-2.5 text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
-        <button type="submit" class="px-5 py-2.5 bg-[#FF5C3D] rounded-lg font-semibold hover:opacity-90 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white">Search</button>
-      </form>
-      @auth
-        <a href="{{ route('member.content.create') }}" class="px-5 py-2.5 border border-white/30 rounded-lg font-semibold hover:bg-white/10 transition text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white">Write an article</a>
-      @endauth
-    </div>
-  </div>
+@include('partials.page-hero', [
+  'kicker' => 'Ideas worth reading',
+  'title' => 'Practical knowledge, written by the community.',
+  'subtitle' => 'Tutorials, career lessons and stories from members. Every article is reviewed before it is published.',
+  'actions' => auth()->check() ? [
+    ['label' => 'Write an article', 'url' => route('member.content.create'), 'style' => 'primary'],
+  ] : [],
+])
+
+<section class="max-w-7xl mx-auto px-4 pt-8">
+  <form method="GET" action="{{ route('articles') }}" role="search" class="flex flex-col sm:flex-row gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
+    @if($activeTopic)<input type="hidden" name="topic" value="{{ $activeTopic }}">@endif
+    <label for="article-search" class="sr-only">Search articles</label>
+    <input id="article-search" type="search" name="search" value="{{ $search }}" placeholder="Search articles"
+           class="w-full flex-1 rounded-xl border border-slate-200 bg-[#F9FAFC] px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+    <button type="submit" class="rounded-xl bg-[#101E33] px-5 py-3 font-semibold text-white transition hover:bg-[#1A2C48]">Search</button>
+  </form>
 </section>
 
 {{-- Topics --}}

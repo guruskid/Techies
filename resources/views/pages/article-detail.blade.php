@@ -56,13 +56,14 @@
 
 <style>[x-cloak]{display:none !important}</style>
 
-<section class="bg-[#101E33] text-white py-12 md:py-16">
-  <div class="max-w-4xl mx-auto px-4">
+<section class="relative overflow-hidden aurora text-white py-12 md:py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
+  <div class="relative max-w-4xl mx-auto px-4">
     <a href="{{ route('articles') }}" class="text-sm text-slate-300 hover:text-white hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded">Back to articles</a>
     <div class="mt-4">
       <a href="{{ route('articles', ['topic' => $article->topic]) }}" class="inline-block px-3 py-1 rounded-full text-xs bg-white/10 border border-white/20 hover:bg-white/15 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white">{{ $article->topicLabel() }}</a>
     </div>
-    <h1 class="mt-4 text-3xl md:text-5xl font-bold leading-tight">{{ $article->title }}</h1>
+    <h1 class="mt-4 font-display text-3xl md:text-5xl font-bold leading-tight">{{ $article->title }}</h1>
     @if($article->excerpt)<p class="mt-4 text-slate-300 text-lg max-w-3xl">{{ $article->excerpt }}</p>@endif
     <div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-300">
       @if($authorName)

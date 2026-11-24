@@ -29,13 +29,14 @@
       fn ($v, $k) => $v !== '' && $k !== $key, ARRAY_FILTER_USE_BOTH))) ? '?'.$q : '');
 @endphp
 
-<section class="bg-[#101E33] text-white py-10 md:py-12">
-  <div class="max-w-7xl mx-auto px-4">
-    <h1 class="text-3xl font-bold">Events</h1>
-    <p class="mt-2 text-slate-300">Discover meetups, workshops, conferences and more.</p>
-    <a href="{{ route('speaker-calls.index') }}" class="mt-4 inline-block px-4 py-2 bg-[#FF5C3D] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition">Call for speakers</a>
-  </div>
-</section>
+@include('partials.page-hero', [
+  'kicker' => 'Meet, learn, build',
+  'title' => 'Events worth showing up for.',
+  'subtitle' => 'Meetups, workshops, conferences and career clinics across the network.',
+  'actions' => [
+    ['label' => 'Call for speakers', 'url' => route('speaker-calls.index'), 'style' => 'primary'],
+  ],
+])
 
 <div class="max-w-7xl mx-auto px-4 py-8">
 

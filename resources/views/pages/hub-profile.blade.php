@@ -35,15 +35,16 @@
 @endphp
 
 {{-- Hero --}}
-<section class="bg-[#101E33] text-white py-12 md:py-16">
-  <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
+<section class="relative overflow-hidden aurora text-white py-12 md:py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
+  <div class="relative max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
     @if($h->logo)
       <img src="{{ $h->logo }}" class="w-24 h-24 shrink-0 rounded-2xl object-cover border-4 border-white/20" alt="">
     @else
       <div class="w-24 h-24 shrink-0 rounded-2xl bg-white/10 border-4 border-white/20 flex items-center justify-center text-3xl font-bold" aria-hidden="true">{{ strtoupper(substr($h->name,0,1)) }}</div>
     @endif
     <div class="min-w-0 flex-1">
-      <h1 class="text-3xl font-bold">{{ $h->name }}</h1>
+      <h1 class="font-display text-3xl font-bold">{{ $h->name }}</h1>
       @if($location)<p class="text-slate-300 mt-1">{{ $location }}</p>@endif
       <div class="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-3">
         @if($h->is_verified)<span class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-200">Verified hub</span>@endif

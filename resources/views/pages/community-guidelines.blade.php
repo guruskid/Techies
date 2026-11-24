@@ -49,9 +49,10 @@
   $contactNumber = count($sections) + 1;
 @endphp
 
-<section class="bg-[#101E33] text-white py-12 md:py-16">
-  <div class="max-w-7xl mx-auto px-4">
-    <h1 class="text-4xl font-bold">Community Guidelines</h1>
+<section class="relative overflow-hidden aurora text-white py-12 md:py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
+  <div class="relative max-w-7xl mx-auto px-4">
+    <h1 class="font-display text-4xl font-bold">Community Guidelines</h1>
     <p class="mt-2 text-slate-300">How we keep MWTT welcoming, safe and valuable for everyone.</p>
   </div>
 </section>

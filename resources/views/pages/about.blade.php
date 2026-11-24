@@ -14,11 +14,12 @@
 @endphp
 
 {{-- Hero --}}
-<section class="bg-[#101E33] text-white py-14 md:py-20">
+<section class="relative overflow-hidden aurora text-white py-14 md:py-20">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
   <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
     <div>
       <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-white/10 border border-white/20">About MWTT</span>
-      <h1 class="mt-5 text-4xl md:text-5xl font-bold leading-tight">More Than a Meetup. A Connected Tech Community.</h1>
+      <h1 class="mt-5 font-display text-4xl md:text-5xl font-bold leading-tight">More Than a Meetup. A Connected Tech Community.</h1>
       <p class="mt-5 text-slate-300 text-lg max-w-xl">Meet with the Techies is a non-profit technology community built to connect people, organizations, technology hubs, innovation centres, developers, designers, founders, students and technology enthusiasts.</p>
     </div>
     <dl class="grid grid-cols-2 gap-4">
@@ -84,7 +85,7 @@
 
 {{-- Values --}}
 <section class="bg-[#F8FAFC] py-14 md:py-20" aria-labelledby="values-h">
-  <div class="max-w-7xl mx-auto px-4">
+  <div class="relative max-w-7xl mx-auto px-4">
     <h2 id="values-h" class="text-3xl font-bold text-[#101E33] text-center">Our Core Values</h2>
     <ul class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       @foreach ([

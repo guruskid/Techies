@@ -7,10 +7,11 @@
   $profileLabel = auth()->check() ? 'Edit your profile' : 'Create a profile';
 @endphp
 
-<section class="bg-[#101E33] text-white py-12 md:py-16">
-  <div class="max-w-7xl mx-auto px-4">
+<section class="relative overflow-hidden aurora text-white py-12 md:py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
+  <div class="relative max-w-7xl mx-auto px-4">
     <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-white/10 border border-white/20">Community</span>
-    <h1 class="mt-5 text-4xl font-bold">One community. Many ways to belong.</h1>
+    <h1 class="mt-5 font-display text-4xl font-bold">One community. Many ways to belong.</h1>
     <p class="mt-4 text-slate-300 max-w-2xl">MWTT brings together developers, designers, founders, students, technology hubs and community organisers. However you work in tech, there is a place for you here.</p>
   </div>
 </section>

@@ -1,9 +1,10 @@
 @extends('layouts.app')
 @section('content')
-<section class="bg-[#101E33] text-white py-16">
-  <div class="max-w-7xl mx-auto px-4">
+<section class="relative overflow-hidden aurora text-white py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
+  <div class="relative max-w-7xl mx-auto px-4">
     <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-white/10 border border-white/20">Mission & Vision</span>
-    <h1 class="mt-5 text-4xl font-bold">Why MWTT exists.</h1>
+    <h1 class="mt-5 font-display text-4xl font-bold">Why MWTT exists.</h1>
     <p class="mt-4 text-slate-300 max-w-2xl">Technology in Nigeria is full of talent, energy and ideas. MWTT exists to connect the people and communities behind that work so they can go further together.</p>
   </div>
 </section>

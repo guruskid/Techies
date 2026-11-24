@@ -41,7 +41,8 @@
 @endphp
 
 {{-- Hero --}}
-<section class="bg-[#101E33] text-white py-12 sm:py-16">
+<section class="relative overflow-hidden aurora text-white py-12 sm:py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
   <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
     @if($p->avatar)
       <img src="{{ asset($p->avatar) }}" alt="" class="w-28 h-28 shrink-0 rounded-full object-cover border-4 border-white/20">
@@ -51,7 +52,7 @@
       </div>
     @endif
     <div class="min-w-0 flex-1">
-      <h1 class="text-3xl font-bold">{{ $user->name }}</h1>
+      <h1 class="font-display text-3xl font-bold">{{ $user->name }}</h1>
       <p class="text-slate-200 mt-1">{{ $p->professional_title ?? 'Member' }}@if($p->current_organization), {{ $p->current_organization }}@endif</p>
       @if($p->headline)<p class="text-slate-300 text-sm mt-2 max-w-2xl">{{ $p->headline }}</p>@endif
       @if($location)<p class="text-sm text-slate-300 mt-2">{{ $location }}</p>@endif

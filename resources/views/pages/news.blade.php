@@ -5,13 +5,11 @@
   $link = 'text-[#FF5C3D] font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] rounded';
 @endphp
 
-<section class="bg-[#101E33] text-white py-12 md:py-16">
-  <div class="max-w-7xl mx-auto px-4">
-    <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-white/10 border border-white/20">News &amp; Updates</span>
-    <h1 class="mt-5 text-4xl font-bold">What's happening across the network.</h1>
-    <p class="mt-4 text-slate-300 max-w-2xl">Announcements, community updates and stories from MWTT chapters, hubs and members.</p>
-  </div>
-</section>
+@include('partials.page-hero', [
+  'kicker' => 'News & updates',
+  'title' => 'What is happening across the network.',
+  'subtitle' => 'Announcements, community updates and stories from MWTT chapters, hubs and members.',
+])
 
 {{-- Announcements --}}
 <section class="max-w-7xl mx-auto px-4 py-12 md:py-16" aria-labelledby="announce-h">

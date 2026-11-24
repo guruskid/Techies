@@ -33,16 +33,18 @@
   $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';
 @endphp
 
-<section class="bg-[#101E33] text-white py-10 md:py-12">
-  <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+<section class="relative overflow-hidden aurora text-white">
+  <div class="absolute inset-0 tech-grid opacity-35" aria-hidden="true"></div>
+  <div class="relative max-w-7xl mx-auto px-4 py-12 md:py-16 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
     <div>
-      <h1 class="text-3xl font-bold">Members Directory</h1>
-      <p class="mt-2 text-slate-300">Find and connect with techies across the network.</p>
+      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#FF8A73]">The network</p>
+      <h1 class="mt-2 font-display text-3xl md:text-5xl font-bold">Members Directory</h1>
+      <p class="mt-3 max-w-2xl text-lg text-slate-300">Find and connect with the builders, designers, founders and students shaping tech across Nigeria.</p>
     </div>
-    <a href="{{ route('membership.show') }}" class="group flex items-center gap-4 rounded-2xl bg-white/10 border border-white/15 px-5 py-4 hover:bg-white/15 transition {{ $focus }}">
+    <a href="{{ route('membership.show') }}" class="group flex shrink-0 items-center gap-4 rounded-2xl border border-white/15 bg-white/5 px-5 py-4 transition hover:bg-white/10 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wide text-[#FF5C3D]">Membership</p>
-        <p class="mt-1 text-lg font-bold">{{ $membershipPrice }} <span class="text-sm font-normal text-slate-300">one time</span></p>
+        <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-[#FF8A73]">Membership</p>
+        <p class="mt-1 font-display text-lg font-bold">{{ $membershipPrice }} <span class="text-sm font-normal text-slate-300">one time</span></p>
       </div>
       <span class="shrink-0 text-sm font-semibold text-white group-hover:underline">Join</span>
     </a>

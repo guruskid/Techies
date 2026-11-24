@@ -5,12 +5,11 @@
   $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';
 @endphp
 
-<section class="bg-[#101E33] text-white py-10 md:py-12">
-  <div class="max-w-7xl mx-auto px-4">
-    <h1 class="text-3xl font-bold">Community Chapters</h1>
-    <p class="mt-2 text-slate-300">Regional and state chapters across Nigeria.</p>
-  </div>
-</section>
+@include('partials.page-hero', [
+  'kicker' => 'Local first',
+  'title' => 'Find your chapter.',
+  'subtitle' => 'Regional and state chapters connecting techies across Nigeria.',
+])
 
 <div class="max-w-7xl mx-auto px-4 py-8">
 

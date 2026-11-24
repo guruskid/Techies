@@ -1,11 +1,10 @@
 @extends('layouts.app')
 @section('content')
-<section class="bg-[#101E33] text-white py-12">
-  <div class="max-w-7xl mx-auto px-4">
-    <h1 class="text-3xl font-bold">Technology Hubs</h1>
-    <p class="mt-2 text-slate-300">Discover verified technology hubs and innovation centres.</p>
-  </div>
-</section>
+@include('partials.page-hero', [
+  'kicker' => 'Where it happens',
+  'title' => 'Technology hubs across the network.',
+  'subtitle' => 'Discover verified hubs, innovation centres and community spaces.',
+])
 <div class="max-w-7xl mx-auto px-4 py-8">
   <form method="GET" class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
     <div class="grid md:grid-cols-12 gap-3 items-end">

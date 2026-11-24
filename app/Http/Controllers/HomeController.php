@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Article;
 use App\Models\Chapter;
 use App\Models\Event;
 use App\Models\Hub;
 use App\Models\Opportunity;
+use App\Models\SpeakerCall;
 use App\Models\User;
 
 class HomeController extends Controller
@@ -27,7 +29,25 @@ class HomeController extends Controller
         $events = Event::where('status', 'published')->where('start_date', '>=', now()->toDateString())->orderBy('start_date')->take(6)->get();
         $opportunities = Opportunity::where('status', 'published')->latest()->take(6)->get();
         $chapters = Chapter::where('status', 'active')->latest()->take(8)->get();
+        $articles = Article::approved()
+            ->with('author')
+            ->latest('published_at')
+            ->take(3)
+            ->get();
+        $speakerCalls = SpeakerCall::with('event')
+            ->where('status', SpeakerCall::STATUS_OPEN)
+            ->where(function ($query): void {
+                $query->whereNull('opens_at')->orWhereDate('opens_at', '<=', today());
+            })
+            ->where(function ($query): void {
+                $query->whereNull('closes_at')->orWhereDate('closes_at', '>=', today());
+            })
+            ->latest()
+            ->take(2)
+            ->get();
 
-        return view('home', compact('stats', 'members', 'hubs', 'events', 'opportunities', 'chapters'));
+        return view('home', compact(
+            'stats', 'members', 'hubs', 'events', 'opportunities', 'chapters', 'articles', 'speakerCalls'
+        ));
     }
 }

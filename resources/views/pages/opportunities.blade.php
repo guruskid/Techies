@@ -23,12 +23,11 @@
       fn ($v, $k) => $v !== '' && $k !== $key, ARRAY_FILTER_USE_BOTH))) ? '?'.$q : '');
 @endphp
 
-<section class="bg-[#101E33] text-white py-10 md:py-12">
-  <div class="max-w-7xl mx-auto px-4">
-    <h1 class="text-3xl font-bold">Opportunities</h1>
-    <p class="mt-2 text-slate-300">Jobs, internships, scholarships, grants and more.</p>
-  </div>
-</section>
+@include('partials.page-hero', [
+  'kicker' => 'Make your next move',
+  'title' => 'Opportunities for people building what is next.',
+  'subtitle' => 'Jobs, internships, scholarships, grants and fellowships curated for the community.',
+])
 
 <div class="max-w-7xl mx-auto px-4 py-8">
 

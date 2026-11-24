@@ -1,8 +1,9 @@
 @extends('layouts.app')
 @section('content')
-<section class="bg-[#101E33] text-white py-16">
-  <div class="max-w-7xl mx-auto px-4">
-    <h1 class="text-4xl font-bold">Terms of Use</h1>
+<section class="relative overflow-hidden aurora text-white py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
+  <div class="relative max-w-7xl mx-auto px-4">
+    <h1 class="font-display text-4xl font-bold">Terms of Use</h1>
     <p class="mt-2 text-slate-300">Please read these terms carefully. Last updated: 2026</p>
   </div>
 </section>

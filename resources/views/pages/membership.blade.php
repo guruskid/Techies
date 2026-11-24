@@ -9,11 +9,12 @@
   $status = $user?->membership_status;
 @endphp
 
-<section class="bg-[#101E33] text-white py-12 md:py-16">
-  <div class="max-w-6xl mx-auto px-4 grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-10 items-center">
+<section class="relative overflow-hidden aurora text-white py-14 md:py-20">
+  <div class="absolute inset-0 tech-grid opacity-30" aria-hidden="true"></div>
+  <div class="relative max-w-6xl mx-auto px-4 grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-10 items-center">
     <div>
-      <p class="text-sm font-semibold uppercase tracking-wide text-[#FF5C3D]">One-time membership</p>
-      <h1 class="mt-2 text-3xl md:text-5xl font-bold leading-tight">Join a community that helps you grow.</h1>
+      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#FF8A73]">One-time membership</p>
+      <h1 class="mt-2 font-display text-3xl md:text-5xl font-bold leading-tight">Join a community that helps you grow.</h1>
       <p class="mt-4 max-w-2xl text-slate-300 text-lg">Pay once, belong for life. Meet with the Techies connects you to events, mentorship, opportunities, speaker stages and a network of people building across Nigeria.</p>
       <div class="mt-6 flex flex-wrap items-center gap-3">
         <span class="px-4 py-2 rounded-full bg-white/10 border border-white/15 text-sm">{{ $price }} once</span>

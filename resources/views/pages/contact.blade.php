@@ -20,12 +20,13 @@
   $sent = session('status') ?? session('success');
 @endphp
 
-<section class="bg-[#101E33] text-white py-12 md:py-16 relative overflow-hidden">
+<section class="relative overflow-hidden aurora text-white py-12 md:py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
   <div class="absolute inset-0 opacity-20" aria-hidden="true">
     <div class="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[#FF5C3D] blur-3xl"></div>
   </div>
   <div class="max-w-7xl mx-auto px-4 relative">
-    <h1 class="text-4xl font-bold">Contact Us</h1>
+    <h1 class="font-display text-4xl font-bold">Contact Us</h1>
     <p class="mt-3 text-slate-300 max-w-2xl">We'd love to hear from you. Reach out to the MWTT team for partnerships, membership, events or any questions.</p>
   </div>
 </section>

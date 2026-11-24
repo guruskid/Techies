@@ -17,11 +17,12 @@
   $labelClass = 'block text-sm font-medium text-slate-700 mb-1';
 @endphp
 
-<section class="bg-[#101E33] text-white py-12 md:py-16">
-  <div class="max-w-5xl mx-auto px-4">
+<section class="relative overflow-hidden aurora text-white py-12 md:py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
+  <div class="relative max-w-5xl mx-auto px-4">
     <a href="{{ route('speaker-calls.index') }}" class="text-sm text-slate-300 hover:text-white hover:underline rounded {{ $focus }}">All calls for speakers</a>
     <p class="mt-4 text-xs font-medium text-[#FF5C3D]">{{ $source }}</p>
-    <h1 class="mt-1 text-3xl md:text-4xl font-bold leading-tight">{{ $speakerCall->title }}</h1>
+    <h1 class="mt-1 font-display text-3xl md:text-4xl font-bold leading-tight">{{ $speakerCall->title }}</h1>
     <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-300">
       <span class="px-2.5 py-1 rounded-full text-xs font-medium {{ $isOpen ? 'bg-green-500/20 text-green-200' : 'bg-white/10 text-slate-200' }}">{{ $isOpen ? 'Open for submissions' : 'Closed' }}</span>
       @if($speakerCall->closes_at)

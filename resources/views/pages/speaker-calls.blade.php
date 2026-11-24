@@ -7,13 +7,11 @@
   $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';
 @endphp
 
-<section class="bg-[#101E33] text-white py-12 md:py-16">
-  <div class="max-w-7xl mx-auto px-4">
-    <p class="text-sm font-semibold uppercase tracking-wide text-[#FF5C3D]">Speak at an event</p>
-    <h1 class="mt-2 text-3xl md:text-4xl font-bold">Call for speakers</h1>
-    <p class="mt-3 max-w-2xl text-slate-300 text-lg">Browse open calls, choose a topic and submit a talk. Organisers review every proposal and email you the decision.</p>
-  </div>
-</section>
+@include('partials.page-hero', [
+  'kicker' => 'Speak at an event',
+  'title' => 'Call for speakers.',
+  'subtitle' => 'Browse open calls, choose a topic and submit a talk. Organisers review every proposal and email you the decision.',
+])
 
 <div class="max-w-7xl mx-auto px-4 py-8 pb-12">
   @if($speakerCalls->count())

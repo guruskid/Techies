@@ -26,7 +26,8 @@
   $sent = session('status') ?? session('success');
 @endphp
 
-<section class="bg-[#101E33] text-white py-12 md:py-16 relative overflow-hidden">
+<section class="relative overflow-hidden aurora text-white py-12 md:py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
   <div class="absolute inset-0 opacity-20" aria-hidden="true">
     <div class="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[#FF5C3D] blur-3xl"></div>
   </div>
@@ -35,7 +36,7 @@
     <div class="mt-4">
       <span class="inline-block text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">{{ $o->category?->name ?? 'Opportunity' }}</span>
     </div>
-    <h1 class="mt-4 text-3xl md:text-4xl font-bold leading-tight">{{ $o->title }}</h1>
+    <h1 class="mt-4 font-display text-3xl md:text-4xl font-bold leading-tight">{{ $o->title }}</h1>
     @if($sub)<p class="mt-2 text-slate-300 text-lg">{{ implode(', ', $sub) }}</p>@endif
     <div class="mt-4 flex flex-wrap gap-2">
       @if($o->is_member_only)<span class="text-xs px-3 py-1 rounded-full bg-white text-[#101E33] font-medium">Members only</span>@endif

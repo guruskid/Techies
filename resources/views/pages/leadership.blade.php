@@ -1,9 +1,10 @@
 @extends('layouts.app')
 @section('content')
-<section class="bg-[#101E33] text-white py-16">
-  <div class="max-w-7xl mx-auto px-4">
+<section class="relative overflow-hidden aurora text-white py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
+  <div class="relative max-w-7xl mx-auto px-4">
     <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-white/10 border border-white/20">MWTT Leadership</span>
-    <h1 class="mt-5 text-4xl font-bold">Leadership that serves the community.</h1>
+    <h1 class="mt-5 font-display text-4xl font-bold">Leadership that serves the community.</h1>
     <p class="mt-4 text-slate-300 max-w-2xl">MWTT is a non-profit community led by volunteers who care about connecting and strengthening the technology ecosystem. Leadership is organised around service, transparency and shared ownership.</p>
   </div>
 </section>

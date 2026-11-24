@@ -1,268 +1,345 @@
 @extends('layouts.app')
 @section('content')
 @php
-  $card = 'bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition';
   $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';
-  $viewAll = 'text-[#FF5C3D] font-medium hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] rounded';
-  $primaryBtn = 'px-6 py-3 bg-[#FF5C3D] text-white font-semibold rounded-lg hover:opacity-90 transition text-center '.$focus;
-  $input = 'w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]';
-  // Signed-in visitors get a way back into the app instead of "Join"
   $memberHome = \Illuminate\Support\Facades\Route::has('dashboard') ? route('dashboard') : route('profile.edit');
+  $membershipFee = (int) \App\Models\Setting::value('membership_fee', '15000');
+  $membershipCurrency = (string) \App\Models\Setting::value('membership_currency', 'NGN');
+  $membershipPrice = $membershipCurrency === 'NGN' ? '₦'.number_format($membershipFee) : $membershipCurrency.' '.number_format($membershipFee);
 @endphp
 
 {{-- Hero --}}
-<section class="bg-[#101E33] text-white">
-  <div class="max-w-7xl mx-auto px-4 py-14 md:py-20 pb-20 md:pb-24 grid md:grid-cols-2 gap-12 items-center">
-    <div>
-      <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-white/10 border border-white/20">Non-profit tech community, Nigeria</span>
-      <h1 class="mt-5 text-4xl md:text-6xl font-bold leading-tight tracking-tight">Where Techies Connect, Collaborate and Grow.</h1>
-      <p class="mt-5 text-lg text-slate-300 max-w-xl">Meet with the Techies is a growing technology community connecting professionals, developers, innovators, founders, students and technology hubs to build a stronger, more connected tech ecosystem.</p>
-      <div class="mt-8 flex flex-wrap gap-3">
+<section class="relative overflow-hidden aurora text-white">
+  <div class="absolute inset-0 tech-grid opacity-40" aria-hidden="true"></div>
+  <div class="absolute -top-32 -left-24 w-[28rem] h-[28rem] rounded-full bg-[#FF5C3D]/20 blur-3xl" aria-hidden="true"></div>
+  <div class="absolute -bottom-40 right-0 w-[34rem] h-[34rem] rounded-full bg-cyan-400/10 blur-3xl" aria-hidden="true"></div>
+
+  <div class="relative max-w-7xl mx-auto px-4 pt-16 pb-12 md:pt-24 md:pb-16 grid lg:grid-cols-[1.08fr_0.92fr] gap-12 items-center min-w-0">
+    <div class="min-w-0">
+      <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-slate-200">
+        <span class="w-2 h-2 rounded-full bg-[#FF5C3D]"></span>
+        Nigeria's community layer for technology
+      </div>
+      <h1 class="mt-6 font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.03] tracking-tight">
+        <span class="text-gradient">Build in public.</span><br>
+        Grow with people<br>
+        who get it.
+      </h1>
+      <p class="mt-6 max-w-xl text-lg leading-relaxed text-slate-300 break-words">
+        Meet with the Techies connects developers, designers, founders, students and hubs into one network for events, mentorship, opportunities and the conversations that move careers forward.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center gap-3">
         @guest
-          <a href="{{ route('register') }}" class="{{ $primaryBtn }} shadow-lg focus-visible:ring-offset-[#101E33]">Join the Community</a>
-        @else
-          <a href="{{ $memberHome }}" class="{{ $primaryBtn }} shadow-lg focus-visible:ring-offset-[#101E33]">Go to my dashboard</a>
-        @endguest
-        <a href="/members" class="px-6 py-3 border border-white/30 rounded-lg hover:bg-white/10 transition text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white">Explore Our Network</a>
-      </div>
-    </div>
-    <div class="hidden md:flex justify-center" aria-hidden="true">
-      <svg viewBox="0 0 400 400" class="w-full max-w-md" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="200" cy="200" r="180" stroke="#FF5C3D" stroke-width="1" stroke-dasharray="4 6" opacity="0.4"/>
-        <circle cx="200" cy="200" r="120" stroke="#06B6D4" stroke-width="1" stroke-dasharray="4 6" opacity="0.4"/>
-        @foreach([[100,120],[280,100],[320,260],[120,300],[60,200],[260,320]] as $pt)
-          <line x1="{{ $pt[0] }}" y1="{{ $pt[1] }}" x2="200" y2="200" stroke="#ffffff33" stroke-width="1"/>
-          <circle cx="{{ $pt[0] }}" cy="{{ $pt[1] }}" r="14" fill="#FF5C3D"/>
-        @endforeach
-        <circle cx="200" cy="200" r="22" fill="#06B6D4"/>
-      </svg>
-    </div>
-  </div>
-</section>
-
-{{-- Stats (shown once; the hero no longer repeats them) --}}
-<section class="max-w-7xl mx-auto px-4 -mt-10 relative z-10" aria-label="Community at a glance">
-  <dl class="grid grid-cols-2 md:grid-cols-4 gap-4">
-    @foreach (['members'=>'Registered Techies','hubs'=>'Verified Hubs','chapters'=>'Chapters','events'=>'Events Organized'] as $k=>$label)
-      <div class="bg-white rounded-2xl p-6 text-center shadow-xl border border-slate-100 flex flex-col-reverse">
-        <dt class="text-sm text-slate-600 mt-1">{{ $label }}</dt>
-        <dd class="text-3xl font-bold text-[#FF5C3D] tabular-nums">{{ number_format((int) $stats[$k]) }}</dd>
-      </div>
-    @endforeach
-  </dl>
-</section>
-
-{{-- About --}}
-<section class="max-w-7xl mx-auto px-4 py-14 md:py-20">
-  <div class="max-w-3xl">
-    <h2 class="text-3xl md:text-4xl font-bold text-[#101E33]">More Than a Meetup. A Connected Tech Community.</h2>
-    <p class="mt-4 text-slate-600 text-lg">MWTT brings together developers, designers, engineers, founders, students and technology hubs to collaborate, learn and grow, connecting the entire technology ecosystem under one network.</p>
-    <a href="/about" class="inline-block mt-6 font-semibold {{ $viewAll }}">Learn about us</a>
-  </div>
-</section>
-
-{{-- Who we bring together --}}
-<section class="bg-white py-14 md:py-20" aria-labelledby="who-h">
-  <div class="max-w-7xl mx-auto px-4">
-    <h2 id="who-h" class="text-3xl font-bold text-[#101E33] mb-8">Who We Bring Together</h2>
-    <ul class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      @foreach ([
-        ['Developers','Building software and products that move the world.'],
-        ['Designers','Crafting beautiful, usable digital experiences.'],
-        ['Engineers','Solving hard technical problems at scale.'],
-        ['Founders','Creating companies and communities.'],
-        ['Product Managers','Turning ideas into shipped products.'],
-        ['Tech Students','Learning and launching their careers.'],
-        ['Tech Hubs','Running spaces where innovation happens.'],
-        ['Innovation Communities','Growing ecosystems across regions.'],
-      ] as [$title, $blurb])
-        <li class="rounded-2xl border border-slate-100 p-5 hover:shadow-md transition">
-          <div class="w-10 h-10 rounded-lg bg-[#FF5C3D]/10 text-[#FF5C3D] flex items-center justify-center font-bold" aria-hidden="true">{{ substr($title,0,1) }}</div>
-          <h3 class="mt-3 font-semibold text-[#101E33]">{{ $title }}</h3>
-          <p class="mt-1 text-sm text-slate-600">{{ $blurb }}</p>
-        </li>
-      @endforeach
-    </ul>
-  </div>
-</section>
-
-{{-- Members --}}
-<section class="max-w-7xl mx-auto px-4 py-14 md:py-20" aria-labelledby="members-h">
-  <div class="flex items-end justify-between gap-4 mb-8">
-    <h2 id="members-h" class="text-3xl font-bold text-[#101E33]">Explore the Community</h2>
-    <a href="/members" class="shrink-0 {{ $viewAll }}">View all<span class="sr-only"> members</span></a>
-  </div>
-  <ul class="grid md:grid-cols-3 gap-4">
-    @forelse ($members as $m)
-      @php $mp = $m->profile; $loc = implode(', ', array_filter([$mp?->city, $mp?->state])); @endphp
-      <li>
-        <a href="{{ $mp?->username ? $mp->publicUrl() : '/members' }}" class="{{ $card }} p-5 flex gap-4 items-center {{ $focus }}">
-          @if($mp?->avatar)
-            <img src="{{ $mp->avatar }}" alt="" loading="lazy" class="w-14 h-14 shrink-0 rounded-full object-cover">
-          @else
-            <div class="w-14 h-14 shrink-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold" aria-hidden="true">{{ strtoupper(substr($m->name,0,1)) }}</div>
-          @endif
-          <div class="min-w-0">
-            <div class="font-semibold text-[#101E33] truncate">{{ $m->name }}</div>
-            <div class="text-sm text-slate-600 truncate">{{ $mp?->professional_title ?? 'Member' }}</div>
-            @if($loc)<div class="text-xs text-slate-500 truncate">{{ $loc }}</div>@endif
-          </div>
-        </a>
-      </li>
-    @empty
-      <li class="text-slate-600 md:col-span-3">No public members yet. Be the first to join.</li>
-    @endforelse
-  </ul>
-</section>
-
-{{-- Hubs --}}
-<section class="bg-[#F8FAFC] py-14 md:py-20" aria-labelledby="hubs-h">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="flex items-end justify-between gap-4 mb-8">
-      <h2 id="hubs-h" class="text-3xl font-bold text-[#101E33]">Discover Technology Hubs</h2>
-      <a href="/hubs" class="shrink-0 {{ $viewAll }}">View all<span class="sr-only"> hubs</span></a>
-    </div>
-    <ul class="grid md:grid-cols-3 gap-4">
-      @forelse ($hubs as $h)
-        @php $hloc = implode(', ', array_filter([$h->city, $h->state])); @endphp
-        <li>
-          <a href="/hubs/{{ $h->slug }}" class="{{ $card }} p-6 h-full flex flex-col {{ $focus }}">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 shrink-0 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-600" aria-hidden="true">{{ strtoupper(substr($h->name,0,1)) }}</div>
-              <div class="min-w-0">
-                <div class="font-semibold text-[#101E33]">{{ $h->name }}</div>
-                @if($hloc)<div class="text-xs text-slate-500">{{ $hloc }}</div>@endif
-              </div>
-              @if($h->is_verified)<span class="ml-auto shrink-0 text-xs px-2 py-1 rounded-full bg-green-50 text-green-700 font-medium">Verified</span>@endif
-            </div>
-            <p class="mt-4 text-sm text-slate-600 flex-1">{{ \Illuminate\Support\Str::limit($h->description,110) }}</p>
-            <span class="mt-4 text-sm font-medium text-[#FF5C3D]">View hub</span>
+          <a href="{{ route('membership.show') }}" class="btn-glow inline-flex items-center gap-2 rounded-xl bg-[#FF5C3D] px-6 py-3.5 font-semibold text-white transition hover:opacity-90 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
+            Become a member
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
           </a>
-        </li>
-      @empty
-        <li class="text-slate-600 md:col-span-3">No verified hubs yet.</li>
-      @endforelse
-    </ul>
+        @else
+          <a href="{{ $memberHome }}" class="btn-glow inline-flex items-center gap-2 rounded-xl bg-[#FF5C3D] px-6 py-3.5 font-semibold text-white transition hover:opacity-90 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
+            Open my dashboard
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </a>
+        @endguest
+        <a href="{{ route('members') }}" class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 font-semibold text-white transition hover:bg-white/10 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
+          Explore the network
+        </a>
+      </div>
+      <p class="mt-5 text-sm text-slate-400">One-time membership · No monthly renewal · Built for the Nigerian tech ecosystem</p>
+    </div>
+
+    <div class="relative min-w-0 w-full">
+      <div class="glass w-full rounded-3xl p-5 sm:p-6">
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Network snapshot</p>
+          <span class="inline-flex items-center gap-2 text-xs text-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Live</span>
+        </div>
+
+        <div class="mt-5 grid grid-cols-2 gap-3">
+          @foreach ([
+            ['label' => 'Members', 'value' => $stats['members'], 'tone' => 'text-white'],
+            ['label' => 'Verified hubs', 'value' => $stats['hubs'], 'tone' => 'text-white'],
+            ['label' => 'Chapters', 'value' => $stats['chapters'], 'tone' => 'text-white'],
+            ['label' => 'Events hosted', 'value' => $stats['events'], 'tone' => 'text-white'],
+          ] as $stat)
+            <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+              <p class="text-[11px] uppercase tracking-wider text-slate-400">{{ $stat['label'] }}</p>
+              <p class="mt-1 font-display text-2xl font-bold {{ $stat['tone'] }}">{{ number_format((int) $stat['value']) }}</p>
+            </div>
+          @endforeach
+        </div>
+
+        <div class="mt-5 flex flex-col sm:flex-row sm:items-center gap-3 border-t border-white/10 pt-5">
+          <div class="flex shrink-0 -space-x-2">
+            @foreach($members->take(4) as $member)
+              @if($member->profile?->avatar)
+                <img src="{{ $member->profile->avatar }}" alt="" class="h-9 w-9 rounded-full border-2 border-[#0D1728] object-cover">
+              @else
+                <span class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0D1728] bg-[#FF5C3D] text-xs font-bold text-white">{{ strtoupper(substr($member->name, 0, 1)) }}</span>
+              @endif
+            @endforeach
+          </div>
+          <p class="text-xs leading-relaxed text-slate-400">Builders, designers, founders and students across Nigeria.</p>
+        </div>
+
+        @if($speakerCalls->isNotEmpty())
+          @php $openCall = $speakerCalls->first(); @endphp
+          <a href="{{ route('speaker-calls.show', $openCall->slug) }}" class="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-[#FF5C3D]/30 bg-[#FF5C3D]/10 p-4 transition hover:bg-[#FF5C3D]/15 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-[#FF5C3D]">Open call for speakers</p>
+              <p class="mt-1 truncate text-sm font-semibold text-white">{{ $openCall->title }}</p>
+            </div>
+            <svg class="h-4 w-4 shrink-0 text-[#FF5C3D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </a>
+        @endif
+      </div>
+    </div>
+  </div>
+</section>
+
+{{-- Value pillars --}}
+<section class="relative z-10 -mt-8 pb-4">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      @foreach ([
+        ['Meet', 'Find the people building the same future you are.', route('members')],
+        ['Learn', 'Events, workshops and honest conversations with practitioners.', route('events')],
+        ['Move', 'Opportunities, internships and career support in one place.', route('opportunities')],
+        ['Lead', 'Take the stage, join a chapter and shape your community.', route('speaker-calls.index')],
+      ] as [$title, $copy, $url])
+        <a href="{{ $url }}" class="card-lift group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_20px_60px_-45px_rgba(10,18,32,.6)] {{ $focus }}">
+          <div class="flex items-center justify-between">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#101E33] text-white">
+              <span class="h-2 w-2 rounded-full bg-[#FF5C3D]"></span>
+            </span>
+            <svg class="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-[#FF5C3D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+          <h2 class="mt-4 font-display text-lg font-bold text-[#101E33]">{{ $title }}</h2>
+          <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $copy }}</p>
+        </a>
+      @endforeach
+    </div>
   </div>
 </section>
 
 {{-- Events --}}
-<section class="max-w-7xl mx-auto px-4 py-14 md:py-20" aria-labelledby="events-h">
-  <div class="flex items-end justify-between gap-4 mb-8">
-    <h2 id="events-h" class="text-3xl font-bold text-[#101E33]">Upcoming Events</h2>
-    <a href="/events" class="shrink-0 {{ $viewAll }}">View all<span class="sr-only"> events</span></a>
+<section class="max-w-7xl mx-auto px-4 py-16 md:py-20" aria-labelledby="events-h">
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+    <div>
+      <p class="section-label">What's next</p>
+      <h2 id="events-h" class="mt-2 font-display text-3xl md:text-4xl font-bold text-[#101E33]">Upcoming events</h2>
+    </div>
+    <a href="{{ route('events') }}" class="text-sm font-semibold text-[#C23A1F] hover:underline {{ $focus }}">View all events</a>
   </div>
-  <ul class="grid md:grid-cols-3 gap-4">
-    @forelse ($events as $e)
-      <li>
-        <a href="/events/{{ $e->slug }}" class="{{ $card }} h-full flex gap-4 p-5 {{ $focus }}">
-          <div class="w-14 h-14 shrink-0 rounded-xl bg-[#FF5C3D]/10 text-[#FF5C3D] flex flex-col items-center justify-center leading-none" aria-hidden="true">
-            <span class="text-[11px] font-semibold uppercase">{{ $e->start_date->format('M') }}</span>
-            <span class="text-xl font-bold">{{ $e->start_date->format('j') }}</span>
+
+  <div class="grid md:grid-cols-3 gap-4">
+    @forelse($events->take(3) as $event)
+      <a href="{{ route('events.show', $event->slug) }}" class="card-lift group flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_22px_70px_-55px_rgba(10,18,32,.7)] {{ $focus }}">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex h-14 w-14 flex-col items-center justify-center rounded-xl bg-[#101E33] text-white leading-none">
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-[#FF8A73]">{{ $event->start_date->format('M') }}</span>
+            <span class="font-display text-xl font-bold">{{ $event->start_date->format('j') }}</span>
           </div>
-          <div class="min-w-0">
-            <div class="text-xs font-medium text-[#C23A1F]">{{ $e->start_date->format('M j, Y') }}{{ $e->is_online ? ', Online' : ($e->city ? ', '.$e->city : '') }}</div>
-            <h3 class="mt-1 font-semibold text-[#101E33]">{{ $e->title }}</h3>
-            <span class="inline-block mt-2 text-sm font-medium text-[#FF5C3D]">View event</span>
+          <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">{{ $event->category?->name ?? 'Event' }}</span>
+        </div>
+        <h3 class="mt-4 font-display text-lg font-bold leading-snug text-[#101E33] group-hover:text-[#C23A1F]">{{ $event->title }}</h3>
+        <p class="mt-2 text-sm text-slate-600">{{ $event->is_online ? 'Online' : ($event->city ?: 'Location to be announced') }}{{ $event->start_time ? ' · '.$event->start_time : '' }}</p>
+        <span class="mt-auto pt-5 text-sm font-semibold text-[#C23A1F]">View event</span>
+      </a>
+    @empty
+      <p class="text-slate-600 md:col-span-3">No upcoming events yet. Check back soon.</p>
+    @endforelse
+  </div>
+</section>
+
+{{-- Opportunities + speaker calls --}}
+<section class="bg-white border-y border-slate-200/70 py-16 md:py-20">
+  <div class="max-w-7xl mx-auto px-4 grid lg:grid-cols-[1.35fr_0.65fr] gap-8 items-start">
+    <div>
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+        <div>
+          <p class="section-label">Make your next move</p>
+          <h2 class="mt-2 font-display text-3xl md:text-4xl font-bold text-[#101E33]">Opportunities</h2>
+        </div>
+        <a href="{{ route('opportunities') }}" class="text-sm font-semibold text-[#C23A1F] hover:underline {{ $focus }}">View all</a>
+      </div>
+      <div class="space-y-3">
+        @forelse($opportunities->take(4) as $opportunity)
+          @php $meta = array_filter([$opportunity->organization, $opportunity->location ?: ($opportunity->is_remote ? 'Remote' : null)]); @endphp
+          <a href="{{ route('opportunities.show', $opportunity->slug) }}" class="card-lift group flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-[#F9FAFC] p-5 {{ $focus }}">
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-wider text-[#C23A1F]">{{ $opportunity->category?->name ?? 'Opportunity' }}</p>
+              <h3 class="mt-1 font-display text-lg font-bold text-[#101E33] group-hover:text-[#C23A1F]">{{ $opportunity->title }}</h3>
+              @if($meta)<p class="mt-1 text-sm text-slate-600">{{ implode(' · ', $meta) }}</p>@endif
+            </div>
+            <span class="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 group-hover:border-[#FF5C3D] group-hover:text-[#C23A1F]">View role</span>
+          </a>
+        @empty
+          <p class="text-slate-600">No opportunities yet.</p>
+        @endforelse
+      </div>
+    </div>
+
+    <aside class="rounded-3xl bg-[#101E33] p-6 text-white">
+      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#FF8A73]">Speak</p>
+      <h2 class="mt-2 font-display text-2xl font-bold">Have something worth sharing?</h2>
+      <p class="mt-2 text-sm leading-relaxed text-slate-300">Open calls let you submit a talk, choose a topic and get a decision by email.</p>
+      @if($speakerCalls->isNotEmpty())
+        <ul class="mt-5 space-y-2">
+          @foreach($speakerCalls as $call)
+            <li>
+              <a href="{{ route('speaker-calls.show', $call->slug) }}" class="block rounded-xl border border-white/10 bg-white/5 p-3 transition hover:bg-white/10 {{ $focus }} focus-visible:ring-offset-[#101E33]">
+                <span class="block text-sm font-semibold">{{ $call->title }}</span>
+                <span class="mt-0.5 block text-xs text-slate-400">{{ $call->closes_at ? 'Closes '.$call->closes_at->format('M j') : 'Open now' }}</span>
+              </a>
+            </li>
+          @endforeach
+        </ul>
+      @else
+        <p class="mt-5 text-sm text-slate-400">New calls are announced regularly.</p>
+      @endif
+      <a href="{{ route('speaker-calls.index') }}" class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#FF8A73] hover:text-white">Browse calls <span aria-hidden="true">&rarr;</span></a>
+    </aside>
+  </div>
+</section>
+
+{{-- Hubs and chapters --}}
+<section class="max-w-7xl mx-auto px-4 py-16 md:py-20">
+  <div class="grid lg:grid-cols-[1.4fr_0.6fr] gap-8 items-start">
+    <div>
+      <div class="flex items-end justify-between gap-4 mb-6">
+        <div>
+          <p class="section-label">Where it happens</p>
+          <h2 class="mt-2 font-display text-3xl md:text-4xl font-bold text-[#101E33]">Technology hubs</h2>
+        </div>
+        <a href="{{ route('hubs') }}" class="text-sm font-semibold text-[#C23A1F] hover:underline {{ $focus }}">View all</a>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        @forelse($hubs->take(4) as $hub)
+          <a href="{{ route('hubs.show', $hub->slug) }}" class="card-lift group rounded-2xl border border-slate-200/80 bg-white p-5 {{ $focus }}">
+            <div class="flex items-center gap-3">
+              @if($hub->logo)
+                <img src="{{ $hub->logo }}" alt="" class="h-11 w-11 rounded-xl object-cover border border-slate-100">
+              @else
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#101E33] font-display text-lg font-bold text-white">{{ strtoupper(substr($hub->name, 0, 1)) }}</span>
+              @endif
+              <div class="min-w-0">
+                <h3 class="truncate font-display font-bold text-[#101E33] group-hover:text-[#C23A1F]">{{ $hub->name }}</h3>
+                <p class="text-xs text-slate-500">{{ implode(', ', array_filter([$hub->city, $hub->state])) ?: 'Nigeria' }}</p>
+              </div>
+            </div>
+            <p class="mt-3 line-clamp-2 text-sm text-slate-600">{{ \Illuminate\Support\Str::limit(strip_tags($hub->description), 100) }}</p>
+          </a>
+        @empty
+          <p class="text-slate-600">No hubs yet.</p>
+        @endforelse
+      </div>
+    </div>
+
+    <aside class="rounded-3xl border border-slate-200/80 bg-white p-6">
+      <p class="section-label">Local first</p>
+      <h2 class="mt-2 font-display text-2xl font-bold text-[#101E33]">Chapters</h2>
+      <p class="mt-2 text-sm text-slate-600">Find the community closest to you.</p>
+      <ul class="mt-5 flex flex-wrap gap-2">
+        @forelse($chapters as $chapter)
+          <li>
+            <a href="{{ route('chapters.show', $chapter->slug) }}" class="inline-flex rounded-full border border-slate-200 bg-[#F9FAFC] px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-[#FF5C3D] hover:text-[#C23A1F] {{ $focus }}">{{ $chapter->name }}</a>
+          </li>
+        @empty
+          <li class="text-sm text-slate-600">No chapters yet.</li>
+        @endforelse
+      </ul>
+      <a href="{{ route('chapters') }}" class="mt-5 inline-flex text-sm font-semibold text-[#C23A1F] hover:underline">See all chapters</a>
+    </aside>
+  </div>
+</section>
+
+{{-- Articles --}}
+<section class="bg-white border-y border-slate-200/70 py-16 md:py-20">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+      <div>
+        <p class="section-label">Ideas worth reading</p>
+        <h2 class="mt-2 font-display text-3xl md:text-4xl font-bold text-[#101E33]">From the community</h2>
+      </div>
+      <a href="{{ route('articles') }}" class="text-sm font-semibold text-[#C23A1F] hover:underline {{ $focus }}">View all articles</a>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">
+      @forelse($articles as $article)
+        <a href="{{ route('articles.show', $article) }}" class="card-lift group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-[#F9FAFC] {{ $focus }}">
+          <div class="aspect-[16/9] overflow-hidden bg-[#101E33]">
+            @if($article->cover_image)
+              <img src="{{ $article->cover_image }}" alt="" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]">
+            @else
+              <div class="flex h-full items-center justify-center bg-gradient-to-br from-[#101E33] to-[#1E3557] font-display text-2xl font-bold text-white/80">{{ $article->topicLabel() }}</div>
+            @endif
+          </div>
+          <div class="flex flex-1 flex-col p-5">
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-[#C23A1F]">{{ $article->topicLabel() }}</p>
+            <h3 class="mt-2 font-display text-lg font-bold leading-snug text-[#101E33] group-hover:text-[#C23A1F]">{{ $article->title }}</h3>
+            <p class="mt-2 line-clamp-2 text-sm text-slate-600">{{ $article->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($article->body), 120) }}</p>
+            <p class="mt-auto pt-4 text-xs text-slate-500">{{ $article->readingTime() }} min read</p>
           </div>
         </a>
-      </li>
-    @empty
-      <li class="text-slate-600 md:col-span-3">No upcoming events. Check back soon.</li>
-    @endforelse
-  </ul>
-</section>
-
-{{-- Opportunities --}}
-<section class="bg-[#F8FAFC] py-14 md:py-20" aria-labelledby="opps-h">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="flex items-end justify-between gap-4 mb-8">
-      <h2 id="opps-h" class="text-3xl font-bold text-[#101E33]">Community Opportunities</h2>
-      <a href="/opportunities" class="shrink-0 {{ $viewAll }}">View all<span class="sr-only"> opportunities</span></a>
-    </div>
-    <ul class="grid md:grid-cols-3 gap-4">
-      @forelse ($opportunities as $o)
-        @php $meta = array_filter([$o->organization, $o->location ?: ($o->is_remote ? 'Remote' : null)]); @endphp
-        <li>
-          <a href="/opportunities/{{ $o->slug }}" class="{{ $card }} p-6 h-full flex flex-col {{ $focus }}">
-            <span class="self-start text-xs px-2 py-1 rounded-full bg-[#FF5C3D]/10 text-[#C23A1F] font-medium">{{ $o->category?->name ?? 'Opportunity' }}</span>
-            <h3 class="mt-3 font-semibold text-[#101E33]">{{ $o->title }}</h3>
-            @if($meta)<p class="mt-1 text-sm text-slate-600 flex-1">{{ implode(', ', $meta) }}</p>@endif
-            <span class="mt-4 text-sm font-medium text-[#FF5C3D]">View opportunity</span>
-          </a>
-        </li>
       @empty
-        <li class="text-slate-600 md:col-span-3">No opportunities yet.</li>
+        <p class="text-slate-600 md:col-span-3">No articles yet.</p>
       @endforelse
-    </ul>
-  </div>
-</section>
-
-{{-- Hub partner CTA --}}
-<section class="max-w-7xl mx-auto px-4 py-14 md:py-20">
-  <div class="bg-[#101E33] text-white rounded-3xl p-8 md:p-16 grid md:grid-cols-2 gap-8 items-center">
-    <div>
-      <h2 class="text-3xl md:text-4xl font-bold">Bring Your Tech Community Into the Network.</h2>
-      <p class="mt-4 text-slate-300">Are you running a technology hub, innovation centre, developer community or university tech community? Join MWTT and connect with a wider technology ecosystem.</p>
-      <a href="/hubs/register" class="inline-block mt-6 px-6 py-3 bg-[#FF5C3D] rounded-lg font-semibold hover:opacity-90 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white">Register Your Hub</a>
     </div>
-    <ul class="space-y-3 text-slate-300 text-sm">
-      @foreach(['Dedicated hub profile and public page','Publish events to the MWTT directory','Manage your team and community members','Showcase programs and opportunities'] as $perk)
-        <li class="flex items-start gap-3">
-          <svg class="w-5 h-5 shrink-0 text-[#FF5C3D]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z" clip-rule="evenodd"/></svg>
-          <span>{{ $perk }}</span>
-        </li>
-      @endforeach
-    </ul>
   </div>
 </section>
 
-{{-- Chapters --}}
-<section class="max-w-7xl mx-auto px-4 pb-14 md:pb-20" aria-labelledby="chapters-h">
-  <h2 id="chapters-h" class="text-3xl font-bold text-[#101E33] mb-6">Community Chapters</h2>
-  <ul class="flex flex-wrap gap-3">
-    @forelse ($chapters as $c)
-      <li>
-        <a href="/chapters/{{ $c->slug }}" class="inline-block px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:border-[#FF5C3D] hover:text-[#FF5C3D] transition {{ $focus }}">{{ $c->name }}</a>
-      </li>
-    @empty
-      <li class="text-slate-600">No chapters yet.</li>
-    @endforelse
-  </ul>
+{{-- Membership CTA --}}
+<section class="max-w-7xl mx-auto px-4 py-16 md:py-20">
+  <div class="relative overflow-hidden rounded-3xl bg-[#101E33] p-8 md:p-12 text-white">
+    <div class="absolute inset-0 tech-grid opacity-30" aria-hidden="true"></div>
+    <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[#FF5C3D]/20 blur-3xl" aria-hidden="true"></div>
+    <div class="relative grid lg:grid-cols-[1.2fr_0.8fr] gap-8 items-center">
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#FF8A73]">Membership</p>
+        <h2 class="mt-2 font-display text-3xl md:text-4xl font-bold">Do the work. Find your people.</h2>
+        <p class="mt-3 max-w-xl text-slate-300">One membership gives you access to the events, mentorship, opportunities, chapters and speaker stages that help technology careers compound.</p>
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          <span class="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold">{{ $membershipPrice }} once</span>
+          <span class="text-sm text-slate-400">No monthly renewal</span>
+        </div>
+        <a href="{{ route('membership.show') }}" class="btn-glow mt-6 inline-flex items-center gap-2 rounded-xl bg-[#FF5C3D] px-6 py-3.5 font-semibold text-white transition hover:opacity-90 {{ $focus }} focus-visible:ring-offset-[#101E33]">
+          See what is included
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
+      </div>
+      <ul class="space-y-3 text-sm text-slate-300">
+        @foreach(['Member events, workshops and meetups', 'A public profile that showcases your work', 'Mentorship and peer learning circles', 'Opportunity applications and speaker calls'] as $benefit)
+          <li class="flex items-start gap-3">
+            <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FF5C3D]/15 text-[#FF8A73]">
+              <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4l3.8 3.8 6.8-6.8a1 1 0 011.4 0z" clip-rule="evenodd"/></svg>
+            </span>
+            {{ $benefit }}
+          </li>
+        @endforeach
+      </ul>
+    </div>
+  </div>
 </section>
 
 {{-- Newsletter --}}
-<section id="newsletter" class="bg-[#F8FAFC] py-14 md:py-20">
-  <div class="max-w-2xl mx-auto px-4 text-center">
-    <h2 class="text-3xl font-bold text-[#101E33]">Stay in the Loop</h2>
-    <p class="mt-3 text-slate-600">Subscribe to community updates, events and opportunities.</p>
-    <form method="POST" action="/newsletter" class="mt-6 flex flex-col sm:flex-row gap-2 text-left">
+<section class="bg-white border-t border-slate-200/70 py-16">
+  <div class="max-w-4xl mx-auto px-4 text-center">
+    <p class="section-label">Stay close</p>
+    <h2 class="mt-2 font-display text-3xl font-bold text-[#101E33]">The community, in your inbox.</h2>
+    <p class="mt-2 text-slate-600">Events, opportunities and honest lessons from people building in tech.</p>
+    <form method="POST" action="/newsletter" class="mx-auto mt-6 flex max-w-2xl flex-col sm:flex-row gap-2 text-left">
       @csrf
       <div class="flex-1">
         <label for="nl-name" class="sr-only">Your name</label>
-        <input id="nl-name" name="name" value="{{ old('name') }}" placeholder="Your name" autocomplete="name" class="{{ $input }}" required>
+        <input id="nl-name" name="name" value="{{ old('name') }}" placeholder="Your name" autocomplete="name" required class="w-full rounded-xl border border-slate-200 bg-[#F9FAFC] px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
         @error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
       </div>
       <div class="flex-1">
         <label for="nl-email" class="sr-only">Your email</label>
-        <input id="nl-email" name="email" type="email" value="{{ old('email') }}" placeholder="Your email" autocomplete="email" class="{{ $input }}" required>
+        <input id="nl-email" name="email" type="email" value="{{ old('email') }}" placeholder="Your email" autocomplete="email" required class="w-full rounded-xl border border-slate-200 bg-[#F9FAFC] px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
         @error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
       </div>
-      <button type="submit" class="self-start sm:self-auto px-6 py-3 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition {{ $focus }}">Subscribe</button>
+      <button type="submit" class="rounded-xl bg-[#101E33] px-6 py-3.5 font-semibold text-white transition hover:bg-[#1A2C48] {{ $focus }}">Subscribe</button>
     </form>
-  </div>
-</section>
-
-{{-- Final CTA --}}
-<section class="max-w-7xl mx-auto px-4 py-14 md:py-20 text-center">
-  <h2 class="text-3xl md:text-4xl font-bold text-[#101E33]">The Future of Tech Is Better Together.</h2>
-  <div class="mt-8 flex flex-wrap justify-center gap-3">
-    @guest
-      <a href="{{ route('register') }}" class="{{ $primaryBtn }}">Join the Community</a>
-    @else
-      <a href="{{ $memberHome }}" class="{{ $primaryBtn }}">Go to my dashboard</a>
-    @endguest
-    <a href="/hubs/register" class="px-6 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 transition text-center {{ $focus }}">Register Your Hub</a>
   </div>
 </section>
 @endsection

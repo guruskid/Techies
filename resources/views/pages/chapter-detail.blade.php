@@ -1,18 +1,19 @@
 @extends('layouts.app')
 @section('content')
 @php $c = $chapter; @endphp
-<section class="bg-[#101E33] text-white py-16 relative overflow-hidden">
+<section class="relative overflow-hidden aurora text-white py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
   <div class="absolute inset-0 opacity-20">
     <div class="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[#FF5C3D] blur-3xl"></div>
   </div>
-  <div class="max-w-7xl mx-auto px-4 relative flex flex-col md:flex-row items-center gap-6">
+  <div class="relative max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-6">
     @if($c->logo)
       <img src="{{ $c->logo }}" class="w-24 h-24 rounded-2xl object-cover border-4 border-white/20" alt="{{ $c->name }}">
     @else
       <div class="w-24 h-24 rounded-2xl bg-white/10 border-4 border-white/20 flex items-center justify-center text-3xl font-bold">{{ strtoupper(substr($c->name,0,1)) }}</div>
     @endif
     <div>
-      <h1 class="text-3xl font-bold">{{ $c->name }}</h1>
+      <h1 class="font-display text-3xl font-bold">{{ $c->name }}</h1>
       <p class="text-slate-300 mt-1">{{ collect([$c->state, $c->country])->filter()->implode(', ') ?: 'Chapter' }}</p>
       <span class="inline-block mt-2 text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-300">{{ ucfirst($c->status) }}</span>
     </div>

@@ -1,13 +1,14 @@
 @extends('layouts.app')
 @section('content')
 @php $e = $event; @endphp
-<section class="bg-[#101E33] text-white py-16 relative overflow-hidden">
+<section class="relative overflow-hidden aurora text-white py-16">
+  <div class="absolute inset-0 tech-grid opacity-25" aria-hidden="true"></div>
   <div class="absolute inset-0 opacity-20">
     <div class="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-[#FF5C3D] blur-3xl"></div>
   </div>
   <div class="max-w-7xl mx-auto px-4 relative">
     @if($e->category)<span class="inline-block text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">{{ $e->category->name }}</span>@endif
-    <h1 class="mt-4 text-3xl md:text-4xl font-bold leading-tight">{{ $e->title }}</h1>
+    <h1 class="mt-4 font-display text-3xl md:text-4xl font-bold leading-tight">{{ $e->title }}</h1>
     <p class="mt-2 text-slate-300 text-lg">{{ $e->start_date->format('M j, Y') }} @if($e->start_time)· {{ $e->start_time }} @endif @if($e->is_online)· Online @else· {{ $e->city }} @endif</p>
     <div class="mt-4 flex flex-wrap gap-2">
       @if($e->is_online)<span class="text-xs px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300">Online Event</span>@else<span class="text-xs px-3 py-1 rounded-full bg-white/10">In Person</span>@endif
