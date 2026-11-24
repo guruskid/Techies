@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -18,7 +19,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name', 'email', 'password', 'role', 'status', 'membership_status',
         'membership_reference', 'membership_paid_at', 'membership_confirmed_by',
-        'membership_notes',
+        'membership_notes', 'member_number', 'referral_code', 'referred_by',
+        'is_founding_member', 'feedback_requested_at', 'opportunity_match_sent_at',
     ];
 
     protected $hidden = [
@@ -30,6 +32,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'membership_paid_at' => 'datetime',
+            'feedback_requested_at' => 'datetime',
+            'opportunity_match_sent_at' => 'datetime',
+            'is_founding_member' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -37,6 +42,43 @@ class User extends Authenticatable implements MustVerifyEmail
     public function profile()
     {
         return $this->hasOne(UserProfile::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function (User $user): void {
+            $year = $user->created_at?->format('Y') ?? now()->format('Y');
+
+            $user->forceFill([
+                'member_number' => $user->member_number ?: 'MWTT-'.$year.'-'.str_pad((string) $user->id, 5, '0', STR_PAD_LEFT),
+                'referral_code' => $user->referral_code ?: Str::upper(Str::random(8)),
+            ])->saveQuietly();
+        });
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by');
+    }
+
+    public function mentorshipRequest()
+    {
+        return $this->hasOne(MentorshipRequest::class);
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    public function feedback()
+    {
+        return $this->hasMany(MemberFeedback::class);
     }
 
     /**

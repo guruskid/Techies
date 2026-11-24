@@ -2,9 +2,13 @@
   $user = auth()->user();
   $tabs = [
     ['Dashboard', route('dashboard'), request()->routeIs('dashboard')],
+    ['Passport', route('passport.show'), request()->routeIs('passport.*')],
     ['Profile', route('profile.edit'), request()->routeIs('profile.*')],
     ['My articles', route('member.content.index'), request()->routeIs('member.content.*')],
     ['Membership', route('membership.show'), request()->routeIs('membership.*')],
+    ['Mentorship', route('mentorship.index'), request()->routeIs('mentorship.*')],
+    ['Benefits', route('benefits.index'), request()->routeIs('benefits.*')],
+    ['Programmes', route('programs.index'), request()->routeIs('programs.*')],
   ];
   if ($user?->hub) {
     $tabs[] = ['My hub', route('hub.dashboard'), request()->routeIs('hub.dashboard')];

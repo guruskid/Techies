@@ -14,6 +14,7 @@
         ['key' => 'members',  'title' => 'Members',  'description' => 'View, suspend and restore member accounts.',     'url' => route('admin.members.index')],
         ['key' => 'hubs',     'title' => 'Hubs',     'description' => 'Review, approve and manage technology hubs.',    'url' => route('admin.hubs.index'), 'badge' => 'pending'],
         ['key' => 'chapters', 'title' => 'Chapters', 'description' => 'Create and manage regional chapters.',           'url' => route('admin.chapters.index')],
+        ['key' => 'mentorship', 'title' => 'Mentorship', 'description' => 'Match mentors and mentees, and close cycles.', 'url' => route('admin.mentorship.index')],
       ],
     ],
     [
@@ -27,6 +28,9 @@
         ['key' => 'opportunities', 'title' => 'Opportunities',   'description' => 'Post and manage jobs and opportunities.',      'url' => route('admin.opportunities.index')],
         ['key' => 'speaker-calls', 'title' => 'Call for speakers', 'description' => 'Open calls, review proposals and email speakers.', 'url' => route('admin.speaker-calls.index')],
         ['key' => 'categories',    'title' => 'Categories',      'description' => 'Manage event and opportunity categories.',     'url' => route('admin.categories.index')],
+        ['key' => 'benefits',      'title' => 'Member benefits',  'description' => 'Manage partner offers and member perks.',      'url' => route('admin.benefits.index')],
+        ['key' => 'certificates',  'title' => 'Certificates',      'description' => 'Issue verified certificates to members.',      'url' => route('admin.certificates.index')],
+        ['key' => 'feedback',      'title' => 'Member feedback',   'description' => 'Read thirty-day feedback from members.',       'url' => route('admin.feedback.index')],
       ],
     ],
     [

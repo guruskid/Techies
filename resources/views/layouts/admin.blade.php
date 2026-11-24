@@ -29,6 +29,9 @@
       ['Members', route('admin.members.index'), request()->is('admin/members*')],
       ['Hubs', route('admin.hubs.index'), request()->is('admin/hubs*')],
       ['Chapters', route('admin.chapters.index'), request()->is('admin/chapters*')],
+      ['Mentorship', route('admin.mentorship.index'), request()->is('admin/mentorship*')],
+      ['Feedback', route('admin.feedback.index'), request()->is('admin/feedback*')],
+      ['Certificates', route('admin.certificates.index'), request()->is('admin/certificates*')],
     ],
     'Content' => [
       ['Content review', route('admin.content.index'), request()->is('admin/content*')],
@@ -36,6 +39,7 @@
       ['Events', route('admin.events.index'), request()->is('manage/events*')],
       ['Opportunities', route('admin.opportunities.index'), request()->is('manage/opportunities*')],
       ['Call for speakers', route('admin.speaker-calls.index'), request()->is('manage/speaker-calls*')],
+      ['Benefits', route('admin.benefits.index'), request()->is('admin/benefits*')],
       ['Categories', route('admin.categories.index'), request()->is('admin/categories*', 'admin/event-categories*', 'admin/opportunity-categories*')],
     ],
     'Communication' => [

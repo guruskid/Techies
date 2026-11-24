@@ -233,6 +233,8 @@
           <li><a href="/hubs" class="text-slate-400 hover:text-white transition">Technology hubs</a></li>
           <li><a href="/chapters" class="text-slate-400 hover:text-white transition">Chapters</a></li>
           <li><a href="/membership" class="text-slate-400 hover:text-white transition">Membership</a></li>
+          <li><a href="/benefits" class="text-slate-400 hover:text-white transition">Member benefits</a></li>
+          <li><a href="/programmes" class="text-slate-400 hover:text-white transition">Programmes</a></li>
         </ul>
       </div>
 

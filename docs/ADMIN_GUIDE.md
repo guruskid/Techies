@@ -272,6 +272,34 @@ php artisan users:sync-roles             # apply
 
 `users:sync-roles` aligns the Spatie pivot with `users.role` and preserves extra capability roles such as `hub_owner`. It is safe to run repeatedly.
 
+### 4.9 Member passport and retention tools
+
+Every account receives a **member number** (`MWTT-YYYY-00000`), a **referral code** and, for existing members, a **founding member** badge.
+
+**Member passport** — `/passport` in the member workspace. It shows:
+- a digital membership card with a QR code,
+- member number, status and member-since date,
+- events, talks, articles, chapters, certificates and referrals,
+- an onboarding checklist,
+- mentorship status,
+- a referral link and certificate list.
+
+**Benefits** — `/benefits` lists active partner offers and resources. Manage them at **Admin → Member benefits**. Add a title, provider, description, offer label, category and link.
+
+**Mentorship** — members request a mentor or volunteer as one at `/mentorship`. Admins match a mentee to an available mentor at **Admin → Mentorship**. Both members are emailed. The admin screen also closes completed cycles.
+
+**Certificates** — issue verified certificates at **Admin → Certificates**. Types include attendance, speaking, volunteering, mentorship and chapter participation. Members are emailed, and anyone can verify a certificate at `/certificates/{number}`.
+
+**Programmes** — `/programmes` lists upcoming events in the **Career Clinics** and **Office Hours** categories. Create these events through the normal event form.
+
+**Referrals** — a member can share `/register?ref=CODE`. The new account records the referrer. Referral counts appear on the passport and the admin member screen.
+
+**Opportunity matches** — `opportunities:send-matches` emails up to three opportunities matched by state, skills and technology category. It runs weekly on Monday at 09:00. Members opt in through the weekly digest preference on their profile.
+
+**Thirty-day feedback** — `members:request-feedback` emails members 30 days after membership activation. Responses are stored and reviewed at **Admin → Member feedback**.
+
+**Onboarding** — the member dashboard and passport show a checklist covering profile completion, a chapter, an event, an opportunity or talk, and mentorship.
+
 ---
 
 ## 5. Member profiles and profile subdomains
@@ -1083,6 +1111,10 @@ All of these are sent through the system mailer (Section 14.9), not the mail cen
 | Speaker proposal rejected | Organiser rejects a call for speakers submission | The speaker |
 | Membership payment submitted | Member submits a payment reference | Admins and super admins |
 | Membership activated | Staff confirms or waives the fee | The member |
+| Mentorship matched | Admin matches a mentor and mentee | Both members |
+| Certificate issued | Admin issues a certificate | The member |
+| Membership feedback request | 30 days after activation | The member |
+| Opportunity matches | Weekly matching job | Opted-in active members |
 | New event | An event is first published | Active members in the event's state (or all active members when no state is recorded) |
 | New opportunity | An opportunity is first published | Active members in the hub's state (or all active members when there is no hub state) |
 | Hub application submitted | A hub is registered | Admins and super admins, excluding the owner |
@@ -1107,6 +1139,8 @@ Operational note: publishing mail is broad by design. An event or opportunity wi
 | Mondays 08:00 | `community:send-digest` | Weekly digest to opted-in members |
 | Every 10 minutes | `mail:sync` | Poll connected IMAP inboxes |
 | Every minute | `mail:broadcasts:send-due` | Send scheduled broadcasts whose time has arrived |
+| Daily 09:00 | `members:request-feedback` | Ask members for feedback after 30 days |
+| Mondays 09:00 | `opportunities:send-matches` | Email matched opportunities to opted-in members |
 
 The scheduler requires the server cron entry shown in Section 2.
 
@@ -1353,6 +1387,7 @@ Members whose account carries the `hub_owner` capability, or who coordinate a ch
 /membership                         membership benefits and payment
 /speaker-calls                      open calls for speakers
 /speaker-calls/{slug}               call detail and submission form
+/certificates/{number}              public certificate verification
 /articles                           article directory
 /articles/{slug}                    article detail
 /news                               announcements and recent articles
@@ -1387,6 +1422,11 @@ Members whose account carries the `hub_owner` capability, or who coordinate a ch
 /member/content/create              new article
 /member/content/{article}/edit      edit draft or returned article
 /hub/dashboard                      hub owner dashboard
+/passport                           member passport and card
+/mentorship                         mentorship request
+/benefits                           member benefits
+/programmes                         career clinics and office hours
+/feedback                           thirty-day member feedback
 ```
 
 ### Admin
@@ -1399,6 +1439,10 @@ Members whose account carries the `hub_owner` capability, or who coordinate a ch
 /admin/hubs                         hubs
 /admin/hubs/{hub}                   hub detail and decisions
 /admin/chapters                     chapters
+/admin/mentorship                    mentorship matching
+/admin/certificates                  certificates
+/admin/benefits                      member benefits
+/admin/feedback                      member feedback
 /admin/content                      content queue
 /admin/content/{article}            review screen
 /admin/announcements                announcements

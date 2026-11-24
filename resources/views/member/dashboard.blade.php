@@ -53,6 +53,30 @@
     </section>
   @endif
 
+  @php
+    $completeOnboarding = collect($onboarding ?? [])->where(1, true)->count();
+    $totalOnboarding = count($onboarding ?? []);
+  @endphp
+  @if($totalOnboarding > 0 && $completeOnboarding < $totalOnboarding)
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 mb-8 shadow-sm" aria-labelledby="onboarding-h">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 id="onboarding-h" class="font-display text-lg font-bold text-[#101E33]">Your first steps</h2>
+          <p class="mt-1 text-sm text-slate-500">{{ $completeOnboarding }} of {{ $totalOnboarding }} complete — keep going.</p>
+        </div>
+        <span class="font-display text-2xl font-extrabold text-[#C23A1F]">{{ round(($completeOnboarding / $totalOnboarding) * 100) }}%</span>
+      </div>
+      <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-5 gap-2">
+        @foreach($onboarding as [$label, $done, $url])
+          <a href="{{ $url }}" class="rounded-lg border px-3 py-2 text-xs transition {{ $done ? 'border-green-100 bg-green-50 text-green-700' : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300' }}">
+            <span class="block font-semibold">{{ $done ? 'Done' : 'Next' }}</span>
+            <span class="mt-0.5 block">{{ $label }}</span>
+          </a>
+        @endforeach
+      </div>
+    </section>
+  @endif
+
   {{-- Your hub (only for members who run a hub) --}}
   @if($hub ?? null)
     @php

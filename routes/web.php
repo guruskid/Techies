@@ -2,15 +2,19 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
+use App\Http\Controllers\Admin\BenefitController as AdminBenefitController;
+use App\Http\Controllers\Admin\CertificateController as AdminCertificateController;
 use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 use App\Http\Controllers\Admin\ContentController as AdminContentController;
 use App\Http\Controllers\Admin\EventCategoryController as AdminEventCategoryController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
+use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\Mail\AccountController as MailAccountController;
 use App\Http\Controllers\Admin\Mail\BroadcastController as MailBroadcastController;
 use App\Http\Controllers\Admin\Mail\MessageController as MailMessageController;
 use App\Http\Controllers\Admin\Mail\TemplateController as MailTemplateController;
 use App\Http\Controllers\Admin\MemberController;
+use App\Http\Controllers\Admin\MentorshipController as AdminMentorshipController;
 use App\Http\Controllers\Admin\OpportunityCategoryController as AdminOpportunityCategoryController;
 use App\Http\Controllers\Admin\OpportunityController as AdminOpportunityController;
 use App\Http\Controllers\Admin\SpeakerCallController as AdminSpeakerCallController;
@@ -19,6 +23,8 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\BenefitController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Chapter\ChapterController;
 use App\Http\Controllers\Event\EventController;
 use App\Http\Controllers\FeedController;
@@ -28,10 +34,14 @@ use App\Http\Controllers\Hub\HubDashboardController;
 use App\Http\Controllers\InboundMailController;
 use App\Http\Controllers\Member\ContentController as MemberContentController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboard;
+use App\Http\Controllers\Member\FeedbackController;
+use App\Http\Controllers\Member\MentorshipController;
 use App\Http\Controllers\Member\MyProfileController;
+use App\Http\Controllers\Member\PassportController;
 use App\Http\Controllers\Member\ProfileController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\Opportunity\OpportunityController;
+use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SpeakerCallController;
 use App\Http\Controllers\SuperAdmin\AuditLogController as SuperAdminAuditLogController;
@@ -147,6 +157,9 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
 Route::post('/register', [RegisterController::class, 'store']);
 
+Route::get('/benefits', [BenefitController::class, 'index'])->name('benefits.index');
+Route::get('/programmes', [ProgramController::class, 'index'])->name('programs.index');
+Route::get('/certificates/{certificate:certificate_number}', [CertificateController::class, 'show'])->name('certificates.show');
 Route::get('/membership', [MembershipController::class, 'show'])->name('membership.show');
 Route::post('/membership/payment', [MembershipController::class, 'submitPayment'])
     ->middleware(['auth', 'verified'])
@@ -154,6 +167,11 @@ Route::post('/membership/payment', [MembershipController::class, 'submitPayment'
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [MemberDashboard::class, 'index'])->name('dashboard');
+    Route::get('/passport', [PassportController::class, 'show'])->name('passport.show');
+    Route::get('/feedback', [FeedbackController::class, 'show'])->name('feedback.show');
+    Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+    Route::get('/mentorship', [MentorshipController::class, 'index'])->name('mentorship.index');
+    Route::post('/mentorship', [MentorshipController::class, 'store'])->name('mentorship.store');
     Route::get('/profile', [MyProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [MyProfileController::class, 'update'])->name('profile.update');
     Route::get('/profile/username-availability', [MyProfileController::class, 'checkUsername'])->name('profile.username.check')->middleware('throttle:30,1');
@@ -282,6 +300,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/chapters/{chapter}/edit', [AdminChapterController::class, 'edit'])->name('admin.chapters.edit');
         Route::patch('/admin/chapters/{chapter}', [AdminChapterController::class, 'update'])->name('admin.chapters.update');
         Route::delete('/admin/chapters/{chapter}', [AdminChapterController::class, 'destroy'])->name('admin.chapters.destroy');
+
+        Route::get('/admin/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
+
+        Route::get('/admin/certificates', [AdminCertificateController::class, 'index'])->name('admin.certificates.index');
+        Route::get('/admin/certificates/create', [AdminCertificateController::class, 'create'])->name('admin.certificates.create');
+        Route::post('/admin/certificates', [AdminCertificateController::class, 'store'])->name('admin.certificates.store');
+        Route::delete('/admin/certificates/{certificate}', [AdminCertificateController::class, 'destroy'])->name('admin.certificates.destroy');
+
+        Route::get('/admin/mentorship', [AdminMentorshipController::class, 'index'])->name('admin.mentorship.index');
+        Route::post('/admin/mentorship/{mentorshipRequest}/match', [AdminMentorshipController::class, 'match'])->name('admin.mentorship.match');
+        Route::post('/admin/mentorship/{mentorshipRequest}/close', [AdminMentorshipController::class, 'close'])->name('admin.mentorship.close');
+
+        Route::get('/admin/benefits', [AdminBenefitController::class, 'index'])->name('admin.benefits.index');
+        Route::get('/admin/benefits/create', [AdminBenefitController::class, 'create'])->name('admin.benefits.create');
+        Route::post('/admin/benefits', [AdminBenefitController::class, 'store'])->name('admin.benefits.store');
+        Route::get('/admin/benefits/{benefit}/edit', [AdminBenefitController::class, 'edit'])->name('admin.benefits.edit');
+        Route::patch('/admin/benefits/{benefit}', [AdminBenefitController::class, 'update'])->name('admin.benefits.update');
+        Route::delete('/admin/benefits/{benefit}', [AdminBenefitController::class, 'destroy'])->name('admin.benefits.destroy');
 
         Route::get('/admin/announcements', [AdminAnnouncementController::class, 'index'])->name('admin.announcements.index');
         Route::get('/admin/announcements/create', [AdminAnnouncementController::class, 'create'])->name('admin.announcements.create');

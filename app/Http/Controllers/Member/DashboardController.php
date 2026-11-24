@@ -9,6 +9,7 @@ use App\Models\Chapter;
 use App\Models\Event;
 use App\Models\Hub;
 use App\Models\Opportunity;
+use App\Models\SpeakerSubmission;
 use App\Models\User;
 use App\Models\UserProfile;
 
@@ -63,6 +64,14 @@ class DashboardController extends Controller
         ];
         $latestArticles = $user->articles()->latest()->take(4)->get();
 
-        return view('member.dashboard', compact('user', 'profile', 'completion', 'missing', 'upcomingEvents', 'recommendedHubs', 'recentMembers', 'opportunities', 'announcements', 'registeredEvents', 'contentStats', 'latestArticles', 'applicationCount', 'hub', 'coordinatedChapters'));
+        $onboarding = [
+            ['Complete your profile', ($profile?->completionPercentage() ?? 0) >= 80, route('profile.edit')],
+            ['Join a chapter', $user->chapters()->exists(), route('chapters')],
+            ['Register for an event', $user->eventRegistrations()->whereIn('status', ['registered', 'waitlisted'])->exists(), route('events')],
+            ['Apply to an opportunity or submit a talk', $user->opportunityApplications()->exists() || SpeakerSubmission::where('user_id', $user->id)->exists(), route('opportunities')],
+            ['Request a mentor or become one', $user->mentorshipRequest()->exists(), route('mentorship.index')],
+        ];
+
+        return view('member.dashboard', compact('user', 'profile', 'completion', 'missing', 'upcomingEvents', 'recommendedHubs', 'recentMembers', 'opportunities', 'announcements', 'registeredEvents', 'contentStats', 'latestArticles', 'applicationCount', 'hub', 'coordinatedChapters', 'onboarding'));
     }
 }

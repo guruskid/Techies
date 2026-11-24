@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Announcement;
 use App\Models\Article;
+use App\Models\Certificate;
 use App\Models\Chapter;
 use App\Models\EmailTemplate;
 use App\Models\Event;
@@ -12,6 +13,9 @@ use App\Models\EventRegistration;
 use App\Models\Hub;
 use App\Models\HubApplication;
 use App\Models\Interest;
+use App\Models\MemberBenefit;
+use App\Models\MemberFeedback;
+use App\Models\MentorshipRequest;
 use App\Models\NewsletterSubscriber;
 use App\Models\Opportunity;
 use App\Models\OpportunityApplication;
@@ -68,6 +72,7 @@ class DummyDataSeeder extends Seeder
 
         Setting::updateOrCreate(['key' => 'coming_soon'], ['value' => '0']);
         $this->seedMembershipSettings();
+        $this->seedMemberExperience($members);
 
         $this->call(ArticleSeeder::class);
         $this->seedRichArticles($members, $superAdmin);
@@ -856,6 +861,56 @@ class DummyDataSeeder extends Seeder
                 'registration_type' => 'free',
                 'status' => 'published',
             ],
+            [
+                'slug' => 'monthly-career-clinic',
+                'title' => 'Monthly Career Clinic',
+                'category' => 'Career Clinics',
+                'organizer' => $staff,
+                'hub' => $hubs['lagos'],
+                'chapter' => null,
+                'host' => 'Meet with the Techies',
+                'description' => '<p>A member-only clinic for CV reviews, LinkedIn feedback, mock interviews and salary conversations.</p><p>Bring one challenge you want help with and leave with a clear next step.</p>',
+                'agenda' => '<p>Small-group reviews followed by open questions.</p>',
+                'requirements' => '<p>Register to receive the meeting link.</p>',
+                'speakers' => "Ngozi Achebe\nAdaeze Okafor",
+                'speaker_images' => [],
+                'start_date' => now()->addDays(10)->toDateString(),
+                'start_time' => '18:00',
+                'end_time' => '19:30',
+                'venue' => null,
+                'city' => 'Online',
+                'state' => 'Lagos',
+                'is_online' => true,
+                'meeting_url' => 'https://meet.example.com/member-career-clinic',
+                'max_attendees' => 40,
+                'registration_type' => 'free',
+                'status' => 'published',
+            ],
+            [
+                'slug' => 'member-office-hours',
+                'title' => 'Member Office Hours',
+                'category' => 'Office Hours',
+                'organizer' => $staff,
+                'hub' => null,
+                'chapter' => null,
+                'host' => 'Meet with the Techies',
+                'description' => '<p>An open room with staff and senior members. Bring one question about your career, project or community idea.</p>',
+                'agenda' => '<p>Open questions, no slides.</p>',
+                'requirements' => null,
+                'speakers' => 'Ngozi Achebe',
+                'speaker_images' => [],
+                'start_date' => now()->addDays(5)->toDateString(),
+                'start_time' => '17:00',
+                'end_time' => '18:00',
+                'venue' => null,
+                'city' => 'Online',
+                'state' => 'Lagos',
+                'is_online' => true,
+                'meeting_url' => 'https://meet.example.com/member-office-hours',
+                'max_attendees' => 30,
+                'registration_type' => 'free',
+                'status' => 'published',
+            ],
         ];
 
         $events = [];
@@ -1374,6 +1429,99 @@ class DummyDataSeeder extends Seeder
                 );
             }
         }
+    }
+
+    /**
+     * @param  array<int, User>  $members
+     */
+    private function seedMemberExperience(array $members): void
+    {
+        $benefits = [
+            ['Co-working day pass', 'Lagos Builders Hub', 'A free day pass at the hub for focused work and community meetups.', '1 day pass', 'Hub perks', 'https://example.com/hub-day-pass'],
+            ['Cloud credits', 'Northstar Systems', 'Starter cloud credits for a personal or community project.', '$100 credit', 'Tools', 'https://example.com/cloud-credits'],
+            ['Course discount', 'Kite Academy', 'A member discount on practical frontend and backend courses.', '20% off', 'Learning', 'https://example.com/courses'],
+            ['CV and LinkedIn review', 'MWTT career team', 'A 30-minute review with actionable feedback on your CV or LinkedIn profile.', 'Free review', 'Career support', null],
+            ['Book bundle', 'Techies Library', 'A curated reading list and a discount on selected technology books.', '15% off', 'Learning', 'https://example.com/books'],
+        ];
+
+        foreach ($benefits as $index => [$title, $provider, $description, $label, $category, $url]) {
+            MemberBenefit::updateOrCreate(['title' => $title], [
+                'provider' => $provider,
+                'description' => $description,
+                'discount_label' => $label,
+                'category' => $category,
+                'url' => $url,
+                'is_active' => true,
+                'sort_order' => $index,
+            ]);
+        }
+
+        $mentor = MentorshipRequest::updateOrCreate(['user_id' => $members[0]->id], [
+            'role' => MentorshipRequest::ROLE_MENTOR,
+            'expertise' => 'Frontend engineering, design systems and career growth',
+            'goals' => 'Help two early-career members ship their first production feature.',
+            'availability' => 'Two evenings a month',
+            'status' => MentorshipRequest::STATUS_PENDING,
+        ]);
+
+        $mentee = MentorshipRequest::updateOrCreate(['user_id' => $members[10]->id], [
+            'role' => MentorshipRequest::ROLE_MENTEE,
+            'expertise' => 'Technical writing and frontend',
+            'goals' => 'Build a portfolio and prepare for a first frontend role.',
+            'availability' => 'Weekday evenings',
+            'status' => MentorshipRequest::STATUS_PENDING,
+        ]);
+
+        MentorshipRequest::updateOrCreate(['user_id' => $members[2]->id], [
+            'role' => MentorshipRequest::ROLE_MENTOR,
+            'expertise' => 'Product design and user research',
+            'goals' => 'Mentor a designer moving into product work.',
+            'availability' => 'Weekends',
+            'status' => MentorshipRequest::STATUS_PENDING,
+        ]);
+
+        MentorshipRequest::updateOrCreate(['user_id' => $members[8]->id], [
+            'role' => MentorshipRequest::ROLE_MENTEE,
+            'expertise' => 'Product management',
+            'goals' => 'Move from project coordination into product management.',
+            'availability' => 'Flexible',
+            'status' => MentorshipRequest::STATUS_MATCHED,
+            'matched_with' => $members[2]->id,
+            'matched_at' => now()->subDays(14),
+        ]);
+
+        MentorshipRequest::updateOrCreate(['user_id' => $members[2]->id], [
+            'role' => MentorshipRequest::ROLE_MENTOR,
+            'expertise' => 'Product design and user research',
+            'goals' => 'Mentor a designer moving into product work.',
+            'availability' => 'Weekends',
+            'status' => MentorshipRequest::STATUS_MATCHED,
+            'matched_with' => $members[8]->id,
+            'matched_at' => now()->subDays(14),
+        ]);
+
+        $certificates = [
+            [$members[0], 'speaker', 'Speaker at Lagos Frontend Meetup', 'Gave a practical talk on building fast interfaces.', 'MWTT-CERT-2026-A1B2C3'],
+            [$members[7], 'attendance', 'Community Showcase attendance', 'Attended and participated in the community showcase.', 'MWTT-CERT-2026-D4E5F6'],
+            [$members[2], 'mentorship', 'Mentorship cycle completion', 'Completed a three-month mentorship cycle as a mentor.', 'MWTT-CERT-2026-G7H8I9'],
+        ];
+
+        foreach ($certificates as [$user, $type, $title, $description, $number]) {
+            Certificate::updateOrCreate(['certificate_number' => $number], [
+                'user_id' => $user->id,
+                'issued_by' => $members[0]->id,
+                'type' => $type,
+                'title' => $title,
+                'description' => $description,
+                'issued_at' => now()->subDays(20),
+            ]);
+        }
+
+        MemberFeedback::updateOrCreate(['user_id' => $members[1]->id], [
+            'rating' => 5,
+            'comments' => 'The events are practical and the people are generous with their time.',
+            'submitted_at' => now()->subDays(5),
+        ]);
     }
 
     /**

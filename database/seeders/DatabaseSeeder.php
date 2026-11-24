@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
         $this->call(AdminUserSeeder::class);
         // seed categories
-        foreach (['Meetups', 'Conferences', 'Workshops', 'Hackathons', 'Networking', 'Webinars', 'Training', 'Career Events', 'Community Events'] as $c) {
+        foreach (['Meetups', 'Conferences', 'Workshops', 'Hackathons', 'Networking', 'Webinars', 'Training', 'Career Events', 'Community Events', 'Career Clinics', 'Office Hours'] as $c) {
             EventCategory::firstOrCreate(['name' => $c], ['slug' => Str::slug($c)]);
         }
         foreach (['Jobs', 'Internships', 'Scholarships', 'Grants', 'Fellowships', 'Training', 'Mentorship', 'Hackathons', 'Competitions'] as $c) {

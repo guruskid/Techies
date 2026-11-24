@@ -78,6 +78,12 @@
           <input id="password_confirmation" name="password_confirmation" :type="show ? 'text' : 'password'" type="password" autocomplete="new-password" required class="{{ $inputClass }}">
         </div>
 
+        <div>
+          <label for="referral_code" class="{{ $labelClass }}">Referral code <span class="font-normal text-slate-500">(optional)</span></label>
+          <input id="referral_code" name="referral_code" value="{{ old('referral_code', request('ref')) }}" maxlength="20" class="{{ $inputClass }}" placeholder="Enter a member's code">
+          {!! $err('referral_code') !!}
+        </div>
+
         <button type="submit" class="w-full px-6 py-3 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed {{ $focus }}">Create account</button>
 
         <p class="text-xs text-slate-600 text-center">

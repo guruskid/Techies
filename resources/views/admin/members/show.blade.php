@@ -112,6 +112,10 @@
           <div><dt class="text-slate-600">Reference</dt><dd class="font-medium text-[#101E33] break-all">{{ $user->membership_reference ?: 'Not provided' }}</dd></div>
           <div><dt class="text-slate-600">Confirmed</dt><dd class="font-medium text-[#101E33]">{{ $user->membership_paid_at?->format('M j, Y g:i A') ?? 'Not yet' }}</dd></div>
           <div><dt class="text-slate-600">Confirmed by</dt><dd class="font-medium text-[#101E33]">{{ $user->membership_confirmed_by ? (\App\Models\User::find($user->membership_confirmed_by)?->name ?? 'Staff') : '—' }}</dd></div>
+          <div><dt class="text-slate-600">Member number</dt><dd class="font-medium text-[#101E33]">{{ $user->member_number ?: '—' }}</dd></div>
+          <div><dt class="text-slate-600">Referral code</dt><dd class="font-mono font-medium text-[#101E33]">{{ $user->referral_code ?: '—' }}</dd></div>
+          <div><dt class="text-slate-600">Referrals</dt><dd class="font-medium text-[#101E33]">{{ $user->referrals()->count() }}</dd></div>
+          <div><dt class="text-slate-600">Founding member</dt><dd class="font-medium text-[#101E33]">{{ $user->is_founding_member ? 'Yes' : 'No' }}</dd></div>
         </dl>
 
         @if(! in_array($user->membership_status, ['active', 'exempt'], true))
