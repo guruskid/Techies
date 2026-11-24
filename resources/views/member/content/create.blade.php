@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('content')
+@include('partials.member-nav')
 <div class="max-w-7xl mx-auto px-4 py-8">
   <div class="mb-6">
     <a href="{{ route('member.content.index') }}" class="text-sm text-[#FF5C3D] hover:underline">← Back to my content</a>

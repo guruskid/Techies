@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('content')
+@include('partials.member-nav')
 @php
   $user = auth()->user();
   $firstName = \Illuminate\Support\Str::of($user->name)->before(' ');

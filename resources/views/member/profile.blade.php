@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('content')
+@include('partials.member-nav')
 @php
   $completion = $profile->completionPercentage();
   $miss = $profile->missingCompletionFields();

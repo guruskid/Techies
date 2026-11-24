@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('content')
+@include('partials.member-nav')
 @php
   $card = 'bg-white rounded-2xl border border-slate-100 shadow-sm';
   $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';

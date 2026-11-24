@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('content')
+@include('partials.member-nav')
 @php
   $statusStyles = [
     'draft' => 'bg-slate-100 text-slate-600',

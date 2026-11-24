@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('content')
+@include('partials.member-nav')
 <div class="max-w-7xl mx-auto px-4 py-8">
   <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
     <div>
