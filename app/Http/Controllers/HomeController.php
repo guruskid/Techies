@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Chapter;
 use App\Models\Event;
 use App\Models\Hub;
+use App\Models\MemberSpotlight;
 use App\Models\Opportunity;
 use App\Models\SpeakerCall;
 use App\Models\User;
@@ -34,6 +35,8 @@ class HomeController extends Controller
             ->latest('published_at')
             ->take(3)
             ->get();
+        $spotlight = MemberSpotlight::with('user.profile')->where('is_published', true)->latest('month')->first();
+
         $speakerCalls = SpeakerCall::with('event')
             ->where('status', SpeakerCall::STATUS_OPEN)
             ->where(function ($query): void {
@@ -47,7 +50,7 @@ class HomeController extends Controller
             ->get();
 
         return view('home', compact(
-            'stats', 'members', 'hubs', 'events', 'opportunities', 'chapters', 'articles', 'speakerCalls'
+            'stats', 'members', 'hubs', 'events', 'opportunities', 'chapters', 'articles', 'speakerCalls', 'spotlight'
         ));
     }
 }

@@ -127,6 +127,39 @@
       </div>
     </section>
 
+    @auth
+      <section class="{{ $card }} p-6" aria-labelledby="referrals-h">
+        <h2 id="referrals-h" class="text-lg font-bold text-[#101E33] mb-2">Referrals</h2>
+        <p class="text-sm text-slate-600">Members who can refer someone into this role.</p>
+
+        @if($myOffer)
+          <p class="mt-3 rounded-lg bg-green-50 p-3 text-sm text-green-800">You are offering a referral for this role.</p>
+        @else
+          <form method="POST" action="{{ route('referrals.offer', $o) }}" class="mt-3 space-y-2">
+            @csrf
+            <label for="referral-note" class="sr-only">Referral note</label>
+            <input id="referral-note" name="note" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="Optional note, e.g. I work on this team">
+            <button class="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Offer a referral</button>
+          </form>
+        @endif
+
+        @foreach($referralOffers as $offer)
+          @if($offer->user_id !== auth()->id())
+            <div class="mt-3 rounded-lg border border-slate-100 p-3 text-sm">
+              <p class="font-medium text-[#101E33]">{{ $offer->user?->name }}</p>
+              @if($offer->note)<p class="text-xs text-slate-500">{{ $offer->note }}</p>@endif
+              <form method="POST" action="{{ route('referrals.request', $offer) }}" class="mt-2 space-y-2">
+                @csrf
+                <label for="referral-message-{{ $offer->id }}" class="sr-only">Message</label>
+                <input id="referral-message-{{ $offer->id }}" name="message" required class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="Why you are a fit">
+                <button class="w-full rounded-lg bg-[#101E33] px-4 py-2 text-sm font-semibold text-white">Request referral</button>
+              </form>
+            </div>
+          @endif
+        @endforeach
+      </section>
+    @endauth
+
     <section class="{{ $card }} p-6" aria-labelledby="details-h">
       <h2 id="details-h" class="text-lg font-bold text-[#101E33] mb-4">Quick details</h2>
       <dl class="space-y-4 text-sm">

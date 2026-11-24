@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\EventRegistration;
 use App\Models\SpeakerSubmission;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class PassportController extends Controller
@@ -14,6 +15,28 @@ class PassportController extends Controller
     {
         $user = auth()->user();
         $user->load(['profile', 'chapters', 'certificates.event', 'mentorshipRequest.match']);
+
+        $attendedMonths = EventRegistration::where('user_id', $user->id)
+            ->whereNotNull('checked_in_at')
+            ->with('event')
+            ->get()
+            ->pluck('event.start_date')
+            ->filter()
+            ->map(fn ($date) => $date->format('Y-m'))
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        $streak = 0;
+        $cursor = $attendedMonths->first() ? Carbon::createFromFormat('Y-m', $attendedMonths->first()) : null;
+        foreach ($attendedMonths as $month) {
+            if ($cursor && $month === $cursor->format('Y-m')) {
+                $streak++;
+                $cursor->subMonth();
+            } else {
+                break;
+            }
+        }
 
         $stats = [
             'events' => EventRegistration::where('user_id', $user->id)
@@ -24,6 +47,9 @@ class PassportController extends Controller
             'chapters' => $user->chapters->count(),
             'certificates' => $user->certificates->count(),
             'referrals' => $user->referrals()->count(),
+            'projects' => $user->showcaseProjects()->where('status', 'approved')->count(),
+            'grants' => $user->grantApplications()->count(),
+            'streak' => $streak,
         ];
 
         $steps = [

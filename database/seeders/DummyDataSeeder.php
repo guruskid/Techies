@@ -6,21 +6,31 @@ use App\Models\Announcement;
 use App\Models\Article;
 use App\Models\Certificate;
 use App\Models\Chapter;
+use App\Models\Cohort;
 use App\Models\EmailTemplate;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\EventRegistration;
+use App\Models\Grant;
+use App\Models\GrantApplication;
 use App\Models\Hub;
 use App\Models\HubApplication;
 use App\Models\Interest;
+use App\Models\IntroRequest;
+use App\Models\LoungePost;
+use App\Models\LoungeReply;
 use App\Models\MemberBenefit;
 use App\Models\MemberFeedback;
+use App\Models\MemberSpotlight;
 use App\Models\MentorshipRequest;
 use App\Models\NewsletterSubscriber;
 use App\Models\Opportunity;
 use App\Models\OpportunityApplication;
 use App\Models\OpportunityCategory;
+use App\Models\ReferralOffer;
+use App\Models\ReferralRequest;
 use App\Models\Setting;
+use App\Models\ShowcaseProject;
 use App\Models\Skill;
 use App\Models\SpeakerCall;
 use App\Models\SpeakerSubmission;
@@ -73,6 +83,7 @@ class DummyDataSeeder extends Seeder
         Setting::updateOrCreate(['key' => 'coming_soon'], ['value' => '0']);
         $this->seedMembershipSettings();
         $this->seedMemberExperience($members);
+        $this->seedCommunityExtras($members);
 
         $this->call(ArticleSeeder::class);
         $this->seedRichArticles($members, $superAdmin);
@@ -1428,6 +1439,144 @@ class DummyDataSeeder extends Seeder
                     ]
                 );
             }
+        }
+    }
+
+    /**
+     * @param  array<int, User>  $members
+     */
+    private function seedCommunityExtras(array $members): void
+    {
+        $availability = [
+            0 => ['open_to_work' => true, 'open_to_mentor' => true, 'available_for_speaking' => true],
+            1 => ['open_to_work' => true, 'open_to_collaborate' => true],
+            2 => ['open_to_mentor' => true, 'available_for_speaking' => true],
+            3 => ['open_to_work' => true],
+            4 => ['open_to_collaborate' => true],
+            5 => ['open_to_work' => true, 'open_to_collaborate' => true],
+            8 => ['hiring' => true, 'available_for_speaking' => true],
+        ];
+
+        foreach ($availability as $index => $flags) {
+            $members[$index]->profile?->update($flags);
+        }
+
+        $cohorts = [
+            ['title' => 'Frontend Build Sprint', 'track' => 'Frontend', 'status' => Cohort::STATUS_OPEN, 'starts_at' => now()->addDays(14), 'ends_at' => now()->addDays(45), 'capacity' => 24, 'description' => '<p>A four-week sprint for frontend developers. Ship a real feature, get peer review and present at demo day.</p>'],
+            ['title' => 'Data Storytelling Cohort', 'track' => 'Data', 'status' => Cohort::STATUS_OPEN, 'starts_at' => now()->addDays(21), 'ends_at' => now()->addDays(56), 'capacity' => 20, 'description' => '<p>Learn to turn a dataset into a clear story with weekly exercises and a final presentation.</p>'],
+        ];
+
+        foreach ($cohorts as $seed) {
+            $cohort = Cohort::updateOrCreate(['title' => $seed['title']], [
+                'slug' => Str::slug($seed['title']),
+                'description' => $seed['description'],
+                'track' => $seed['track'],
+                'starts_at' => $seed['starts_at']->toDateString(),
+                'ends_at' => $seed['ends_at']->toDateString(),
+                'capacity' => $seed['capacity'],
+                'status' => $seed['status'],
+                'created_by' => $members[0]->id,
+            ]);
+
+            $cohort->members()->syncWithoutDetaching(collect($members)->slice(0, 4)->pluck('id')->all());
+        }
+
+        foreach ([
+            ['Lagos Transit Guide', 'A lightweight guide to navigating Lagos with real-time transport notes.', 'A community-built transit guide with route notes, fares and accessibility details.', $members[5], ShowcaseProject::STATUS_APPROVED, true],
+            ['Community Study Tracker', 'A small tool for study groups to track sessions and shared resources.', 'Built with Laravel and Alpine, this started as a chapter study group tool.', $members[7], ShowcaseProject::STATUS_APPROVED, false],
+            ['Payroll Calculator for Small Teams', 'A simple payroll estimate tool for small Nigerian teams.', 'A calculator that helps founders estimate take-home pay and deductions.', $members[1], ShowcaseProject::STATUS_PENDING, false],
+        ] as [$title, $summary, $description, $user, $status, $featured]) {
+            ShowcaseProject::updateOrCreate(['slug' => Str::slug($title)], [
+                'user_id' => $user->id,
+                'title' => $title,
+                'summary' => $summary,
+                'description' => $description,
+                'url' => 'https://example.com/'.Str::slug($title),
+                'image' => 'https://picsum.photos/seed/'.Str::slug($title).'/1200/700',
+                'stack' => ['Laravel', 'Tailwind', 'MySQL'],
+                'looking_for_collaborators' => true,
+                'status' => $status,
+                'is_featured' => $featured,
+            ]);
+        }
+
+        IntroRequest::updateOrCreate([
+            'requester_id' => $members[10]->id,
+            'purpose' => 'Advice on moving into product design',
+        ], [
+            'target_user_id' => $members[2]->id,
+            'status' => IntroRequest::STATUS_PENDING,
+        ]);
+
+        $opportunity = Opportunity::where('slug', 'frontend-engineer-lagos')->first();
+
+        if ($opportunity) {
+            $offer = ReferralOffer::updateOrCreate([
+                'user_id' => $members[0]->id,
+                'opportunity_id' => $opportunity->id,
+            ], [
+                'note' => 'I work with this team and can refer strong frontend candidates.',
+                'status' => 'open',
+            ]);
+
+            ReferralRequest::updateOrCreate([
+                'referral_offer_id' => $offer->id,
+                'requester_id' => $members[5]->id,
+            ], [
+                'message' => 'I have three years of frontend experience and would love a referral.',
+                'status' => 'pending',
+            ]);
+        }
+
+        $post = LoungePost::updateOrCreate(['title' => 'What are you building this month?'], [
+            'user_id' => $members[8]->id,
+            'category' => 'General',
+            'body' => 'Share what you are working on. A sentence is enough. Let us see if anyone can help.',
+            'is_pinned' => true,
+        ]);
+
+        LoungeReply::updateOrCreate([
+            'lounge_post_id' => $post->id,
+            'user_id' => $members[0]->id,
+        ], [
+            'body' => 'I am rebuilding our design system and documenting the decisions. Happy to share notes.',
+        ]);
+
+        $grant = Grant::updateOrCreate(['slug' => 'community-build-grant-2026'], [
+            'title' => 'Community Build Grant 2026',
+            'description' => '<p>Small grants for member projects that make the community stronger. We fund tools, events and open resources.</p><p>Grants range from ₦50,000 to ₦150,000.</p>',
+            'amount' => 150000,
+            'opens_at' => now()->subDays(5)->toDateString(),
+            'closes_at' => now()->addDays(25)->toDateString(),
+            'status' => Grant::STATUS_OPEN,
+            'created_by' => $members[0]->id,
+        ]);
+
+        GrantApplication::updateOrCreate([
+            'grant_id' => $grant->id,
+            'user_id' => $members[7]->id,
+        ], [
+            'project_title' => 'Chapter study tracker',
+            'summary' => 'A shared tool for study groups to run sessions and keep resources in one place.',
+            'budget_breakdown' => 'Hosting, design support and a small stipend for two contributors.',
+            'status' => 'pending',
+        ]);
+
+        MemberSpotlight::updateOrCreate([
+            'user_id' => $members[0]->id,
+            'month' => now()->format('Y-m'),
+        ], [
+            'quote' => 'The community gave me the confidence to speak and the feedback to get better.',
+            'achievement' => 'Spoke at the Lagos Frontend Meetup and mentored two members.',
+            'is_published' => true,
+            'created_by' => $members[0]->id,
+        ]);
+
+        foreach (['Co-working day pass' => 'MWTT-HUB-20', 'Course discount' => 'MWTT-LEARN-20'] as $title => $code) {
+            MemberBenefit::where('title', $title)->update([
+                'redemption_code' => $code,
+                'redemption_instructions' => 'Show this code to the partner. One redemption per member.',
+            ]);
         }
     }
 

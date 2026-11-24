@@ -52,6 +52,25 @@
     @endforeach
   </dl>
 
+  @if($event->check_in_token)
+    <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div id="event-check-in-qr" class="rounded-lg bg-white p-2" aria-label="Event check-in QR code"></div>
+      <div>
+        <p class="font-semibold text-[#101E33]">Self check-in</p>
+        <p class="mt-1 text-sm text-slate-500">Members scan this code at the door. They must already be registered for the event.</p>
+        <a href="{{ route('events.check-in', [$event->slug, $event->check_in_token]) }}" class="mt-2 inline-block text-sm font-semibold text-[#C23A1F] hover:underline">Open check-in link</a>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+      (function () {
+        var el = document.getElementById('event-check-in-qr');
+        if (!el || typeof QRCode === 'undefined') return;
+        new QRCode(el, { text: @json(route('events.check-in', [$event->slug, $event->check_in_token])), width: 112, height: 112, correctLevel: QRCode.CorrectLevel.M });
+      })();
+    </script>
+  @endif
+
   {{-- Filters --}}
   <nav class="flex flex-wrap gap-2" aria-label="Filter attendees by status">
     @foreach($tabs as $value => $label)

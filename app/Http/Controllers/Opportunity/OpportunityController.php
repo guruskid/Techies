@@ -24,7 +24,12 @@ class OpportunityController extends Controller
             ? $opportunity->applications()->where('user_id', auth()->id())->exists()
             : false;
 
-        return view('pages.opportunity-detail', compact('opportunity', 'hasApplied'));
+        $referralOffers = $opportunity->referralOffers()->with('user')->where('status', 'open')->get();
+        $myOffer = auth()->check()
+            ? $opportunity->referralOffers()->where('user_id', auth()->id())->first()
+            : null;
+
+        return view('pages.opportunity-detail', compact('opportunity', 'hasApplied', 'referralOffers', 'myOffer'));
     }
 
     public function apply(Request $request, Opportunity $opportunity): RedirectResponse

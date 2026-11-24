@@ -5,6 +5,7 @@
   $technology = $technology ?? '';
   $state      = $state ?? '';
   $experience = $experience ?? '';
+  $openTo     = $openTo ?? '';
 
   $technologies = ['Software Development','Frontend Development','Backend Development','Full-Stack Development','Mobile Development','DevOps and Cloud Engineering','Cybersecurity','Data Science','Artificial Intelligence and Machine Learning','UI/UX Design','Product Management'];
   $states       = ['Lagos','Abuja','Rivers','Oyo','Enugu','Edo','Akwa Ibom'];
@@ -19,9 +20,10 @@
     'technology' => $technology ?: null,
     'state'      => $state      ?: null,
     'experience' => $experience ?: null,
+    'open_to'    => ['open_to_work' => 'Open to work', 'open_to_mentor' => 'Open to mentor', 'open_to_collaborate' => 'Open to collaborate', 'available_for_speaking' => 'Available for speaking', 'hiring' => 'Hiring'][$openTo] ?? null,
   ])->filter();
   $without = fn ($key) => '/members?'.http_build_query(array_filter(
-      ['search' => $search, 'technology' => $technology, 'state' => $state, 'experience' => $experience],
+      ['search' => $search, 'technology' => $technology, 'state' => $state, 'experience' => $experience, 'open_to' => $openTo],
       fn ($v, $k) => $v && $k !== $key, ARRAY_FILTER_USE_BOTH));
 
   $membershipFee = (int) \App\Models\Setting::value('membership_fee', '15000');
@@ -88,6 +90,15 @@
           <option value="">All levels</option>
           @foreach ($withSelected($levels, $experience) as $e)
             <option value="{{ $e }}" @selected($experience === $e)>{{ $e }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="sm:col-span-3">
+        <label for="open_to" class="{{ $labelClass }}">Open to</label>
+        <select id="open_to" name="open_to" onchange="this.form.submit()" class="{{ $fieldClass }}">
+          <option value="">Anyone</option>
+          @foreach(['open_to_work' => 'Open to work', 'open_to_mentor' => 'Open to mentor', 'open_to_collaborate' => 'Open to collaborate', 'available_for_speaking' => 'Available for speaking', 'hiring' => 'Hiring'] as $value => $labelText)
+            <option value="{{ $value }}" @selected($openTo === $value)>{{ $labelText }}</option>
           @endforeach
         </select>
       </div>

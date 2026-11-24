@@ -9,6 +9,8 @@ use App\Models\SpeakerCall;
 use App\Notifications\EventRegistered;
 use App\Notifications\EventRegistrationPromoted;
 use App\Notifications\EventWaitlisted;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -39,6 +41,32 @@ class EventController extends Controller
             ->get();
 
         return view('pages.event-detail', compact('event', 'registration', 'registeredCount', 'spotsLeft', 'canViewMeetingLink', 'speakerCalls'));
+    }
+
+    public function checkIn(Request $request, Event $event, string $token): RedirectResponse
+    {
+        abort_unless($event->check_in_token && hash_equals($event->check_in_token, $token), 404);
+        abort_unless($event->status === 'published', 404);
+
+        $registration = $event->registrations()
+            ->where('user_id', $request->user()->id)
+            ->where('status', EventRegistration::STATUS_REGISTERED)
+            ->first();
+
+        if (! $registration) {
+            return redirect()->route('events.show', $event->slug)
+                ->with('error', 'You need a confirmed registration to check in for this event.');
+        }
+
+        if ($registration->checked_in_at) {
+            return redirect()->route('events.show', $event->slug)
+                ->with('status', 'You are already checked in for this event.');
+        }
+
+        $registration->update(['checked_in_at' => now()]);
+
+        return redirect()->route('events.show', $event->slug)
+            ->with('success', 'You are checked in for '.$event->title.'.');
     }
 
     public function register(Event $event)

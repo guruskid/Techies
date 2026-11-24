@@ -44,6 +44,23 @@
                 @if($benefit->url)
                   <a href="{{ $benefit->url }}" target="_blank" rel="noopener noreferrer" class="mt-5 inline-flex text-sm font-semibold text-[#C23A1F] hover:underline">View offer<span class="sr-only"> (opens in a new tab)</span></a>
                 @endif
+
+                @auth
+                  @if(in_array($benefit->id, $redeemed, true))
+                    <div class="mt-4 rounded-lg border border-green-100 bg-green-50 p-3 text-sm text-green-800">
+                      <p class="font-semibold">Marked as used</p>
+                      @if($benefit->redemption_code)<p class="mt-1">Code: <span class="font-mono font-bold">{{ $benefit->redemption_code }}</span></p>@endif
+                      @if($benefit->redemption_instructions)<p class="mt-1">{{ $benefit->redemption_instructions }}</p>@endif
+                    </div>
+                  @else
+                    <form method="POST" action="{{ route('benefits.redeem', $benefit) }}" class="mt-4">
+                      @csrf
+                      <button class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reveal code / mark as used</button>
+                    </form>
+                  @endif
+                @else
+                  <a href="{{ route('login') }}" class="mt-4 inline-flex text-sm font-semibold text-slate-600 hover:underline">Sign in to redeem</a>
+                @endauth
               </article>
             @endforeach
           </div>

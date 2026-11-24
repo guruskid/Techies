@@ -67,6 +67,8 @@ class BenefitController extends Controller
             'discount_label' => ['nullable', 'string', 'max:100'],
             'category' => ['required', 'string', 'max:100'],
             'url' => ['nullable', 'url', 'max:2048'],
+            'redemption_code' => ['nullable', 'string', 'max:100'],
+            'redemption_instructions' => ['nullable', 'string', 'max:2000'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
         ]);
 

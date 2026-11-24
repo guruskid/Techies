@@ -7,6 +7,12 @@
     ['My articles', route('member.content.index'), request()->routeIs('member.content.*')],
     ['Membership', route('membership.show'), request()->routeIs('membership.*')],
     ['Mentorship', route('mentorship.index'), request()->routeIs('mentorship.*')],
+    ['Cohorts', route('cohorts.index'), request()->routeIs('cohorts.*')],
+    ['Showcase', route('projects.index'), request()->routeIs('projects.*')],
+    ['Referrals', route('referrals.index'), request()->routeIs('referrals.*')],
+    ['Lounge', route('lounge.index'), request()->routeIs('lounge.*')],
+    ['Grants', route('grants.index'), request()->routeIs('grants.*')],
+    ['Introductions', route('introductions.index'), request()->routeIs('introductions.*')],
     ['Benefits', route('benefits.index'), request()->routeIs('benefits.*')],
     ['Programmes', route('programs.index'), request()->routeIs('programs.*')],
   ];

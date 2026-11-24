@@ -13,10 +13,15 @@ class UserProfile extends Model
         'linkedin', 'github', 'facebook', 'twitter', 'tiktok',
         'areas_of_interest', 'preferred_participation', 'membership_type',
         'is_public', 'weekly_digest', 'profile_completion', 'likes', 'certifications', 'languages',
-        'availability',
+        'availability', 'open_to_work', 'open_to_mentor', 'open_to_collaborate',
+        'available_for_speaking', 'hiring',
     ];
 
-    protected $casts = ['areas_of_interest' => 'array', 'is_public' => 'boolean', 'weekly_digest' => 'boolean'];
+    protected $casts = [
+        'areas_of_interest' => 'array', 'is_public' => 'boolean', 'weekly_digest' => 'boolean',
+        'open_to_work' => 'boolean', 'open_to_mentor' => 'boolean', 'open_to_collaborate' => 'boolean',
+        'available_for_speaking' => 'boolean', 'hiring' => 'boolean',
+    ];
 
     /**
      * Fields that count towards profile completion, keyed by column with a human label.

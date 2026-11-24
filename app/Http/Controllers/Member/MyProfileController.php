@@ -69,6 +69,11 @@ class MyProfileController extends Controller
             'certifications' => 'nullable|string|max:1000',
             'languages' => 'nullable|string|max:500',
             'availability' => 'nullable|string|max:100',
+            'open_to_work' => 'nullable|boolean',
+            'open_to_mentor' => 'nullable|boolean',
+            'open_to_collaborate' => 'nullable|boolean',
+            'available_for_speaking' => 'nullable|boolean',
+            'hiring' => 'nullable|boolean',
             'skills' => 'nullable|array',
             'skills.*' => 'exists:skills,id',
         ]);
@@ -102,6 +107,9 @@ class MyProfileController extends Controller
 
         $profile->is_public = $request->boolean('is_public');
         $profile->weekly_digest = $request->boolean('weekly_digest');
+        foreach (['open_to_work', 'open_to_mentor', 'open_to_collaborate', 'available_for_speaking', 'hiring'] as $flag) {
+            $profile->{$flag} = $request->boolean($flag);
+        }
         $profile->profile_completion = $profile->completionPercentage();
         $profile->save();
 

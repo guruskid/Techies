@@ -81,6 +81,36 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(MemberFeedback::class);
     }
 
+    public function showcaseProjects()
+    {
+        return $this->hasMany(ShowcaseProject::class);
+    }
+
+    public function introRequests()
+    {
+        return $this->hasMany(IntroRequest::class, 'requester_id');
+    }
+
+    public function referralOffers()
+    {
+        return $this->hasMany(ReferralOffer::class);
+    }
+
+    public function loungePosts()
+    {
+        return $this->hasMany(LoungePost::class);
+    }
+
+    public function grantApplications()
+    {
+        return $this->hasMany(GrantApplication::class);
+    }
+
+    public function benefitRedemptions()
+    {
+        return $this->hasMany(BenefitRedemption::class);
+    }
+
     /**
      * Staff always have access. Members need a paid or waived membership.
      */

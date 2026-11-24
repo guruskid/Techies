@@ -300,6 +300,30 @@ Every account receives a **member number** (`MWTT-YYYY-00000`), a **referral cod
 
 **Onboarding** — the member dashboard and passport show a checklist covering profile completion, a chapter, an event, an opportunity or talk, and mentorship.
 
+### 4.10 Community and career features
+
+**Availability signals** — members can mark themselves as open to work, open to mentor, open to collaborate, available for speaking or hiring. The members directory filters by these signals.
+
+**Warm introductions** — members request an introduction at `/introductions`. Admins review requests at **Admin → Introductions** and mark them completed or declined. Both members are emailed.
+
+**Cohorts** — admins create cohorts at **Admin → Cohorts**. Members browse `/cohorts`, join open cohorts and leave at any time. Capacity is enforced.
+
+**Project showcase** — members submit projects at `/projects`. Admins approve, reject or feature them at **Admin → Showcase**. Approved projects appear publicly.
+
+**Job referrals** — members can offer a referral on an opportunity and request a referral from another member. Members manage responses at `/referrals`; admins can review activity at **Admin → Referrals**.
+
+**Member lounge** — a members-only discussion board at `/lounge`. Members create posts and replies. Admins can pin or delete posts at **Admin → Lounge**.
+
+**Micro-grants** — admins create grant rounds at **Admin → Micro-grants**. Members apply from `/grants`. Admins review applications and members are emailed the decision.
+
+**Benefit redemption** — add a redemption code and instructions to a benefit. Members reveal the code and record use from `/benefits`; redemptions are stored for reporting.
+
+**QR event check-in** — each event has a check-in token. The attendee screen shows a QR code and link. Signed-in, registered members scan it to check in. The passport shows a monthly attendance streak.
+
+**Member spotlights** — admins publish a spotlight at **Admin → Spotlights**. The latest published spotlight appears on the homepage.
+
+**Monthly report** — `community:send-monthly-report` emails active members a short monthly summary and the current spotlight. It runs on the first day of each month at 08:00.
+
 ---
 
 ## 5. Member profiles and profile subdomains
@@ -1115,6 +1139,9 @@ All of these are sent through the system mailer (Section 14.9), not the mail cen
 | Certificate issued | Admin issues a certificate | The member |
 | Membership feedback request | 30 days after activation | The member |
 | Opportunity matches | Weekly matching job | Opted-in active members |
+| Introduction update | Admin completes or declines an introduction | Requester and target |
+| Grant application update | Admin approves or rejects a grant application | Applicant |
+| Monthly community report | First day of each month | Active members |
 | New event | An event is first published | Active members in the event's state (or all active members when no state is recorded) |
 | New opportunity | An opportunity is first published | Active members in the hub's state (or all active members when there is no hub state) |
 | Hub application submitted | A hub is registered | Admins and super admins, excluding the owner |
@@ -1141,6 +1168,7 @@ Operational note: publishing mail is broad by design. An event or opportunity wi
 | Every minute | `mail:broadcasts:send-due` | Send scheduled broadcasts whose time has arrived |
 | Daily 09:00 | `members:request-feedback` | Ask members for feedback after 30 days |
 | Mondays 09:00 | `opportunities:send-matches` | Email matched opportunities to opted-in members |
+| 1st of month 08:00 | `community:send-monthly-report` | Email a monthly community report to active members |
 
 The scheduler requires the server cron entry shown in Section 2.
 
@@ -1427,6 +1455,12 @@ Members whose account carries the `hub_owner` capability, or who coordinate a ch
 /benefits                           member benefits
 /programmes                         career clinics and office hours
 /feedback                           thirty-day member feedback
+/projects                           project showcase
+/grants                             micro-grants
+/cohorts                            cohorts and build sprints
+/introductions                      warm introduction requests
+/referrals                          job referral offers and requests
+/lounge                             member discussion board
 ```
 
 ### Admin
@@ -1443,6 +1477,13 @@ Members whose account carries the `hub_owner` capability, or who coordinate a ch
 /admin/certificates                  certificates
 /admin/benefits                      member benefits
 /admin/feedback                      member feedback
+/admin/introductions                 introduction requests
+/admin/cohorts                       cohorts
+/admin/showcase                      project showcase
+/admin/referrals                     referrals
+/admin/lounge                        lounge moderation
+/admin/grants                        micro-grants
+/admin/spotlights                    member spotlights
 /admin/content                      content queue
 /admin/content/{article}            review screen
 /admin/announcements                announcements

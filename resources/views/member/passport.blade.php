@@ -88,6 +88,9 @@
           ['Chapters', $stats['chapters']],
           ['Certificates', $stats['certificates']],
           ['Referrals', $stats['referrals']],
+          ['Prototypes', $stats['projects']],
+          ['Grant applications', $stats['grants']],
+          ['Month streak', $stats['streak']],
         ] as [$label, $value])
           <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <p class="text-xs text-slate-500">{{ $label }}</p>

@@ -56,6 +56,9 @@
       @if($user->is_founding_member)
         <span class="mt-2 inline-flex rounded-full bg-[#FF5C3D]/15 px-2.5 py-1 text-xs font-semibold text-[#FFB4A4]">Founding member</span>
       @endif
+      @if($p)
+        <div class="mt-3">@include('partials.member-badges', ['profile' => $p])</div>
+      @endif
       <p class="text-slate-200 mt-1">{{ $p->professional_title ?? 'Member' }}@if($p->current_organization), {{ $p->current_organization }}@endif</p>
       @if($p->headline)<p class="text-slate-300 text-sm mt-2 max-w-2xl">{{ $p->headline }}</p>@endif
       @if($location)<p class="text-sm text-slate-300 mt-2">{{ $location }}</p>@endif

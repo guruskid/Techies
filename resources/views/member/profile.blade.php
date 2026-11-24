@@ -467,6 +467,26 @@
           </label>
         </section>
 
+        {{-- 9b. Availability signals --}}
+        <section class="space-y-3" aria-labelledby="sec-availability">
+          <h2 id="sec-availability" class="text-lg font-bold text-[#101E33]">Open to</h2>
+          <p class="text-sm text-slate-500">These signals appear on your profile and in the members directory.</p>
+          <div class="grid sm:grid-cols-2 gap-3">
+            @foreach([
+              ['open_to_work', 'Open to work', 'Let recruiters and members know you are looking.'],
+              ['open_to_mentor', 'Open to mentor', 'Offer guidance to another member.'],
+              ['open_to_collaborate', 'Open to collaborate', 'Looking for project or event collaborators.'],
+              ['available_for_speaking', 'Available for speaking', 'Open to talks, panels and workshops.'],
+              ['hiring', 'Hiring', 'You are hiring for a role or project.'],
+            ] as [$field, $labelText, $hint])
+              <label for="{{ $field }}" class="flex items-start gap-3 rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
+                <input type="checkbox" name="{{ $field }}" id="{{ $field }}" value="1" @checked(old($field, $profile->{$field})) class="mt-0.5 rounded text-[#FF5C3D] focus:ring-[#FF5C3D]">
+                <span><span class="font-medium">{{ $labelText }}</span><span class="block text-xs text-slate-500">{{ $hint }}</span></span>
+              </label>
+            @endforeach
+          </div>
+        </section>
+
         {{-- 10. Email preferences --}}
         <section class="space-y-2" aria-labelledby="sec-email">
           <h2 id="sec-email" class="text-lg font-bold text-[#101E33]">Email preferences</h2>

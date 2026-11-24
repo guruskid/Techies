@@ -320,6 +320,23 @@
   </div>
 </section>
 
+@if($spotlight)
+<section class="max-w-7xl mx-auto px-4 py-14 md:py-16">
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm grid md:grid-cols-[auto_1fr] gap-6 items-center">
+    @if($spotlight->user?->profile?->avatar)
+      <img src="{{ $spotlight->user->profile->avatar }}" alt="" class="h-20 w-20 rounded-full object-cover border border-slate-200">
+    @else
+      <span class="flex h-20 w-20 items-center justify-center rounded-full bg-[#101E33] font-display text-2xl font-bold text-white">{{ strtoupper(substr($spotlight->user?->name ?? 'M', 0, 1)) }}</span>
+    @endif
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C23A1F]">Member spotlight · {{ $spotlight->month }}</p>
+      <p class="mt-2 max-w-3xl font-display text-xl font-bold text-[#101E33]">“{{ $spotlight->quote }}”</p>
+      <p class="mt-2 text-sm text-slate-600">{{ $spotlight->user?->name }}{{ $spotlight->achievement ? ' — '.$spotlight->achievement : '' }}</p>
+    </div>
+  </div>
+</section>
+@endif
+
 {{-- Membership CTA --}}
 <section class="max-w-7xl mx-auto px-4 py-16 md:py-20">
   <div class="relative overflow-hidden rounded-3xl bg-[#101E33] p-8 md:p-12 text-white">

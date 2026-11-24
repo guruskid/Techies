@@ -5,10 +5,14 @@ use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementContro
 use App\Http\Controllers\Admin\BenefitController as AdminBenefitController;
 use App\Http\Controllers\Admin\CertificateController as AdminCertificateController;
 use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
+use App\Http\Controllers\Admin\CohortController as AdminCohortController;
 use App\Http\Controllers\Admin\ContentController as AdminContentController;
 use App\Http\Controllers\Admin\EventCategoryController as AdminEventCategoryController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
+use App\Http\Controllers\Admin\GrantController as AdminGrantController;
+use App\Http\Controllers\Admin\IntroductionController as AdminIntroductionController;
+use App\Http\Controllers\Admin\LoungeController as AdminLoungeController;
 use App\Http\Controllers\Admin\Mail\AccountController as MailAccountController;
 use App\Http\Controllers\Admin\Mail\BroadcastController as MailBroadcastController;
 use App\Http\Controllers\Admin\Mail\MessageController as MailMessageController;
@@ -17,7 +21,10 @@ use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\MentorshipController as AdminMentorshipController;
 use App\Http\Controllers\Admin\OpportunityCategoryController as AdminOpportunityCategoryController;
 use App\Http\Controllers\Admin\OpportunityController as AdminOpportunityController;
+use App\Http\Controllers\Admin\ReferralController as AdminReferralController;
+use App\Http\Controllers\Admin\ShowcaseController as AdminShowcaseController;
 use App\Http\Controllers\Admin\SpeakerCallController as AdminSpeakerCallController;
+use App\Http\Controllers\Admin\SpotlightController as AdminSpotlightController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -32,13 +39,19 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Hub\HubController;
 use App\Http\Controllers\Hub\HubDashboardController;
 use App\Http\Controllers\InboundMailController;
+use App\Http\Controllers\Member\CohortController;
 use App\Http\Controllers\Member\ContentController as MemberContentController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboard;
 use App\Http\Controllers\Member\FeedbackController;
+use App\Http\Controllers\Member\GrantController;
+use App\Http\Controllers\Member\IntroductionController;
+use App\Http\Controllers\Member\LoungeController;
 use App\Http\Controllers\Member\MentorshipController;
 use App\Http\Controllers\Member\MyProfileController;
 use App\Http\Controllers\Member\PassportController;
 use App\Http\Controllers\Member\ProfileController;
+use App\Http\Controllers\Member\ReferralController;
+use App\Http\Controllers\Member\ShowcaseController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\Opportunity\OpportunityController;
 use App\Http\Controllers\ProgramController;
@@ -158,6 +171,8 @@ Route::get('/register', [RegisterController::class, 'show'])->name('register');
 Route::post('/register', [RegisterController::class, 'store']);
 
 Route::get('/benefits', [BenefitController::class, 'index'])->name('benefits.index');
+Route::get('/projects', [ShowcaseController::class, 'index'])->name('projects.index');
+Route::post('/benefits/{benefit}/redeem', [BenefitController::class, 'redeem'])->middleware(['auth', 'verified', 'membership'])->name('benefits.redeem');
 Route::get('/programmes', [ProgramController::class, 'index'])->name('programs.index');
 Route::get('/certificates/{certificate:certificate_number}', [CertificateController::class, 'show'])->name('certificates.show');
 Route::get('/membership', [MembershipController::class, 'show'])->name('membership.show');
@@ -170,6 +185,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/passport', [PassportController::class, 'show'])->name('passport.show');
     Route::get('/feedback', [FeedbackController::class, 'show'])->name('feedback.show');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+    Route::middleware('membership')->group(function () {
+        Route::get('/lounge', [LoungeController::class, 'index'])->name('lounge.index');
+        Route::get('/lounge/create', [LoungeController::class, 'create'])->name('lounge.create');
+        Route::post('/lounge', [LoungeController::class, 'store'])->name('lounge.store');
+        Route::get('/lounge/{post}', [LoungeController::class, 'show'])->name('lounge.show');
+        Route::post('/lounge/{post}/reply', [LoungeController::class, 'reply'])->name('lounge.reply');
+    });
+    Route::get('/grants', [GrantController::class, 'index'])->name('grants.index');
+    Route::get('/grants/{grant:slug}', [GrantController::class, 'show'])->name('grants.show');
+    Route::post('/grants/{grant:slug}/apply', [GrantController::class, 'apply'])->middleware('membership')->name('grants.apply');
+    Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
+    Route::post('/opportunities/{opportunity:slug}/referrals/offer', [ReferralController::class, 'storeOffer'])->middleware('membership')->name('referrals.offer');
+    Route::post('/referral-offers/{offer}/request', [ReferralController::class, 'requestReferral'])->middleware('membership')->name('referrals.request');
+    Route::post('/referrals/{referralRequest}/respond', [ReferralController::class, 'respond'])->name('referrals.respond');
+    Route::get('/projects/create', [ShowcaseController::class, 'create'])->name('projects.create');
+    Route::post('/projects', [ShowcaseController::class, 'store'])->name('projects.store');
+    Route::get('/projects/{project:slug}/edit', [ShowcaseController::class, 'edit'])->name('projects.edit');
+    Route::patch('/projects/{project:slug}', [ShowcaseController::class, 'update'])->name('projects.update');
+    Route::delete('/projects/{project:slug}', [ShowcaseController::class, 'destroy'])->name('projects.destroy');
+    Route::get('/cohorts', [CohortController::class, 'index'])->name('cohorts.index');
+    Route::get('/cohorts/{cohort:slug}', [CohortController::class, 'show'])->name('cohorts.show');
+    Route::post('/cohorts/{cohort:slug}/join', [CohortController::class, 'join'])->name('cohorts.join');
+    Route::post('/cohorts/{cohort:slug}/leave', [CohortController::class, 'leave'])->name('cohorts.leave');
+    Route::get('/introductions', [IntroductionController::class, 'index'])->name('introductions.index');
+    Route::post('/introductions', [IntroductionController::class, 'store'])->name('introductions.store');
     Route::get('/mentorship', [MentorshipController::class, 'index'])->name('mentorship.index');
     Route::post('/mentorship', [MentorshipController::class, 'store'])->name('mentorship.store');
     Route::get('/profile', [MyProfileController::class, 'edit'])->name('profile.edit');
@@ -301,6 +341,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/admin/chapters/{chapter}', [AdminChapterController::class, 'update'])->name('admin.chapters.update');
         Route::delete('/admin/chapters/{chapter}', [AdminChapterController::class, 'destroy'])->name('admin.chapters.destroy');
 
+        Route::get('/admin/grants', [AdminGrantController::class, 'index'])->name('admin.grants.index');
+        Route::get('/admin/grants/create', [AdminGrantController::class, 'create'])->name('admin.grants.create');
+        Route::post('/admin/grants', [AdminGrantController::class, 'store'])->name('admin.grants.store');
+        Route::get('/admin/grants/{grant}/edit', [AdminGrantController::class, 'edit'])->name('admin.grants.edit');
+        Route::patch('/admin/grants/{grant}', [AdminGrantController::class, 'update'])->name('admin.grants.update');
+        Route::get('/admin/grants/{grant}/applications', [AdminGrantController::class, 'applications'])->name('admin.grants.applications');
+        Route::post('/admin/grants/{grant}/applications/{application}', [AdminGrantController::class, 'review'])->name('admin.grants.review');
+        Route::delete('/admin/grants/{grant}', [AdminGrantController::class, 'destroy'])->name('admin.grants.destroy');
+
+        Route::get('/admin/lounge', [AdminLoungeController::class, 'index'])->name('admin.lounge.index');
+        Route::post('/admin/lounge/{post}/pin', [AdminLoungeController::class, 'togglePin'])->name('admin.lounge.pin');
+        Route::delete('/admin/lounge/{post}', [AdminLoungeController::class, 'destroy'])->name('admin.lounge.destroy');
+
+        Route::get('/admin/spotlights', [AdminSpotlightController::class, 'index'])->name('admin.spotlights.index');
+        Route::get('/admin/spotlights/create', [AdminSpotlightController::class, 'create'])->name('admin.spotlights.create');
+        Route::post('/admin/spotlights', [AdminSpotlightController::class, 'store'])->name('admin.spotlights.store');
+        Route::get('/admin/spotlights/{spotlight}/edit', [AdminSpotlightController::class, 'edit'])->name('admin.spotlights.edit');
+        Route::patch('/admin/spotlights/{spotlight}', [AdminSpotlightController::class, 'update'])->name('admin.spotlights.update');
+        Route::delete('/admin/spotlights/{spotlight}', [AdminSpotlightController::class, 'destroy'])->name('admin.spotlights.destroy');
+
+        Route::get('/admin/referrals', [AdminReferralController::class, 'index'])->name('admin.referrals.index');
+
+        Route::get('/admin/showcase', [AdminShowcaseController::class, 'index'])->name('admin.showcase.index');
+        Route::post('/admin/showcase/{project}', [AdminShowcaseController::class, 'moderate'])->name('admin.showcase.moderate');
+        Route::delete('/admin/showcase/{project}', [AdminShowcaseController::class, 'destroy'])->name('admin.showcase.destroy');
+
+        Route::get('/admin/cohorts', [AdminCohortController::class, 'index'])->name('admin.cohorts.index');
+        Route::get('/admin/cohorts/create', [AdminCohortController::class, 'create'])->name('admin.cohorts.create');
+        Route::post('/admin/cohorts', [AdminCohortController::class, 'store'])->name('admin.cohorts.store');
+        Route::get('/admin/cohorts/{cohort}/edit', [AdminCohortController::class, 'edit'])->name('admin.cohorts.edit');
+        Route::patch('/admin/cohorts/{cohort}', [AdminCohortController::class, 'update'])->name('admin.cohorts.update');
+        Route::delete('/admin/cohorts/{cohort}', [AdminCohortController::class, 'destroy'])->name('admin.cohorts.destroy');
+
+        Route::get('/admin/introductions', [AdminIntroductionController::class, 'index'])->name('admin.introductions.index');
+        Route::post('/admin/introductions/{introRequest}', [AdminIntroductionController::class, 'update'])->name('admin.introductions.update');
+
         Route::get('/admin/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
 
         Route::get('/admin/certificates', [AdminCertificateController::class, 'index'])->name('admin.certificates.index');
@@ -380,6 +456,9 @@ Route::get('/members', function (Request $r) {
     if ($r->filled('experience')) {
         $q->whereHas('profile', fn ($p) => $p->where('experience_level', $r->experience));
     }
+    if ($r->filled('open_to') && in_array($r->open_to, ['open_to_work', 'open_to_mentor', 'open_to_collaborate', 'available_for_speaking', 'hiring'], true)) {
+        $q->whereHas('profile', fn ($p) => $p->where($r->open_to, true));
+    }
 
     return view('pages.members', [
         'members' => $q->latest()->paginate(12)->withQueryString(),
@@ -387,6 +466,7 @@ Route::get('/members', function (Request $r) {
         'technology' => $r->technology,
         'state' => $r->state,
         'experience' => $r->experience,
+        'openTo' => $r->open_to,
     ]);
 })->name('members');
 Route::view('/hubs/register', 'pages.hub-register')->name('hubs.register');
@@ -463,6 +543,7 @@ Route::get('/hubs', function (Request $r) {
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
 Route::get('/events/{event:slug}/calendar', [EventController::class, 'calendar'])->name('events.calendar');
 Route::post('/events/{event:slug}/register', [EventController::class, 'register'])->middleware(['auth', 'verified', 'membership'])->name('events.register');
+Route::get('/events/{event:slug}/check-in/{token}', [EventController::class, 'checkIn'])->middleware(['auth', 'verified', 'membership'])->name('events.check-in');
 Route::post('/events/{event:slug}/cancel', [EventController::class, 'cancel'])->middleware(['auth', 'verified'])->name('events.cancel');
 Route::get('/events', function (Request $r) {
     $q = Event::with('category')->where('status', 'published')->where('start_date', '>=', now()->toDateString());

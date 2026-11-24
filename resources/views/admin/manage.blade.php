@@ -15,6 +15,8 @@
         ['key' => 'hubs',     'title' => 'Hubs',     'description' => 'Review, approve and manage technology hubs.',    'url' => route('admin.hubs.index'), 'badge' => 'pending'],
         ['key' => 'chapters', 'title' => 'Chapters', 'description' => 'Create and manage regional chapters.',           'url' => route('admin.chapters.index')],
         ['key' => 'mentorship', 'title' => 'Mentorship', 'description' => 'Match mentors and mentees, and close cycles.', 'url' => route('admin.mentorship.index')],
+        ['key' => 'introductions', 'title' => 'Introductions', 'description' => 'Make warm introductions between members.', 'url' => route('admin.introductions.index')],
+        ['key' => 'cohorts', 'title' => 'Cohorts', 'description' => 'Run structured learning cohorts and sprints.', 'url' => route('admin.cohorts.index')],
       ],
     ],
     [
@@ -31,6 +33,11 @@
         ['key' => 'benefits',      'title' => 'Member benefits',  'description' => 'Manage partner offers and member perks.',      'url' => route('admin.benefits.index')],
         ['key' => 'certificates',  'title' => 'Certificates',      'description' => 'Issue verified certificates to members.',      'url' => route('admin.certificates.index')],
         ['key' => 'feedback',      'title' => 'Member feedback',   'description' => 'Read thirty-day feedback from members.',       'url' => route('admin.feedback.index')],
+        ['key' => 'showcase',      'title' => 'Project showcase',  'description' => 'Review and feature member projects.',          'url' => route('admin.showcase.index')],
+        ['key' => 'referrals',     'title' => 'Referrals',         'description' => 'Review referral offers and requests.',         'url' => route('admin.referrals.index')],
+        ['key' => 'lounge',        'title' => 'Member lounge',     'description' => 'Moderate member discussions.',                 'url' => route('admin.lounge.index')],
+        ['key' => 'grants',        'title' => 'Micro-grants',      'description' => 'Create grant rounds and review applications.', 'url' => route('admin.grants.index')],
+        ['key' => 'spotlights',    'title' => 'Member spotlights', 'description' => 'Recognise members on the homepage.',           'url' => route('admin.spotlights.index')],
       ],
     ],
     [

@@ -1,31 +1,57 @@
 <style>
-  :root{--brand:#FF5C3D;--ink:#0A1220;--paper:#F7F8FC}
-  html{scroll-behavior:smooth}
-  body{font-family:Inter,system-ui,sans-serif;background:var(--paper)}
-  .font-display{font-family:'Manrope',Inter,sans-serif;letter-spacing:-.02em}
-  h1,h2,h3,h4{font-family:'Manrope',Inter,sans-serif;letter-spacing:-.02em}
-  [class*="border-slate-100"]{border-color:#e5e7eb}
-  .bg-white.rounded-2xl{box-shadow:0 1px 3px rgba(15,23,42,.05),0 12px 32px -28px rgba(15,23,42,.25)}
-  [x-cloak]{display:none !important}
-  .tech-grid{background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);background-size:44px 44px}
-  .tech-grid-dark{background-image:linear-gradient(rgba(10,18,32,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(10,18,32,.045) 1px,transparent 1px);background-size:44px 44px}
-  .glass{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(16px)}
-  .text-gradient{background:linear-gradient(92deg,#fff 10%,#ffd8cf 55%,#ffb0a0 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .btn-glow{box-shadow:0 18px 45px -16px rgba(255,92,61,.8)}
-  .card-lift{transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
-  .card-lift:hover{transform:translateY(-4px);box-shadow:0 28px 70px -38px rgba(10,18,32,.45);border-color:rgba(255,92,61,.35)}
-  .aurora{background:
-    radial-gradient(42rem 42rem at 82% 18%,rgba(255,92,61,.18),transparent 62%),
-    radial-gradient(34rem 34rem at 12% 82%,rgba(34,211,238,.12),transparent 60%),
-    linear-gradient(180deg,#080F1D 0%,#0A1220 60%,#0C1528 100%)}
-  .section-label{font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#FF5C3D}
-  .prose-tech{max-width:70ch;color:#475569;line-height:1.8}
-  .prose-tech h2{font-family:'Space Grotesk',Inter,sans-serif;font-size:1.5rem;font-weight:700;color:#101E33;margin:2rem 0 .75rem}
-  .prose-tech h3{font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;color:#101E33;margin:1.5rem 0 .5rem}
-  .prose-tech p{margin-bottom:1rem}
-  .prose-tech ul{list-style:disc;padding-left:1.25rem;margin-bottom:1rem}
-  .prose-tech ol{list-style:decimal;padding-left:1.25rem;margin-bottom:1rem}
-  .prose-tech blockquote{border-left:3px solid #FF5C3D;padding-left:1rem;color:#334155;font-style:italic;margin:1.25rem 0}
-  .prose-tech a{color:#C23A1F;text-decoration:underline}
-  .prose-tech img{border-radius:1rem;margin:1.25rem 0}
+  :root {
+    color-scheme: light;
+    --brand: #c84e35;
+    --brand-strong: #a83b27;
+    --ink: #172b43;
+    --paper: #f4f6f8;
+    --line: #dfe5eb;
+    --muted: #607184;
+    --surface: #ffffff;
+    --shadow-soft: 0 2px 8px rgb(23 43 67 / 4%), 0 18px 42px -34px rgb(23 43 67 / 28%);
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: var(--paper); color: #29394b; }
+  h1, h2, h3, h4, .font-display { font-family: Manrope, Inter, ui-sans-serif, sans-serif; letter-spacing: -.025em; }
+  [x-cloak] { display: none !important; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+
+  /* Keep the existing utility based pages, but give their shared surfaces one visual language. */
+  [class*="border-slate-100"], [class*="border-slate-200"] { border-color: var(--line) !important; }
+  .bg-white.rounded-2xl, .bg-white.rounded-xl { box-shadow: var(--shadow-soft); }
+  .card-lift { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+  .card-lift:hover { transform: translateY(-2px); box-shadow: 0 18px 38px -28px rgb(23 43 67 / 40%); border-color: #cbd5df; }
+  .btn-glow { box-shadow: 0 8px 20px -12px rgb(200 78 53 / 58%); }
+
+  /* Shared public and workspace chrome */
+  body > header, header.sticky { box-shadow: 0 1px 0 rgb(23 43 67 / 4%); }
+  header.sticky nav a[aria-current="page"] { position: relative; }
+  main { min-height: 60vh; }
+  footer { background: #172b43 !important; }
+  footer a { transition: color .16s ease; }
+
+  /* Reading surfaces */
+  .prose-tech { max-width: 70ch; color: #526477; line-height: 1.8; }
+  .prose-tech h2, .prose-tech h3 { color: var(--ink); margin-top: 2rem; margin-bottom: .75rem; }
+  .prose-tech h2 { font-size: 1.5rem; font-weight: 750; }
+  .prose-tech h3 { font-weight: 700; }
+  .prose-tech p { margin-bottom: 1rem; }
+  .prose-tech ul { list-style: disc; padding-left: 1.25rem; margin-bottom: 1rem; }
+  .prose-tech ol { list-style: decimal; padding-left: 1.25rem; margin-bottom: 1rem; }
+  .prose-tech blockquote { border-left: 3px solid var(--brand); padding-left: 1rem; color: #394d62; font-style: italic; margin: 1.25rem 0; }
+  .prose-tech a { color: var(--brand-strong); text-decoration: underline; text-underline-offset: 3px; }
+  .prose-tech img { border-radius: .9rem; margin: 1.25rem 0; }
+
+  .tech-grid { background-image: linear-gradient(rgb(255 255 255 / 5%) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 5%) 1px, transparent 1px); background-size: 44px 44px; }
+  .tech-grid-dark { background-image: linear-gradient(rgb(23 43 67 / 4%) 1px, transparent 1px), linear-gradient(90deg, rgb(23 43 67 / 4%) 1px, transparent 1px); background-size: 44px 44px; }
+  .glass { background: rgb(255 255 255 / 6%); border: 1px solid rgb(255 255 255 / 12%); backdrop-filter: blur(16px); }
+  .text-gradient { background: linear-gradient(92deg, #fff 10%, #f6d5cd 55%, #efaa9c 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .aurora { background: radial-gradient(42rem 42rem at 82% 18%, rgb(200 78 53 / 18%), transparent 62%), radial-gradient(34rem 34rem at 12% 82%, rgb(90 129 148 / 14%), transparent 60%), linear-gradient(180deg, #14273c 0%, #172b43 60%, #1b3048 100%); }
+  .section-label { font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-strong); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
 </style>

@@ -39,30 +39,8 @@
 @stack('head')
 </head>
 <body class="bg-[#F7F8FC] text-slate-800 antialiased overflow-x-clip">
-<noscript><style>#preloader{display:none !important}</style></noscript>
-<div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-[#101E33] transition-opacity duration-500">
-  <div class="flex flex-col items-center gap-4">
-    <div class="w-16 h-16 border-4 border-white/20 border-t-[#FF5C3D] rounded-full animate-spin"></div>
-    <div class="text-white font-bold text-2xl tracking-widest">MWTT</div>
-    <div class="text-slate-400 text-sm">Loading...</div>
-  </div>
-</div>
-<script>
-(function () {
-  function hidePreloader() {
-    var p = document.getElementById('preloader');
-    if (p) {
-      p.style.opacity = '0';
-      setTimeout(function () { p.remove(); }, 500);
-    }
-  }
-  window.addEventListener('load', hidePreloader);
-  // Never keep the page covered if a resource stalls.
-  setTimeout(hidePreloader, 4000);
-})();
-</script>
 <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+  <div class="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between gap-5">
     <a href="{{ route('home') }}" class="font-bold text-xl text-[#101E33] flex items-center gap-2 shrink-0">
       <img src="{{ asset('images/logo.svg') }}" alt="MWTT" class="h-8 w-auto">
     </a>
@@ -77,6 +55,8 @@
               ['Members', '/members', request()->is('members', 'members/*')],
               ['Hubs', '/hubs', request()->is('hubs*')],
               ['Chapters', '/chapters', request()->is('chapters*')],
+              ['Project showcase', '/projects', request()->is('projects*')],
+              ['Micro-grants', '/grants', request()->is('grants*')],
               ['About', '/about', request()->is('about*')],
             ],
           ],
@@ -86,6 +66,7 @@
             'items' => [
               ['Events', '/events', request()->is('events*')],
               ['Call for Speakers', '/speaker-calls', request()->is('speaker-calls*')],
+              ['Programmes', '/programmes', request()->is('programmes*')],
             ],
           ],
           ['label' => 'Opportunities', 'url' => '/opportunities', 'active' => request()->is('opportunities*')],
@@ -95,6 +76,8 @@
             'items' => [
               ['Articles', '/articles', request()->is('articles*')],
               ['News', '/news', request()->is('news*')],
+              ['Cohorts', '/cohorts', request()->is('cohorts*')],
+              ['Benefits', '/benefits', request()->is('benefits*')],
             ],
           ],
           ['label' => 'Contact', 'url' => '/contact', 'active' => request()->is('contact*')],
@@ -234,6 +217,9 @@
           <li><a href="/chapters" class="text-slate-400 hover:text-white transition">Chapters</a></li>
           <li><a href="/membership" class="text-slate-400 hover:text-white transition">Membership</a></li>
           <li><a href="/benefits" class="text-slate-400 hover:text-white transition">Member benefits</a></li>
+          <li><a href="/projects" class="text-slate-400 hover:text-white transition">Project showcase</a></li>
+          <li><a href="/grants" class="text-slate-400 hover:text-white transition">Micro-grants</a></li>
+          <li><a href="/cohorts" class="text-slate-400 hover:text-white transition">Cohorts</a></li>
           <li><a href="/programmes" class="text-slate-400 hover:text-white transition">Programmes</a></li>
         </ul>
       </div>

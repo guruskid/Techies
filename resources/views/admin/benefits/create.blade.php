@@ -44,6 +44,14 @@
       </div>
     </div>
     <div>
+      <label for="redemption_code" class="{{ $label }}">Redemption code</label>
+      <input id="redemption_code" name="redemption_code" value="{{ old('redemption_code', $benefit->redemption_code) }}" class="{{ $input }}" placeholder="Optional code members reveal when they redeem">
+    </div>
+    <div>
+      <label for="redemption_instructions" class="{{ $label }}">Redemption instructions</label>
+      <textarea id="redemption_instructions" name="redemption_instructions" rows="3" class="{{ $input }}">{{ old('redemption_instructions', $benefit->redemption_instructions) }}</textarea>
+    </div>
+    <div>
       <label for="description" class="{{ $label }}">Description</label>
       <textarea id="description" name="description" rows="4" class="{{ $input }}">{{ old('description', $benefit->description) }}</textarea>
     </div>

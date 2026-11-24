@@ -32,4 +32,9 @@ class Opportunity extends Model
     {
         return $this->hasMany(OpportunityApplication::class);
     }
+
+    public function referralOffers()
+    {
+        return $this->hasMany(ReferralOffer::class);
+    }
 }
