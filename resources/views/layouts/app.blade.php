@@ -33,12 +33,12 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{--brand:#FF5C3D;--ink:#0A1220;--paper:#F7F8FC}
   html{scroll-behavior:smooth}
   body{font-family:Inter,system-ui,sans-serif;background:var(--paper)}
-  .font-display{font-family:'Space Grotesk',Inter,sans-serif}
+  .font-display{font-family:'Manrope',Inter,sans-serif;letter-spacing:-.02em}
   [x-cloak]{display:none !important}
   .tech-grid{background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);background-size:44px 44px}
   .tech-grid-dark{background-image:linear-gradient(rgba(10,18,32,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(10,18,32,.045) 1px,transparent 1px);background-size:44px 44px}
@@ -88,10 +88,10 @@
   setTimeout(hidePreloader, 4000);
 })();
 </script>
-<header class="sticky top-0 z-50 bg-[#080F1D]/90 backdrop-blur-xl border-b border-white/10">
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-    <a href="{{ route('home') }}" class="font-bold text-xl text-white flex items-center gap-2 shrink-0">
-      <img src="{{ asset('images/logo-light.svg') }}" alt="MWTT" class="h-8 w-auto">
+    <a href="{{ route('home') }}" class="font-bold text-xl text-[#101E33] flex items-center gap-2 shrink-0">
+      <img src="{{ asset('images/logo.svg') }}" alt="MWTT" class="h-8 w-auto">
     </a>
     <nav class="hidden md:flex items-center gap-1 text-sm">
       @php
@@ -99,9 +99,9 @@
           ['label' => 'Home', 'url' => '/', 'active' => request()->is('/')],
           [
             'label' => 'Community',
-            'active' => request()->is('members*', 'hubs*', 'chapters*', 'about*'),
+            'active' => request()->is('members', 'members/*', 'hubs*', 'chapters*', 'about*'),
             'items' => [
-              ['Members', '/members', request()->is('members*')],
+              ['Members', '/members', request()->is('members', 'members/*')],
               ['Hubs', '/hubs', request()->is('hubs*')],
               ['Chapters', '/chapters', request()->is('chapters*')],
               ['About', '/about', request()->is('about*')],
@@ -131,28 +131,28 @@
         @if(isset($item['items']))
           <div class="relative" x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false">
             <button type="button" @click="open = !open" :aria-expanded="open.toString()"
-                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-700 hover:text-[#C23A1F] hover:bg-slate-50' }}">
               {{ $item['label'] }}
               <svg class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </button>
             <div x-show="open" x-cloak x-transition.origin.top.left
-                 class="absolute left-0 mt-2 w-60 rounded-xl border border-white/10 bg-[#0D1728] shadow-2xl p-2 z-50">
+                 class="absolute left-0 mt-2 w-60 rounded-xl border border-white/10 bg-white border-slate-100 shadow-xl p-2 z-50">
               @foreach($item['items'] as [$label, $url, $active])
                 <a href="{{ $url }}" @if($active) aria-current="page" @endif
-                   class="block px-3 py-2 rounded-lg text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] {{ $active ? 'bg-[#FF5C3D]/15 text-[#FF5C3D] font-semibold' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">{{ $label }}</a>
+                   class="block px-3 py-2 rounded-lg text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] {{ $active ? 'bg-[#FF5C3D]/10 text-[#C23A1F] font-semibold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#C23A1F]' }}">{{ $label }}</a>
               @endforeach
             </div>
           </div>
         @else
           <a href="{{ $item['url'] }}" @if($item['active']) aria-current="page" @endif
-             class="px-2.5 py-1.5 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">{{ $item['label'] }}</a>
+             class="px-2.5 py-1.5 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-700 hover:text-[#C23A1F] hover:bg-slate-50' }}">{{ $item['label'] }}</a>
         @endif
       @endforeach
     </nav>
     <div class="flex gap-2 items-center">
-      <button type="button" x-data @click="$dispatch('toggle-menu')" class="md:hidden p-2 rounded-lg border border-white/15 text-white" aria-label="Menu">
+      <button type="button" x-data @click="$dispatch('toggle-menu')" class="md:hidden p-2 rounded-lg border border-slate-200 text-slate-700" aria-label="Menu">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
       @auth
@@ -162,27 +162,27 @@
             : (auth()->user()->isAdmin() ? route('admin.dashboard') : route('dashboard'));
         @endphp
         @if(auth()->user()->isSuperAdmin())
-          <span class="hidden sm:inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-white/10 border border-white/15 text-white">Super Admin</span>
+          <span class="hidden sm:inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[#101E33] text-white">Super Admin</span>
         @elseif(auth()->user()->isAdmin())
           <span class="hidden sm:inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-[#FF5C3D]/10 text-[#FF5C3D]">Admin</span>
         @endif
         <a href="{{ $dashboardUrl }}" class="hidden sm:inline-block px-3.5 py-1.5 text-sm bg-[#FF5C3D] text-white rounded-lg font-semibold btn-glow hover:opacity-90 transition">Dashboard</a>
         <form method="POST" action="{{ route('logout') }}" class="hidden sm:inline-block">
           @csrf
-          <button class="px-3 py-1.5 text-sm border border-white/20 text-white rounded-lg hover:bg-white/10 transition">Logout</button>
+          <button class="px-3 py-1.5 text-sm border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition">Logout</button>
         </form>
       @else
-        <a href="{{ route('login') }}" class="hidden sm:inline-block px-3 py-1.5 text-sm border border-white/20 text-white rounded-lg hover:bg-white/10 transition">Login</a>
+        <a href="{{ route('login') }}" class="hidden sm:inline-block px-3 py-1.5 text-sm border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition">Login</a>
         <a href="{{ route('register') }}" class="hidden sm:inline-block px-3.5 py-1.5 text-sm bg-[#FF5C3D] text-white rounded-lg font-semibold btn-glow hover:opacity-90 transition">Join</a>
       @endauth
     </div>
   </div>
-  <div x-data="{ open: false }" @toggle-menu.window="open = !open" x-show="open" x-cloak class="md:hidden border-t border-white/10 bg-[#080F1D]">
+  <div x-data="{ open: false }" @toggle-menu.window="open = !open" x-show="open" x-cloak class="md:hidden border-t border-slate-200 bg-white">
     <nav class="px-4 py-3 space-y-2 text-sm">
       @foreach($navGroups as $item)
         @if(isset($item['items']))
           <details class="py-1">
-            <summary class="flex cursor-pointer list-none items-center justify-between py-2 {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-300' }}">
+            <summary class="flex cursor-pointer list-none items-center justify-between py-2 {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-700' }}">
               {{ $item['label'] }}
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -191,13 +191,13 @@
             <div class="pl-4 pb-2 space-y-1">
               @foreach($item['items'] as [$label, $url, $active])
                 <a href="{{ $url }}" @if($active) aria-current="page" @endif
-                   class="block py-1.5 {{ $active ? 'text-[#FF5C3D] font-semibold' : 'text-slate-400' }}">{{ $label }}</a>
+                   class="block py-1.5 {{ $active ? 'text-[#FF5C3D] font-semibold' : 'text-slate-500' }}">{{ $label }}</a>
               @endforeach
             </div>
           </details>
         @else
           <a href="{{ $item['url'] }}" @if($item['active']) aria-current="page" @endif
-             class="block py-2 {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-300' }}">{{ $item['label'] }}</a>
+             class="block py-2 {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-700' }}">{{ $item['label'] }}</a>
         @endif
       @endforeach
       @auth
@@ -207,7 +207,7 @@
             : (auth()->user()->isAdmin() ? route('admin.dashboard') : route('dashboard'));
         @endphp
         @if(auth()->user()->isSuperAdmin())
-          <span class="inline-block mb-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/10 border border-white/15 text-white">Super Admin</span>
+          <span class="inline-block mb-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#101E33] text-white">Super Admin</span>
         @elseif(auth()->user()->isAdmin())
           <span class="inline-block mb-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#FF5C3D]/10 text-[#FF5C3D]">Admin</span>
         @endif
@@ -227,11 +227,8 @@
 @include('partials.flash')
 @yield('content')
 </main>
-<footer class="relative overflow-hidden bg-[#080F1D] text-slate-300 mt-20">
-  <div class="absolute inset-0 tech-grid opacity-20" aria-hidden="true"></div>
-  <div class="absolute -top-24 right-0 w-[26rem] h-[26rem] rounded-full bg-[#FF5C3D]/10 blur-3xl" aria-hidden="true"></div>
-
-  <div class="relative max-w-7xl mx-auto px-4 py-16">
+<footer class="bg-[#101E33] text-slate-300 mt-16">
+  <div class="max-w-7xl mx-auto px-4 py-14">
     <div class="grid lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-10">
       <div>
         <img src="{{ asset('images/logo-light.svg') }}" alt="Meet with the Techies" class="h-9 w-auto">
@@ -278,7 +275,7 @@
       </div>
     </div>
 
-    <div class="mt-12 border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+    <div class="mt-10 border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
       <p>&copy; {{ date('Y') }} Meet with the Techies (MWTT). All rights reserved.</p>
       <div class="flex flex-wrap gap-5">
         <a href="/privacy-policy" class="hover:text-white transition">Privacy policy</a>

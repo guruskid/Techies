@@ -9,115 +9,148 @@
 @endphp
 
 {{-- Hero --}}
-<section class="relative overflow-hidden aurora text-white">
-  <div class="absolute inset-0 tech-grid opacity-40" aria-hidden="true"></div>
-  <div class="absolute -top-32 -left-24 w-[28rem] h-[28rem] rounded-full bg-[#FF5C3D]/20 blur-3xl" aria-hidden="true"></div>
-  <div class="absolute -bottom-40 right-0 w-[34rem] h-[34rem] rounded-full bg-cyan-400/10 blur-3xl" aria-hidden="true"></div>
+<section class="relative overflow-hidden border-b border-slate-200 bg-white">
+  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(60rem_32rem_at_88%_-10%,rgba(255,92,61,.09),transparent_62%)]" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(40rem_26rem_at_8%_110%,rgba(15,23,42,.05),transparent_60%)]" aria-hidden="true"></div>
 
-  <div class="relative max-w-7xl mx-auto px-4 pt-16 pb-12 md:pt-24 md:pb-16 grid lg:grid-cols-[1.08fr_0.92fr] gap-12 items-center min-w-0">
+  <div class="relative max-w-7xl mx-auto px-4 py-14 md:py-24 grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
     <div class="min-w-0">
-      <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-slate-200">
-        <span class="w-2 h-2 rounded-full bg-[#FF5C3D]"></span>
-        Nigeria's community layer for technology
+      <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600">
+        <span class="h-2 w-2 rounded-full bg-[#FF5C3D]"></span>
+        Nigeria's community for people in tech
       </div>
-      <h1 class="mt-6 font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.03] tracking-tight">
-        <span class="text-gradient">Build in public.</span><br>
-        Grow with people<br>
-        who get it.
+      <h1 class="mt-6 font-display text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.04] text-[#101E33]">
+        Build your career with people who get it.
       </h1>
-      <p class="mt-6 max-w-xl text-lg leading-relaxed text-slate-300 break-words">
-        Meet with the Techies connects developers, designers, founders, students and hubs into one network for events, mentorship, opportunities and the conversations that move careers forward.
+      <p class="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
+        Meet with the Techies connects developers, designers, founders, students and hubs across Nigeria for events, mentorship, opportunities and honest career support.
       </p>
       <div class="mt-8 flex flex-wrap items-center gap-3">
         @guest
-          <a href="{{ route('membership.show') }}" class="btn-glow inline-flex items-center gap-2 rounded-xl bg-[#FF5C3D] px-6 py-3.5 font-semibold text-white transition hover:opacity-90 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
+          <a href="{{ route('membership.show') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#FF5C3D] px-6 py-3.5 font-semibold text-white transition hover:bg-[#e94f32] {{ $focus }}">
             Become a member
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
           </a>
         @else
-          <a href="{{ $memberHome }}" class="btn-glow inline-flex items-center gap-2 rounded-xl bg-[#FF5C3D] px-6 py-3.5 font-semibold text-white transition hover:opacity-90 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
+          <a href="{{ $memberHome }}" class="inline-flex items-center gap-2 rounded-lg bg-[#FF5C3D] px-6 py-3.5 font-semibold text-white transition hover:bg-[#e94f32] {{ $focus }}">
             Open my dashboard
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
           </a>
         @endguest
-        <a href="{{ route('members') }}" class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 font-semibold text-white transition hover:bg-white/10 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
+        <a href="{{ route('members') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-6 py-3.5 font-semibold text-slate-700 transition hover:bg-slate-50 {{ $focus }}">
           Explore the network
         </a>
       </div>
-      <p class="mt-5 text-sm text-slate-400">One-time membership · No monthly renewal · Built for the Nigerian tech ecosystem</p>
+      <p class="mt-5 text-sm text-slate-500">One-time membership · No monthly renewal · Built for the Nigerian tech ecosystem</p>
     </div>
 
-    <div class="relative min-w-0 w-full">
-      <div class="glass w-full rounded-3xl p-5 sm:p-6">
-        <div class="flex items-center justify-between gap-3">
-          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Network snapshot</p>
-          <span class="inline-flex items-center gap-2 text-xs text-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Live</span>
+    <div class="min-w-0">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_30px_80px_-45px_rgba(15,23,42,.45)]">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C23A1F]">What's happening</p>
+            <p class="mt-1 text-sm text-slate-500">A snapshot of the community right now</p>
+          </div>
+          <a href="{{ route('events') }}" class="text-xs font-semibold text-[#C23A1F] hover:underline">View all</a>
         </div>
 
-        <div class="mt-5 grid grid-cols-2 gap-3">
-          @foreach ([
-            ['label' => 'Members', 'value' => $stats['members'], 'tone' => 'text-white'],
-            ['label' => 'Verified hubs', 'value' => $stats['hubs'], 'tone' => 'text-white'],
-            ['label' => 'Chapters', 'value' => $stats['chapters'], 'tone' => 'text-white'],
-            ['label' => 'Events hosted', 'value' => $stats['events'], 'tone' => 'text-white'],
-          ] as $stat)
-            <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-              <p class="text-[11px] uppercase tracking-wider text-slate-400">{{ $stat['label'] }}</p>
-              <p class="mt-1 font-display text-2xl font-bold {{ $stat['tone'] }}">{{ number_format((int) $stat['value']) }}</p>
-            </div>
-          @endforeach
+        <div class="divide-y divide-slate-100">
+          @if($events->isNotEmpty())
+            @php $nextEvent = $events->first(); @endphp
+            <a href="{{ route('events.show', $nextEvent->slug) }}" class="flex items-center gap-4 py-4 transition hover:bg-slate-50/80 {{ $focus }} rounded-lg">
+              <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 leading-none text-[#101E33]">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#C23A1F]">{{ $nextEvent->start_date->format('M') }}</span>
+                <span class="font-display text-lg font-extrabold">{{ $nextEvent->start_date->format('j') }}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Next event</p>
+                <p class="line-clamp-2 font-semibold text-[#101E33]">{{ $nextEvent->title }}</p>
+                <p class="text-xs text-slate-500">{{ $nextEvent->is_online ? 'Online' : ($nextEvent->city ?: 'Venue to be announced') }}</p>
+              </div>
+              <svg class="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          @endif
+
+          @if($opportunities->isNotEmpty())
+            @php $nextOpportunity = $opportunities->first(); @endphp
+            <a href="{{ route('opportunities.show', $nextOpportunity->slug) }}" class="flex items-center gap-4 py-4 transition hover:bg-slate-50/80 {{ $focus }} rounded-lg">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#101E33] text-white">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Opportunity</p>
+                <p class="line-clamp-2 font-semibold text-[#101E33]">{{ $nextOpportunity->title }}</p>
+                <p class="truncate text-xs text-slate-500">{{ $nextOpportunity->organization ?: 'Community opportunity' }}{{ $nextOpportunity->is_remote ? ' · Remote' : '' }}</p>
+              </div>
+              <svg class="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          @endif
+
+          @if($speakerCalls->isNotEmpty())
+            @php $openCall = $speakerCalls->first(); @endphp
+            <a href="{{ route('speaker-calls.show', $openCall->slug) }}" class="flex items-center gap-4 py-4 transition hover:bg-slate-50/80 {{ $focus }} rounded-lg">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#FF5C3D]/10 text-[#C23A1F]">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v-5m0 0a3 3 0 100-6 3 3 0 000 6zm-7 5a7 7 0 0114 0"/></svg>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Open call</p>
+                <p class="line-clamp-2 font-semibold text-[#101E33]">{{ $openCall->title }}</p>
+                <p class="text-xs text-slate-500">{{ $openCall->closes_at ? 'Closes '.$openCall->closes_at->format('M j, Y') : 'Open for submissions' }}</p>
+              </div>
+              <svg class="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          @endif
         </div>
 
-        <div class="mt-5 flex flex-col sm:flex-row sm:items-center gap-3 border-t border-white/10 pt-5">
+        <div class="flex items-center gap-3 border-t border-slate-100 pt-4">
           <div class="flex shrink-0 -space-x-2">
             @foreach($members->take(4) as $member)
               @if($member->profile?->avatar)
-                <img src="{{ $member->profile->avatar }}" alt="" class="h-9 w-9 rounded-full border-2 border-[#0D1728] object-cover">
+                <img src="{{ $member->profile->avatar }}" alt="" class="h-8 w-8 rounded-full border-2 border-white object-cover">
               @else
-                <span class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0D1728] bg-[#FF5C3D] text-xs font-bold text-white">{{ strtoupper(substr($member->name, 0, 1)) }}</span>
+                <span class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#101E33] text-[10px] font-bold text-white">{{ strtoupper(substr($member->name, 0, 1)) }}</span>
               @endif
             @endforeach
           </div>
-          <p class="text-xs leading-relaxed text-slate-400">Builders, designers, founders and students across Nigeria.</p>
+          <p class="text-xs text-slate-500">{{ number_format((int) $stats['members']) }} members building across Nigeria.</p>
         </div>
-
-        @if($speakerCalls->isNotEmpty())
-          @php $openCall = $speakerCalls->first(); @endphp
-          <a href="{{ route('speaker-calls.show', $openCall->slug) }}" class="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-[#FF5C3D]/30 bg-[#FF5C3D]/10 p-4 transition hover:bg-[#FF5C3D]/15 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
-            <div class="min-w-0">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-[#FF5C3D]">Open call for speakers</p>
-              <p class="mt-1 truncate text-sm font-semibold text-white">{{ $openCall->title }}</p>
-            </div>
-            <svg class="h-4 w-4 shrink-0 text-[#FF5C3D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </a>
-        @endif
       </div>
     </div>
   </div>
 </section>
 
+{{-- Stats --}}
+<section class="border-b border-slate-200 bg-slate-50" aria-label="Community at a glance">
+  <dl class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+    @foreach (['members' => 'Members', 'hubs' => 'Verified hubs', 'chapters' => 'Chapters', 'events' => 'Events hosted'] as $key => $label)
+      <div>
+        <dd class="font-display text-3xl font-extrabold text-[#101E33] tabular-nums">{{ number_format((int) $stats[$key]) }}</dd>
+        <dt class="mt-1 text-sm text-slate-500">{{ $label }}</dt>
+      </div>
+    @endforeach
+  </dl>
+</section>
+
 {{-- Value pillars --}}
-<section class="relative z-10 -mt-8 pb-4">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      @foreach ([
-        ['Meet', 'Find the people building the same future you are.', route('members')],
-        ['Learn', 'Events, workshops and honest conversations with practitioners.', route('events')],
-        ['Move', 'Opportunities, internships and career support in one place.', route('opportunities')],
-        ['Lead', 'Take the stage, join a chapter and shape your community.', route('speaker-calls.index')],
-      ] as [$title, $copy, $url])
-        <a href="{{ $url }}" class="card-lift group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_20px_60px_-45px_rgba(10,18,32,.6)] {{ $focus }}">
-          <div class="flex items-center justify-between">
-            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#101E33] text-white">
-              <span class="h-2 w-2 rounded-full bg-[#FF5C3D]"></span>
-            </span>
-            <svg class="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-[#FF5C3D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </div>
-          <h2 class="mt-4 font-display text-lg font-bold text-[#101E33]">{{ $title }}</h2>
-          <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $copy }}</p>
-        </a>
-      @endforeach
-    </div>
+<section class="max-w-7xl mx-auto px-4 py-14 md:py-16">
+  <div class="grid sm:grid-cols-3 gap-4">
+    @foreach ([
+      ['Meet', 'Find the people building the same future you are.', 'Connect with developers, designers, founders and students across the network.', route('members')],
+      ['Learn', 'Events, workshops and honest conversations with practitioners.', 'Show up, ask questions and leave with something you can apply.', route('events')],
+      ['Grow', 'Opportunities, mentorship and a stage when you are ready.', 'Move your career forward with support from people who have done it.', route('opportunities')],
+    ] as [$title, $copy, $detail, $url])
+      <a href="{{ $url }}" class="group rounded-2xl border border-slate-200 bg-white p-6 transition hover:border-[#FF5C3D]/40 hover:shadow-sm {{ $focus }}">
+        <div class="flex items-center justify-between">
+          <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#101E33]">
+            <span class="h-2 w-2 rounded-full bg-[#FF5C3D]"></span>
+          </span>
+          <svg class="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-[#C23A1F]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </div>
+        <h2 class="mt-4 font-display text-xl font-bold text-[#101E33]">{{ $title }}</h2>
+        <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ $copy }}</p>
+        <p class="mt-2 text-sm leading-relaxed text-slate-500">{{ $detail }}</p>
+      </a>
+    @endforeach
   </div>
 </section>
 

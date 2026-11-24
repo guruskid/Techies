@@ -33,20 +33,20 @@
   $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';
 @endphp
 
-<section class="relative overflow-hidden aurora text-white">
-  <div class="absolute inset-0 tech-grid opacity-35" aria-hidden="true"></div>
+<section class="relative overflow-hidden border-b border-slate-200 bg-white">
+  <div class="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-slate-50 to-transparent" aria-hidden="true"></div>
   <div class="relative max-w-7xl mx-auto px-4 py-12 md:py-16 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
     <div>
-      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#FF8A73]">The network</p>
-      <h1 class="mt-2 font-display text-3xl md:text-5xl font-bold">Members Directory</h1>
-      <p class="mt-3 max-w-2xl text-lg text-slate-300">Find and connect with the builders, designers, founders and students shaping tech across Nigeria.</p>
+      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C23A1F]">The network</p>
+      <h1 class="mt-2 font-display text-3xl md:text-5xl font-extrabold text-[#101E33]">Members Directory</h1>
+      <p class="mt-3 max-w-2xl text-lg text-slate-600">Find and connect with the builders, designers, founders and students shaping tech across Nigeria.</p>
     </div>
-    <a href="{{ route('membership.show') }}" class="group flex shrink-0 items-center gap-4 rounded-2xl border border-white/15 bg-white/5 px-5 py-4 transition hover:bg-white/10 {{ $focus }} focus-visible:ring-offset-[#080F1D]">
+    <a href="{{ route('membership.show') }}" class="group flex shrink-0 items-center gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition hover:border-[#FF5C3D]/40 {{ $focus }}">
       <div>
-        <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-[#FF8A73]">Membership</p>
-        <p class="mt-1 font-display text-lg font-bold">{{ $membershipPrice }} <span class="text-sm font-normal text-slate-300">one time</span></p>
+        <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C23A1F]">Membership</p>
+        <p class="mt-1 font-display text-lg font-bold text-[#101E33]">{{ $membershipPrice }} <span class="text-sm font-normal text-slate-500">one time</span></p>
       </div>
-      <span class="shrink-0 text-sm font-semibold text-white group-hover:underline">Join</span>
+      <span class="shrink-0 text-sm font-semibold text-[#C23A1F] group-hover:underline">Join</span>
     </a>
   </div>
 </section>
