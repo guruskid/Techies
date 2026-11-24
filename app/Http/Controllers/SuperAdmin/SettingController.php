@@ -49,6 +49,42 @@ class SettingController extends Controller
                 'rules' => 'nullable|string|max:255',
                 'type' => 'text',
             ],
+            'membership_fee' => [
+                'label' => 'Membership fee (one time)',
+                'default' => '15000',
+                'rules' => 'nullable|numeric|min:0',
+                'type' => 'text',
+            ],
+            'membership_currency' => [
+                'label' => 'Membership currency',
+                'default' => 'NGN',
+                'rules' => 'nullable|string|max:10',
+                'type' => 'text',
+            ],
+            'membership_payment_url' => [
+                'label' => 'Membership payment link',
+                'default' => '',
+                'rules' => 'nullable|url|max:2048',
+                'type' => 'text',
+            ],
+            'membership_payment_instructions' => [
+                'label' => 'Membership payment instructions',
+                'default' => '',
+                'rules' => 'nullable|string|max:2000',
+                'type' => 'textarea',
+            ],
+            'membership_benefits' => [
+                'label' => 'Membership benefits (one per line)',
+                'default' => "Member events, workshops and meetups\nA public profile that showcases your work\nMentorship and peer learning circles\nOpportunity applications and career support\nSpeaker calls, volunteering and chapter membership",
+                'rules' => 'nullable|string|max:3000',
+                'type' => 'textarea',
+            ],
+            'membership_guarantee' => [
+                'label' => 'Membership guarantee',
+                'default' => 'If the community is not a fit, contact us within 14 days of joining and we will review your refund.',
+                'rules' => 'nullable|string|max:1000',
+                'type' => 'textarea',
+            ],
         ];
     }
 

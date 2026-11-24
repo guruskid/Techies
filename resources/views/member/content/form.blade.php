@@ -8,7 +8,7 @@
 
 <style>[x-cloak]{display:none !important}</style>
 
-<form method="POST" action="{{ $editing ? route('member.content.update', $article) : route('member.content.store') }}" class="grid lg:grid-cols-3 gap-6">
+<form method="POST" action="{{ $editing ? route('member.content.update', $article) : route('member.content.store') }}" enctype="multipart/form-data" class="grid lg:grid-cols-3 gap-6">
   @csrf
   @if($editing)
     @method('PATCH')
@@ -59,21 +59,21 @@
 
       <div>
         <label for="body" class="{{ $labelClass }}">Article body</label>
-        <div x-data="{ count: {{ mb_strlen(old('body', $article->body ?? '')) }} }">
-          <textarea id="body" name="body" rows="18" required
-                    @input="count = $event.target.value.length"
-                    placeholder="Write your article. Use blank lines to separate paragraphs."
-                    class="{{ $inputClass }} font-mono text-sm leading-relaxed">{{ old('body', $article->body) }}</textarea>
-          <div class="mt-1 text-right text-xs text-slate-400"><span x-text="count"></span> characters</div>
-        </div>
+        <textarea id="body" name="body" rows="18" required
+                  placeholder="Write your article."
+                  class="{{ $inputClass }} leading-relaxed">{{ old('body', $article->body) }}</textarea>
+        <p class="mt-1 text-xs text-slate-400">Use the toolbar to format headings, lists, links and quotes.</p>
         @error('body')<p class="{{ $errorClass }}">{{ $message }}</p>@enderror
       </div>
 
       <div class="grid sm:grid-cols-2 gap-4">
         <div>
-          <label for="cover_image" class="{{ $labelClass }}">Cover image URL</label>
-          <input id="cover_image" name="cover_image" type="url" value="{{ old('cover_image', $article->cover_image) }}"
-                 placeholder="https://example.com/cover.jpg" class="{{ $inputClass }}">
+          <label for="cover_image" class="{{ $labelClass }}">Cover image</label>
+          <input id="cover_image" name="cover_image" type="file" accept="image/*"
+                 class="block w-full text-sm text-slate-600 border border-slate-200 rounded-lg file:mr-4 file:py-2.5 file:px-4 file:border-0 file:bg-slate-100 file:text-slate-700 file:font-medium hover:file:bg-slate-200">
+          @if($editing && $article->cover_image)
+            <img src="{{ $article->cover_image }}" alt="" class="mt-2 h-24 rounded-lg object-cover">
+          @endif
           @error('cover_image')<p class="{{ $errorClass }}">{{ $message }}</p>@enderror
         </div>
         <div>
@@ -188,3 +188,21 @@
     </div>
   </aside>
 </form>
+
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<script>
+  (function () {
+    const el = document.getElementById('body');
+    if (!el || typeof ClassicEditor === 'undefined') return;
+
+    ClassicEditor.create(el, {
+      simpleUpload: {
+        uploadUrl: @json(route('member.content.upload-image')),
+        headers: { 'X-CSRF-TOKEN': @json(csrf_token()) },
+      },
+      toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'imageUpload', '|', 'undo', 'redo'],
+    }).catch(function (error) {
+      console.error('CKEditor init failed:', error);
+    });
+  })();
+</script>

@@ -101,7 +101,7 @@ Anyone can browse the public site without an account, subject to the visibility 
 | Hub profile | `/hubs/{slug}` | Hub detail and its upcoming events |
 | Register a hub | `/hubs/register` | Hub application form (submitting requires login) |
 | Chapters | `/chapters` | Active chapters |
-| Chapter detail | `/chapters/{slug}` | Chapter description, coordinator, upcoming events, join/leave |
+| Chapter detail | `/chapters/{slug}` | Chapter description, coordinators, upcoming events, join/leave |
 | Events | `/events` | Upcoming published events with filters |
 | Event detail | `/events/{slug}` | Full event detail, registration, waitlist, calendar download |
 | Opportunities | `/opportunities` | Published opportunities with filters |
@@ -152,7 +152,7 @@ Logged-in admins and super admins bypass the restriction entirely, so staff can 
 | Contact | Sends an email to the configured contact address; the visitor's address is set as reply-to. Rate-limited to 5 submissions per minute. |
 | Newsletter | Stores or reuses a newsletter subscriber, then confirms the subscription. |
 | Hub application | Creates a pending hub, a pending hub application, a `hub_owner` role for the applicant and emails staff reviewers. Requires an account. |
-| Member contact | Sends a member-to-member email through the platform using the sender as reply-to. Requires a verified login and is rate-limited to 5 per minute. A hidden honeypot field silently drops bot submissions. |
+| Member contact | Sends a message to a member through the platform using the sender as reply-to. Works for guests on public profiles (name and email required) and for signed-in members (no re-login prompt). Rate-limited to 5 per minute; a hidden honeypot field silently drops bot submissions. |
 
 ---
 
@@ -226,14 +226,37 @@ This happens on the next page refresh, not instantly. It is intentional: permiss
 ### 4.6 Registration and account lifecycle
 
 1. A visitor registers with name, email and password.
-2. The account is created with primary role `member`, status `active`, an unverified email and a generated username.
+2. The account is created with primary role `member`, status `active`, membership status `unpaid`, an unverified email and a generated username.
 3. The member verifies their email.
 4. The member completes their profile and chooses whether it is public.
 5. Staff can suspend or restore an account from the members screen or the super admin users screen.
 
 Staff accounts are created by changing an existing account's role, not through a separate registration form.
 
-### 4.7 Recovery: restoring a super administrator
+### 4.7 Membership fee and onboarding
+
+New members pay a one-time membership fee before using member-only features. The fee and copy are configured under **Super admin → Settings**:
+
+- `membership_fee` — default `15000`.
+- `membership_currency` — default `NGN`.
+- `membership_payment_url` — an external payment link.
+- `membership_payment_instructions` — bank transfer or other instructions.
+- `membership_benefits` — one benefit per line, shown on `/membership`.
+- `membership_guarantee` — the member promise shown on the page and in the FAQ.
+
+The member lifecycle is:
+
+1. The member registers and verifies their email. Membership status is `unpaid`.
+2. They open `/membership`, pay using the link or instructions, and submit their payment reference. Status becomes `pending`.
+3. Admins and super admins are emailed that a payment reference was submitted.
+4. Staff open the member from **Members management** and choose **Confirm payment**. Status becomes `active` and the member is emailed a welcome guide with an onboarding checklist.
+5. **Waive fee** sets the status to `exempt` for comped or staff-approved accounts.
+
+Until the membership is `active` or `exempt`, the member can browse and edit their profile but cannot register for events, apply to opportunities, submit speaker proposals, join chapters, register a hub or publish member content. Those actions redirect to `/membership`.
+
+The dashboard shows a membership banner so an unpaid member always knows the next step. Existing accounts and staff accounts were migrated as `active`.
+
+### 4.8 Recovery: restoring a super administrator
 
 If the last super admin is lost (for example because of a direct database edit), nobody can open `/super-admin`. Recovery requires server access:
 
@@ -329,6 +352,10 @@ A member manages their articles at `/member/content`:
 
 Once an article is pending or approved, the author can no longer edit it. Approved articles can only be changed by staff unpublishing them, which returns the article to the author as a draft.
 
+Admins and super admins write articles through the same screen (`/member/content`), linked from the management centre as **Write an article**. The article is created under the staff account and follows the same topic-based review rules, so an admin can approve their own article for topics they may review, while a super-admin topic still needs a super administrator.
+
+The body uses a rich-text editor (CKEditor) with headings, lists, links, quotes and image upload. Cover images and images inserted into the body are uploaded to the platform — no external URL is required. Content is sanitised on save before it is stored.
+
 ### 6.2 Article fields
 
 | Field | Rules |
@@ -336,8 +363,8 @@ Once an article is pending or approved, the author can no longer edit it. Approv
 | Title | Required, up to 160 characters |
 | Topic | Required, one of the configured topics |
 | Excerpt | Optional, up to 300 characters |
-| Body | Required, at least 100 characters |
-| Cover image | Optional URL |
+| Body | Required, at least 100 characters, written in the rich-text editor |
+| Cover image | Optional upload (JPG, PNG, GIF or WebP) |
 | SEO title | Optional, up to 70 characters |
 | SEO description | Optional, up to 200 characters |
 | SEO keywords | Optional, up to 255 characters; the first keyword is the focus keyword |
@@ -425,12 +452,20 @@ Approved articles appear on `/articles`, `/news`, the home page, the sitemap and
 
 ### 7.1 Event record
 
-Admins manage events at `/admin/events` with create, edit and delete. An event has:
+Staff manage every event at `/manage/events`. Hub owners (accounts carrying the `hub_owner` capability) and chapter coordinators also reach the same screens for their own records:
 
-- Title, slug, description and cover image upload.
+- Staff see and manage all events.
+- A hub owner sees events they organise or that belong to their hub.
+- A chapter coordinator sees events they organise.
+- Members never see the address as "admin" in the browser; the routes live under `/manage`.
+
+An event has:
+
+- Title, slug, description and cover image upload. Description, agenda and requirements use the rich-text editor and are sanitised on save.
 - Category.
 - Host (free text, with member and approved-hub suggestions).
-- Key speakers, agenda, requirements.
+- Key speakers plus an optional **speaker photo gallery**: upload several images at once without holding Ctrl/Cmd, with previews and per-image removal. The public page shows them as a grid.
+- Agenda and requirements (rich text).
 - Contact email and phone.
 - Start date (required), end date, start time, end time.
 - Venue, city, state, country.
@@ -439,14 +474,16 @@ Admins manage events at `/admin/events` with create, edit and delete. An event h
 - Registration type: free or paid, plus an optional fee.
 - Payment link and payment instructions (shown to registered attendees of paid events).
 - Status: `draft`, `published` or `cancelled`.
-- Organiser: the admin who created it.
+- Organiser: the account that created it.
+
+**Publishing is a staff decision.** When a hub owner or coordinator creates or edits an event, the record is forced to `draft` and the status control, publishing section and draft filters are hidden from them. Their list shows such records as "Awaiting review". Only an admin or super admin sets `published`; on first publication, active members in the event's state (or all active members when no state is recorded) are emailed. See Section 9.4.
 
 **The platform tracks payments but does not process cards.** For a paid event, add an external payment link (for example a Paystack or Flutterwave page) and any bank-transfer instructions. Attendees pay outside the platform; an admin then confirms or refunds each registration from the attendee screen. See Section 7.7.
 
 ### 7.2 The public event page
 
 - Only published events can be opened.
-- The page shows the schedule, venue or online details, capacity and remaining spots, speakers, agenda, requirements and contact details.
+- The page shows the schedule, venue or online details, capacity and remaining spots, speakers, the speaker photo gallery, agenda, requirements and contact details.
 - If a meeting link is set, a **Join Online** section is shown. The link itself is only revealed to confirmed attendees, the organiser and staff. Everyone else sees an explanation asking them to register.
 - The page offers an `.ics` calendar download for published events.
 
@@ -504,23 +541,58 @@ The payment-link and instructions fields are disabled in the event form while th
 
 **What the platform does not do:** it does not talk to a payment provider, verify a transaction, or move money. Confirming a payment is a human decision based on the reference you record. If you need automatic confirmation, connect a provider webhook separately.
 
+### 7.8 Call for speakers
+
+Admins, hub owners and chapter coordinators can open a call for speakers at `/manage/speaker-calls`.
+
+**Creating a call**
+- Give it a title and a rich-text description.
+- Add the topics speakers may choose from, one per line.
+- Optionally link an event. The call then appears on that event page and inherits the event's hub and chapter.
+- Set an opening date, a closing date and a status: `draft`, `open` or `closed`.
+
+Without a linked event, a hub owner's call belongs to their hub and a chapter coordinator's call belongs to their chapter. Admins can create platform-wide calls. Drafts are hidden from the public, and submissions stop automatically once the closing date passes.
+
+**What members see**
+
+Open calls appear at `/speaker-calls`, in the main navigation under **Speak**, and on the linked event page. A signed-in, verified member submits:
+- one of the published topics,
+- a talk title,
+- an abstract,
+- an optional short bio.
+
+A member can submit only once per call.
+
+**Reviewing proposals**
+
+The creator opens **Review** from the call list. Every submission shows the member, chosen topic, talk title, abstract and bio. The reviewer chooses **Approve** or **Reject**, optionally adds notes, and saves.
+
+- Approving emails the speaker with the talk details and any notes.
+- Rejecting emails the speaker with the decision and any notes.
+- Saving the same decision again does not send a second email.
+- Decisions are audited.
+
+Approved speakers are listed publicly on the call page. Only staff, the creator, the owning hub and the relevant chapter coordinators can see or review a call.
+
 ---
 
 ## 8. Opportunities
 
 ### 8.1 Opportunity record
 
-Admins manage opportunities at `/admin/opportunities`. Fields:
+Staff manage opportunities at `/manage/opportunities`; hub owners and chapter coordinators reach the same screens for their own records, scoped exactly like events (Section 7.1). Fields:
 
-- Title, slug, description, cover image URL.
+- Title, slug, description (rich text), cover image URL.
 - Category.
 - Organisation and location.
 - Remote flag.
 - **Member-only** flag.
 - Application link (external).
 - Deadline.
-- Eligibility.
+- Eligibility (rich text).
 - Status: `draft` or `published`.
+
+Description and eligibility are written in the rich-text editor and sanitised on save. When a hub owner or coordinator creates or edits an opportunity, the record is forced to `draft`, the status control is hidden, and their list labels it "Awaiting review". Only staff publish; on first publication, active members in the hub's state (or all active members when there is no hub state) are emailed. Hub owners and coordinators can still review applications on their own opportunities, but publishing status is never shown to them.
 
 ### 8.2 Internal-first applications
 
@@ -544,7 +616,7 @@ Admins update the status from the opportunity edit screen. **Every status change
 ### 8.4 Publishing and exports
 
 - An opportunity becomes visible when its status changes from draft to published.
-- On first publication, **every active account is emailed** a "New opportunity" message. This includes staff accounts.
+- On first publication, a "New opportunity" message goes to active members in the owning hub's state. If there is no hub state, it goes to every active account, staff included.
 - Applicants can be exported as CSV with name, email, phone, status, application date and cover letter. Exports are audited.
 
 ### 8.5 Member follow-up
@@ -582,6 +654,8 @@ Admins can preview any hub, in any state, from the admin detail screen. The hub 
 
 `/hub/dashboard` shows the owner's hub, counts for events, team members and applications, the five most recent events and the latest application status. If the account has no hub, it redirects to the registration form.
 
+The member dashboard also shows a **Your hub** card for anyone who owns a hub, with shortcuts to manage the hub and to create an event or an opportunity. Creations from a hub account are always saved as drafts and need staff approval before they appear publicly. On approval, active members in the hub's state are emailed.
+
 There is currently no separate hub-owner editing screen for the hub profile or team beyond the registration form.
 
 ### 9.5 Public hub page
@@ -594,9 +668,15 @@ Approved and public hubs appear in `/hubs` and on their own `/hubs/{slug}` page,
 
 ### 10.1 What a chapter is
 
-A chapter is a regional or local community group with a name, slug, country, state, description, optional coordinator and an `active` or `inactive` status.
+A chapter is a regional or local community group with a name, slug, country, state, city/LGA, description, up to two coordinators and an `active` or `inactive` status.
 
-Admins create and manage chapters at `/admin/chapters`.
+Admins create and manage chapters at `/admin/chapters`. A chapter can name a **primary coordinator** and an optional **second coordinator** (the same person cannot hold both). Assigning or removing a coordinator emails that member, and both coordinators are treated as chapter leads:
+
+- They see a coordination card on their member dashboard.
+- They can create events and opportunities from `/manage`; everything they create is saved as a draft and needs staff approval before publishing.
+- New members who join the chapter are emailed; the primary coordinator is notified of each join.
+
+Descriptions use the rich-text editor and are sanitised on save.
 
 ### 10.2 Member membership
 
@@ -606,7 +686,7 @@ Signed-in, verified members can:
 - **join** the chapter,
 - **leave** the chapter.
 
-On joining, the member is emailed a welcome message that includes the coordinator's name when one is assigned. The coordinator is also emailed that a new member joined. Leaving sends no email.
+On joining, the member is emailed a welcome message that includes the primary coordinator's name when one is assigned. That coordinator is also emailed that a new member joined. Leaving sends no email.
 
 ### 10.3 The chapter selector on the profile
 
@@ -674,10 +754,14 @@ The management centre groups screens into four areas:
 
 **Community content**
 - Content review — the article queue.
+- Write an article — opens the member editor for staff to draft and submit their own articles.
 - Announcements — create, edit, publish and delete announcements for the news page and member dashboard.
-- Events — create, edit, delete, manage attendees, export.
-- Opportunities — create, edit, delete, manage applications, export.
+- Events — at `/manage/events`: create, edit, delete, manage attendees, export.
+- Opportunities — at `/manage/opportunities`: create, edit, delete, manage applications, export.
+- Call for speakers — at `/manage/speaker-calls`: open calls, collect topic proposals and email decisions.
 - Categories — event and opportunity categories.
+
+The event and opportunity screens live under `/manage`, not `/admin`, because hub owners and chapter coordinators use them too. The browser address never exposes a staff-only path to those users.
 
 **Communication**
 - Mail centre — accounts, inbox, sent, compose, templates, broadcasts.
@@ -690,7 +774,7 @@ The management centre groups screens into four areas:
 
 `/admin/announcements` manages community announcements. The same announcements appear on `/news` and in the member dashboard.
 
-- Create an announcement with a title, message, optional chapter and a publish toggle.
+- Create an announcement with a title, message, optional chapter and a publish toggle. The message uses the rich-text editor and is sanitised on save.
 - Published announcements get a publication date and appear immediately.
 - Unpublishing returns the item to draft and clears the date.
 - Announcements can be edited or deleted. All three actions are audited.
@@ -995,14 +1079,21 @@ All of these are sent through the system mailer (Section 14.9), not the mail cen
 | Event reminder | One day before the event | Confirmed attendees not yet reminded |
 | Application received | Member applies to an opportunity | Applicant |
 | Application update | Admin changes an application status | Applicant |
-| New opportunity | An opportunity is first published | Every active account |
+| Speaker proposal approved | Organiser approves a call for speakers submission | The speaker |
+| Speaker proposal rejected | Organiser rejects a call for speakers submission | The speaker |
+| Membership payment submitted | Member submits a payment reference | Admins and super admins |
+| Membership activated | Staff confirms or waives the fee | The member |
+| New event | An event is first published | Active members in the event's state (or all active members when no state is recorded) |
+| New opportunity | An opportunity is first published | Active members in the hub's state (or all active members when there is no hub state) |
 | Hub application submitted | A hub is registered | Admins and super admins, excluding the owner |
 | Hub application reviewed | Hub approved or rejected | Hub owner |
 | Chapter joined | Member joins a chapter | The member |
-| New chapter member | Member joins a chapter | The chapter coordinator, if different |
+| New chapter member | Member joins a chapter | The primary coordinator, if different |
+| Chapter coordinator assigned | A coordinator is set on a chapter | The newly assigned coordinator |
+| Chapter coordinator removed | A coordinator is replaced or cleared | The removed coordinator |
 | Weekly digest | Monday 08:00, if opted in and there is content | Members with the digest enabled |
 
-Operational note: the "New opportunity" email goes to **all active accounts**, including staff. There is no exclusion list.
+Operational note: publishing mail is broad by design. An event or opportunity without a recognisable state goes to every active account, including staff. There is no exclusion list.
 
 ---
 
@@ -1195,7 +1286,7 @@ These are deliberate or current-state limitations, not hidden bugs. They should 
 3. **IMAP is a custom socket client.** PHP's IMAP extension is not required. It supports the common path (SSL/TLS, login, inbox, search, fetch) but has not yet been proven against every live provider. Use **Test IMAP connection** with the target provider before relying on it.
 4. **Webhook signature verification is optional per mailbox.** Turn it on and configure the provider to sign; otherwise the URL token is the only protection.
 5. **Hub decisions and member-screen suspensions are audited, but not every read is.** Audit entries cover decisions, role changes, payments, mail and announcements. Listing and viewing are not logged.
-6. **Capability roles do not grant admin access.** Only the primary role does.
+6. **Capability roles do not grant admin access.** Only the primary role does. The one exception is the `/manage` event and opportunity area, which also accepts hub owners and chapter coordinators and still restricts them to their own records and to drafts.
 7. **Changing a chapter on the profile only adds.** Memberships are never removed from the profile screen; leave a chapter from the chapter page.
 8. **Role changes in the console preserve capability roles but replace the primary-role tag.** `users.role` remains the authority.
 9. **No in-app notification centre, saved items, global search or activity feed.** These were removed on purpose; email is the channel.
@@ -1205,6 +1296,9 @@ These are deliberate or current-state limitations, not hidden bugs. They should 
 13. **Announcements are public labels, not permissions.** A chapter announcement is visible to everyone; the chapter is not an audience restriction.
 14. **Scheduled broadcasts need a working queue and scheduler.** The per-minute command is a safety net, not a replacement for a running worker.
 15. **No billing, invoicing or refund processing.** A refund is a status and a note, not money movement.
+16. **Rich text is cleaned by an in-house allow-list.** Scripts, styles, forms and embedded frames are stripped. There is no embedded video or map block; use a plain link instead.
+17. **Speaker gallery images are not captioned or linked to individual speakers.** The gallery sits alongside the speaker list on the public page. Use clear file names and order the list in the Key speakers field.
+18. **Uploaded images are stored as provided.** The platform does not crop, resize or convert them. Ask contributors to keep files reasonably small.
 
 ---
 
@@ -1230,6 +1324,8 @@ These are deliberate or current-state limitations, not hidden bugs. They should 
 | Edit organisation settings | No | No | Yes |
 | View audit logs | No | No | Yes |
 
+Members whose account carries the `hub_owner` capability, or who coordinate a chapter, can create events and opportunities from `/manage`. Everything they create stays in draft until staff publish it; they cannot see or set publishing status.
+
 ---
 
 ## Appendix B — Screen map
@@ -1254,6 +1350,9 @@ These are deliberate or current-state limitations, not hidden bugs. They should 
 /events/{slug}/calendar             .ics download
 /opportunities                      opportunity directory
 /opportunities/{slug}               opportunity detail
+/membership                         membership benefits and payment
+/speaker-calls                      open calls for speakers
+/speaker-calls/{slug}               call detail and submission form
 /articles                           article directory
 /articles/{slug}                    article detail
 /news                               announcements and recent articles
@@ -1304,13 +1403,17 @@ These are deliberate or current-state limitations, not hidden bugs. They should 
 /admin/content/{article}            review screen
 /admin/announcements                announcements
 /admin/announcements/create         new announcement
-/admin/events                       events
-/admin/events/create                new event
-/admin/events/{event}/edit          edit event
-/admin/events/{event}/registrations attendee list, check-in, export
-/admin/opportunities                opportunities
-/admin/opportunities/create         new opportunity
-/admin/opportunities/{opportunity}/edit  edit and manage applications
+/manage/events                      events (staff, hub owners, coordinators)
+/manage/events/create               new event
+/manage/events/{event}/edit         edit event
+/manage/events/{event}/registrations attendee list, check-in, export
+/manage/opportunities               opportunities (staff, hub owners, coordinators)
+/manage/opportunities/create        new opportunity
+/manage/opportunities/{opportunity}/edit  edit and manage applications
+/manage/speaker-calls               calls for speakers (staff, hub owners, coordinators)
+/manage/speaker-calls/create        new call
+/manage/speaker-calls/{call}/edit   edit call
+/manage/speaker-calls/{call}/submissions  review speaker proposals
 /admin/categories                   category landing page
 /admin/event-categories             event categories
 /admin/opportunity-categories       opportunity categories

@@ -55,7 +55,7 @@
     <section class="{{ $card }} p-6 sm:p-8" aria-labelledby="about-h">
       <h2 id="about-h" class="{{ $h2 }}">About this opportunity</h2>
       @if($o->description)
-        <p class="text-slate-700 leading-relaxed text-lg whitespace-pre-line">{{ $o->description }}</p>
+        <div class="text-slate-700 leading-relaxed text-lg article-body">{!! \App\Support\RichText::render($o->description) !!}</div>
       @else
         <p class="text-slate-500">No description provided.</p>
       @endif
@@ -64,7 +64,7 @@
     @if($o->eligibility)
       <section class="{{ $card }} p-6 sm:p-8" aria-labelledby="elig-h">
         <h2 id="elig-h" class="{{ $h2 }}">Eligibility</h2>
-        <p class="text-slate-700 leading-relaxed whitespace-pre-line">{{ $o->eligibility }}</p>
+        <div class="text-slate-700 leading-relaxed article-body">{!! \App\Support\RichText::render($o->eligibility) !!}</div>
       </section>
     @endif
 

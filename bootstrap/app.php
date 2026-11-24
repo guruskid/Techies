@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\ComingSoon;
+use App\Http\Middleware\EnsureActiveMembership;
+use App\Http\Middleware\EnsureEventOpportunityAccess;
 use App\Http\Middleware\EnsureRoleIsCurrent;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
@@ -23,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'event-opportunity' => EnsureEventOpportunityAccess::class,
+            'membership' => EnsureActiveMembership::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

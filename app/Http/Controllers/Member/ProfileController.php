@@ -35,20 +35,29 @@ class ProfileController extends Controller
         $recipient = $profile->user;
 
         abort_unless($recipient && $recipient->status === 'active', 404);
-        abort_if($recipient->id === auth()->id(), 403, 'You cannot send a message to yourself.');
+        abort_if(auth()->check() && $recipient->id === auth()->id(), 403, 'You cannot send a message to yourself.');
 
         // Silently drop obvious bot submissions.
         if ($request->filled('website')) {
             return back()->with('success', 'Your message has been sent.');
         }
 
-        $data = $request->validate([
+        $rules = [
             'subject' => ['required', 'string', 'max:150'],
             'message' => ['required', 'string', 'max:2000'],
-        ]);
+        ];
+
+        if (! auth()->check()) {
+            $rules['name'] = ['required', 'string', 'max:120'];
+            $rules['email'] = ['required', 'email', 'max:255'];
+        }
+
+        $data = $request->validate($rules);
 
         $recipient->notify(new MemberContactMessage(
             auth()->user(),
+            $data['name'] ?? null,
+            $data['email'] ?? null,
             $data['subject'],
             $data['message'],
         ));

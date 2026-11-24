@@ -27,6 +27,9 @@
 <meta name="twitter:description" content="@yield('meta_description', $defaultMetaDescription)">
 <link rel="alternate" type="application/rss+xml" title="MWTT Articles" href="{{ route('feed.articles') }}">
 <link rel="alternate" type="application/rss+xml" title="MWTT Events" href="{{ route('feed.events') }}">
+<link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+<link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -60,25 +63,64 @@
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
     <a href="{{ route('home') }}" class="font-bold text-xl text-slate-900 flex items-center gap-2">
-      <span class="w-8 h-8 rounded-lg bg-[#FF5C3D] text-white flex items-center justify-center text-sm">M</span>
-      MWTT
+      <img src="{{ asset('images/logo.svg') }}" alt="MWTT" class="h-8 w-auto">
     </a>
     <nav class="hidden md:flex flex-wrap gap-x-6 gap-y-2 text-sm">
       @php
-        $nav = [
-          ['Home','/',request()->is('/')],
-          ['About','/about',request()->is('about*')],
-          ['Members','/members',request()->is('members*')],
-          ['Hubs','/hubs',request()->is('hubs*')],
-          ['Events','/events',request()->is('events*')],
-          ['Opportunities','/opportunities',request()->is('opportunities*')],
-          ['Articles','/articles',request()->is('articles*')],
-          ['Chapters','/chapters',request()->is('chapters*')],
-          ['Contact','/contact',request()->is('contact*')],
+        $navGroups = [
+          ['label' => 'Home', 'url' => '/', 'active' => request()->is('/')],
+          [
+            'label' => 'Community',
+            'active' => request()->is('members*', 'hubs*', 'chapters*', 'about*'),
+            'items' => [
+              ['Members', '/members', request()->is('members*')],
+              ['Hubs', '/hubs', request()->is('hubs*')],
+              ['Chapters', '/chapters', request()->is('chapters*')],
+              ['About', '/about', request()->is('about*')],
+            ],
+          ],
+          [
+            'label' => 'Events',
+            'active' => request()->is('events*', 'speaker-calls*'),
+            'items' => [
+              ['Events', '/events', request()->is('events*')],
+              ['Call for Speakers', '/speaker-calls', request()->is('speaker-calls*')],
+            ],
+          ],
+          ['label' => 'Opportunities', 'url' => '/opportunities', 'active' => request()->is('opportunities*')],
+          [
+            'label' => 'Learn',
+            'active' => request()->is('articles*', 'news*'),
+            'items' => [
+              ['Articles', '/articles', request()->is('articles*')],
+              ['News', '/news', request()->is('news*')],
+            ],
+          ],
+          ['label' => 'Contact', 'url' => '/contact', 'active' => request()->is('contact*')],
         ];
       @endphp
-      @foreach($nav as [$label,$url,$active])
-        <a href="{{ $url }}" class="{{ $active ? 'text-[#FF5C3D] font-semibold border-b-2 border-[#FF5C3D] pb-1' : 'text-slate-700 hover:text-[#FF5C3D] transition' }}">{{ $label }}</a>
+      @foreach($navGroups as $item)
+        @if(isset($item['items']))
+          <div class="relative" x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false">
+            <button type="button" @click="open = !open" :aria-expanded="open.toString()"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-700 hover:text-[#FF5C3D]' }}">
+              {{ $item['label'] }}
+              <svg class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div x-show="open" x-cloak x-transition.origin.top.left
+                 class="absolute left-0 mt-1 w-56 rounded-xl border border-slate-100 bg-white shadow-lg p-2 z-50">
+              @foreach($item['items'] as [$label, $url, $active])
+                <a href="{{ $url }}" @if($active) aria-current="page" @endif
+                   class="block px-3 py-2 rounded-lg text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] {{ $active ? 'bg-[#FF5C3D]/10 text-[#FF5C3D] font-semibold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#FF5C3D]' }}">{{ $label }}</a>
+              @endforeach
+            </div>
+          </div>
+        @else
+          <a href="{{ $item['url'] }}" @if($item['active']) aria-current="page" @endif
+             class="px-2.5 py-1.5 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-700 hover:text-[#FF5C3D]' }}">{{ $item['label'] }}</a>
+        @endif
       @endforeach
     </nav>
     <div class="flex gap-2 items-center">
@@ -109,8 +151,26 @@
   </div>
   <div x-data="{ open: false }" @toggle-menu.window="open = !open" x-show="open" x-cloak class="md:hidden border-t border-slate-200 bg-white">
     <nav class="px-4 py-3 space-y-2 text-sm">
-      @foreach($nav as [$label, $url, $active])
-        <a href="{{ $url }}" class="block py-2 {{ $active ? 'text-[#FF5C3D] font-semibold' : 'text-slate-700' }}">{{ $label }}</a>
+      @foreach($navGroups as $item)
+        @if(isset($item['items']))
+          <details class="py-1">
+            <summary class="flex cursor-pointer list-none items-center justify-between py-2 {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-700' }}">
+              {{ $item['label'] }}
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </summary>
+            <div class="pl-4 pb-2 space-y-1">
+              @foreach($item['items'] as [$label, $url, $active])
+                <a href="{{ $url }}" @if($active) aria-current="page" @endif
+                   class="block py-1.5 {{ $active ? 'text-[#FF5C3D] font-semibold' : 'text-slate-600' }}">{{ $label }}</a>
+              @endforeach
+            </div>
+          </details>
+        @else
+          <a href="{{ $item['url'] }}" @if($item['active']) aria-current="page" @endif
+             class="block py-2 {{ $item['active'] ? 'text-[#FF5C3D] font-semibold' : 'text-slate-700' }}">{{ $item['label'] }}</a>
+        @endif
       @endforeach
       @auth
         @php

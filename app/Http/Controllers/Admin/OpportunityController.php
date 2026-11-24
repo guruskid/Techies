@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\ApplicationStatusUpdated;
 use App\Notifications\OpportunityPublished;
 use App\Support\AuditLogger;
+use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -34,6 +35,19 @@ class OpportunityController extends Controller
             });
         }
 
+        $user = $request->user();
+        if (! $user->isAdmin() && ! $user->isSuperAdmin()) {
+            $hubId = $user->hub?->id;
+
+            $query->where(function ($builder) use ($user, $hubId): void {
+                $builder->where('submitted_by', $user->id);
+
+                if ($hubId) {
+                    $builder->orWhere('hub_id', $hubId);
+                }
+            });
+        }
+
         return view('admin.opportunities.index', [
             'opportunities' => $query->latest()->paginate(20)->withQueryString(),
         ]);
@@ -51,6 +65,14 @@ class OpportunityController extends Controller
         $data = $this->validated($request);
         $wasPublished = false;
 
+        $user = auth()->user();
+        if (! $user->isAdmin() && ! $user->isSuperAdmin()) {
+            $data['status'] = 'draft';
+            if ($user->hasRole('hub_owner')) {
+                $data['hub_id'] = $user->hub?->id;
+            }
+        }
+
         $opportunity = Opportunity::create([
             'title' => $data['title'],
             'slug' => $this->uniqueSlug($data['slug'] ?? null, $data['title']),
@@ -65,6 +87,7 @@ class OpportunityController extends Controller
             'eligibility' => $data['eligibility'] ?? null,
             'cover_image' => $data['cover_image'] ?? null,
             'status' => $data['status'],
+            'hub_id' => $data['hub_id'] ?? null,
             'submitted_by' => auth()->id(),
         ]);
 
@@ -83,6 +106,8 @@ class OpportunityController extends Controller
 
     public function edit(Opportunity $opportunity): View
     {
+        $this->ensureCanManage($opportunity);
+
         return view('admin.opportunities.edit', [
             'opportunity' => $opportunity,
             'categories' => OpportunityCategory::orderBy('name')->get(),
@@ -92,7 +117,16 @@ class OpportunityController extends Controller
 
     public function update(Request $request, Opportunity $opportunity): RedirectResponse
     {
+        $this->ensureCanManage($opportunity);
+
         $data = $this->validated($request);
+
+        $user = $request->user();
+        if (! $user->isAdmin() && ! $user->isSuperAdmin()) {
+            // Publishing stays an admin decision; keep live posts live on edit.
+            $data['status'] = $opportunity->status === 'published' ? 'published' : 'draft';
+        }
+
         $wasPublished = $opportunity->status !== 'published' && $data['status'] === 'published';
 
         $opportunity->update([
@@ -122,6 +156,7 @@ class OpportunityController extends Controller
 
     public function updateApplication(Request $request, Opportunity $opportunity, OpportunityApplication $application): RedirectResponse
     {
+        $this->ensureCanManage($opportunity);
         abort_unless($application->opportunity_id === $opportunity->id, 404);
 
         $data = $request->validate([
@@ -149,6 +184,8 @@ class OpportunityController extends Controller
      */
     public function exportApplications(Opportunity $opportunity): StreamedResponse
     {
+        $this->ensureCanManage($opportunity);
+
         $applications = $opportunity->applications()->with('user.profile')->latest('applied_at')->get();
 
         AuditLogger::log('opportunity.applications.exported', $opportunity, ['title' => $opportunity->title]);
@@ -175,18 +212,53 @@ class OpportunityController extends Controller
     }
 
     public function destroy(Opportunity $opportunity): RedirectResponse
-    {        $opportunity->delete();
+    {
+        $this->ensureCanManage($opportunity);
+
+        $opportunity->delete();
 
         AuditLogger::log('opportunity.deleted', $opportunity, ['title' => $opportunity->title]);
 
         return redirect()->route('admin.opportunities.index')->with('success', 'Opportunity deleted.');
     }
 
+    /**
+     * Only staff, the submitter and the owning hub may work with a post.
+     */
+    private function ensureCanManage(Opportunity $opportunity): void
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            abort(403);
+        }
+
+        if ($user->isAdmin() || $user->isSuperAdmin()) {
+            return;
+        }
+
+        if ((int) $opportunity->submitted_by === (int) $user->id) {
+            return;
+        }
+
+        if ($opportunity->hub_id && (int) $opportunity->hub_id === (int) $user->hub?->id) {
+            return;
+        }
+
+        abort(403);
+    }
+
     private function notifyMembers(Opportunity $opportunity): void
     {
-        $members = User::where('status', 'active')->get();
+        $state = $opportunity->hub?->state;
 
-        foreach ($members as $member) {
+        $members = User::where('status', 'active');
+
+        if ($state) {
+            $members->whereHas('profile', fn ($query) => $query->where('state', $state));
+        }
+
+        foreach ($members->get() as $member) {
             $member->notify(new OpportunityPublished($opportunity));
         }
     }
@@ -196,10 +268,10 @@ class OpportunityController extends Controller
      */
     private function validated(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'title' => ['required', 'string', 'max:200'],
             'slug' => ['nullable', 'alpha_dash', 'max:180'],
-            'description' => ['nullable', 'string', 'max:5000'],
+            'description' => ['nullable', 'string', 'max:30000'],
             'category_id' => ['nullable', 'exists:opportunity_categories,id'],
             'organization' => ['nullable', 'string', 'max:200'],
             'location' => ['nullable', 'string', 'max:200'],
@@ -207,10 +279,16 @@ class OpportunityController extends Controller
             'is_member_only' => ['nullable', 'boolean'],
             'application_link' => ['nullable', 'url', 'max:2048'],
             'deadline' => ['nullable', 'date'],
-            'eligibility' => ['nullable', 'string', 'max:2000'],
+            'eligibility' => ['nullable', 'string', 'max:20000'],
             'cover_image' => ['nullable', 'url', 'max:2048'],
             'status' => ['required', Rule::in(['draft', 'published'])],
         ]);
+
+        foreach (['description', 'eligibility'] as $field) {
+            $data[$field] = RichText::clean($data[$field] ?? null);
+        }
+
+        return $data;
     }
 
     private function uniqueSlug(?string $slug, string $name, ?int $ignoreId = null): string

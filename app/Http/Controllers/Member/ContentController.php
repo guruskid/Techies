@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\User;
 use App\Notifications\ContentSubmitted;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -47,6 +49,12 @@ class ContentController extends Controller
         $data = $this->validated($request);
         $action = $data['action'] ?? 'save';
 
+        if ($request->hasFile('cover_image')) {
+            $data['cover_image'] = Storage::url($request->file('cover_image')->store('articles/covers', 'public'));
+        } elseif (! $request->filled('cover_image')) {
+            unset($data['cover_image']);
+        }
+
         $article = auth()->user()->articles()->create(array_merge(
             Arr::except($data, ['action']),
             ['status' => Article::STATUS_DRAFT]
@@ -81,6 +89,12 @@ class ContentController extends Controller
 
         $data = $this->validated($request, $article);
         $action = $data['action'] ?? 'save';
+
+        if ($request->hasFile('cover_image')) {
+            $data['cover_image'] = Storage::url($request->file('cover_image')->store('articles/covers', 'public'));
+        } elseif (! $request->filled('cover_image')) {
+            unset($data['cover_image']);
+        }
 
         $article->update(array_merge(
             Arr::except($data, ['action']),
@@ -159,13 +173,24 @@ class ContentController extends Controller
             'topic' => ['required', Rule::in(array_keys(Article::topics()))],
             'excerpt' => ['nullable', 'string', 'max:300'],
             'body' => ['required', 'string', 'min:100'],
-            'cover_image' => ['nullable', 'url', 'max:2048'],
+            'cover_image' => ['nullable', 'max:2048'],
             'seo_title' => ['nullable', 'string', 'max:70'],
             'seo_description' => ['nullable', 'string', 'max:200'],
             'seo_keywords' => ['nullable', 'string', 'max:255'],
             'canonical_url' => ['nullable', 'url', 'max:2048'],
             'slug' => ['nullable', 'alpha_dash', 'max:180', $slugRule],
             'action' => ['nullable', Rule::in(['save', 'submit'])],
+        ]);
+    }
+
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate(['upload' => ['required', 'image', 'max:4096']]);
+
+        $path = $request->file('upload')->store('articles/images', 'public');
+
+        return response()->json([
+            'url' => Storage::url($path),
         ]);
     }
 

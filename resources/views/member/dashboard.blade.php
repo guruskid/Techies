@@ -23,6 +23,110 @@
     @endif
   </div>
 
+  @if($user->needsMembershipPayment())
+    @php
+      $membershipFee = (int) \App\Models\Setting::value('membership_fee', '15000');
+      $membershipCurrency = (string) \App\Models\Setting::value('membership_currency', 'NGN');
+      $membershipPrice = $membershipCurrency === 'NGN' ? '₦'.number_format($membershipFee) : $membershipCurrency.' '.number_format($membershipFee);
+    @endphp
+    <section class="bg-white rounded-2xl border border-[#FF5C3D]/30 shadow-sm p-6 mb-8" aria-labelledby="membership-h">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 id="membership-h" class="text-lg font-bold text-[#101E33]">
+            @if($user->membershipIsPending())
+              Membership payment received — awaiting confirmation
+            @else
+              Complete your membership
+            @endif
+          </h2>
+          @if($user->membershipIsPending())
+            <p class="mt-1 text-sm text-slate-600">Reference: {{ $user->membership_reference ?: 'Not provided' }}. The team will confirm it and email you.</p>
+          @else
+            <p class="mt-1 text-sm text-slate-600">Pay {{ $membershipPrice }} once to unlock events, opportunities, speaker calls, chapters and member content.</p>
+          @endif
+        </div>
+        <a href="{{ route('membership.show') }}" class="shrink-0 px-5 py-2.5 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D]">
+          {{ $user->membershipIsPending() ? 'View payment status' : 'Complete membership' }}
+        </a>
+      </div>
+    </section>
+  @endif
+
+  {{-- Your hub (only for members who run a hub) --}}
+  @if($hub ?? null)
+    @php
+      $hubBadge = [
+        'pending'   => 'bg-amber-50 text-amber-700',
+        'approved'  => 'bg-green-50 text-green-700',
+        'rejected'  => 'bg-red-50 text-red-700',
+        'suspended' => 'bg-slate-200 text-slate-700',
+      ];
+      $hubPlace = implode(', ', array_filter([$hub->city, $hub->state]));
+      $hubBtn = 'inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';
+    @endphp
+    <section class="{{ $card }} p-6 mb-8" aria-labelledby="hub-h">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="flex items-center gap-4 min-w-0">
+          @if($hub->logo)
+            <img src="{{ $hub->logo }}" alt="" class="w-14 h-14 shrink-0 rounded-xl object-cover border border-slate-100">
+          @else
+            <div class="w-14 h-14 shrink-0 rounded-xl bg-gradient-to-br from-[#FF5C3D] to-[#101E33] text-white flex items-center justify-center text-xl font-bold" aria-hidden="true">{{ strtoupper(substr($hub->name,0,1)) }}</div>
+          @endif
+          <div class="min-w-0">
+            <p class="text-xs text-slate-600">Your hub</p>
+            <h2 id="hub-h" class="text-lg font-bold text-[#101E33]">{{ $hub->name }}</h2>
+            <div class="mt-1 flex flex-wrap items-center gap-2">
+              @if($hub->status)
+                <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $hubBadge[$hub->status] ?? 'bg-slate-100 text-slate-700' }}">{{ ucfirst($hub->status) }}</span>
+              @endif
+              @if($hub->is_verified)<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">Verified</span>@endif
+              @if($hubPlace)<span class="text-sm text-slate-600">{{ $hubPlace }}</span>@endif
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a href="{{ route('hub.dashboard') }}" class="{{ $hubBtn }} border-slate-200 bg-white text-slate-800 hover:bg-slate-50">Manage hub</a>
+          <a href="{{ route('admin.events.create') }}" class="{{ $hubBtn }} border-[#FF5C3D] bg-[#FF5C3D] text-white hover:opacity-90">Create event</a>
+          <a href="{{ route('admin.opportunities.create') }}" class="{{ $hubBtn }} border-slate-200 bg-white text-slate-800 hover:bg-slate-50">Create opportunity</a>
+        </div>
+      </div>
+
+      @if($hub->status && $hub->status !== 'approved')
+        <p class="mt-4 text-sm rounded-lg bg-slate-50 text-slate-700 p-3" role="status">
+          @if($hub->status === 'pending')
+            Your hub is waiting for approval from the MWTT team.
+          @else
+            Your hub is currently {{ $hub->status }}.
+            <a href="{{ route('contact') }}" class="text-[#FF5C3D] hover:underline">Contact the team</a> if you have questions.
+          @endif
+        </p>
+      @endif
+    </section>
+  @endif
+
+  {{-- Chapters this member coordinates --}}
+  @if(($coordinatedChapters ?? collect())->isNotEmpty())
+    <section class="{{ $card }} p-6 mb-8" aria-labelledby="chapters-h">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="min-w-0">
+          <p class="text-xs text-slate-600">Chapter coordinator</p>
+          <h2 id="chapters-h" class="text-lg font-bold text-[#101E33]">
+            {{ $coordinatedChapters->pluck('name')->join(', ') }}
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Create events and opportunities for your chapter. An admin reviews and publishes them.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="{{ route('admin.events.index') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 transition">My events</a>
+          <a href="{{ route('admin.events.create') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold border border-[#FF5C3D] bg-[#FF5C3D] text-white hover:opacity-90 transition">Create event</a>
+          <a href="{{ route('admin.opportunities.create') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 transition">Create opportunity</a>
+        </div>
+      </div>
+    </section>
+  @endif
+
   {{-- Stats --}}
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     <a href="{{ route('profile.edit') }}" class="block {{ $card }} p-5 hover:shadow-md transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D]">
@@ -150,7 +254,7 @@
         @forelse($announcements as $a)
           <li class="p-3 rounded-xl bg-slate-50">
             <div class="font-medium text-[#101E33] text-sm">{{ $a->title }}</div>
-            <p class="text-xs text-slate-600 mt-1">{{ \Illuminate\Support\Str::limit($a->body, 80) }}</p>
+            <p class="text-xs text-slate-600 mt-1">{{ \Illuminate\Support\Str::limit(strip_tags((string) $a->body), 80) }}</p>
             @if($a->created_at)<p class="text-[11px] text-slate-500 mt-1">{{ $a->created_at->diffForHumans() }}</p>@endif
           </li>
         @empty

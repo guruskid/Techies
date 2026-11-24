@@ -26,13 +26,45 @@
   <div class="md:col-span-2 space-y-6">
     <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
       <h2 class="text-2xl font-bold text-[#101E33] mb-3">About this Event</h2>
-      <p class="text-slate-600 leading-relaxed text-lg">{{ $e->description ?? 'No description provided.' }}</p>
+      @if($e->description)
+        <div class="text-slate-600 leading-relaxed text-lg article-body">{!! \App\Support\RichText::render($e->description) !!}</div>
+      @else
+        <p class="text-slate-600 leading-relaxed text-lg">No description provided.</p>
+      @endif
     </div>
 
-    @if($e->host || $e->key_speakers)
+    @if($speakerCalls->isNotEmpty())
+      <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
+        <h2 class="text-2xl font-bold text-[#101E33] mb-3">Call for speakers</h2>
+        <p class="text-slate-600">This event is looking for speakers. Choose a topic and submit a talk.</p>
+        <ul class="mt-4 space-y-3">
+          @foreach($speakerCalls as $call)
+            <li>
+              <a href="{{ route('speaker-calls.show', $call->slug) }}" class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl border border-slate-200 hover:border-[#FF5C3D] transition">
+                <div>
+                  <div class="font-semibold text-[#101E33]">{{ $call->title }}</div>
+                  <div class="text-xs text-slate-500">{{ count($call->topicList()) }} topics · {{ $call->closes_at ? 'Closes '.$call->closes_at->format('M j, Y') : 'No deadline' }}</div>
+                </div>
+                <span class="text-sm font-semibold text-[#FF5C3D]">Submit a talk</span>
+              </a>
+            </li>
+          @endforeach
+        </ul>
+      </div>
+    @endif
+
+    @if($e->host || $e->key_speakers || ! empty($e->speaker_images))
     <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
       <h2 class="text-2xl font-bold text-[#101E33] mb-3">Hosted by</h2>
       @if($e->host)<p class="text-slate-600 text-lg">{{ $e->host }}</p>@endif
+      @if(! empty($e->speaker_images))
+        <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-3">
+          @foreach($e->speaker_images as $image)
+            <img src="{{ $image }}" alt="Speaker at {{ $e->title }}"
+                 class="w-full h-40 object-cover rounded-xl border border-slate-200">
+          @endforeach
+        </div>
+      @endif
       @if($e->key_speakers)
         <div class="mt-4">
           <h3 class="font-semibold text-[#101E33] mb-2">Key speakers</h3>
@@ -45,14 +77,14 @@
     @if($e->agenda)
     <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
       <h2 class="text-2xl font-bold text-[#101E33] mb-3">Agenda</h2>
-      <div class="text-slate-600 leading-relaxed whitespace-pre-line">{{ $e->agenda }}</div>
+      <div class="text-slate-600 leading-relaxed article-body">{!! \App\Support\RichText::render($e->agenda) !!}</div>
     </div>
     @endif
 
     @if($e->requirements)
     <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
       <h2 class="text-2xl font-bold text-[#101E33] mb-3">Requirements</h2>
-      <div class="text-slate-600 leading-relaxed whitespace-pre-line">{{ $e->requirements }}</div>
+      <div class="text-slate-600 leading-relaxed article-body">{!! \App\Support\RichText::render($e->requirements) !!}</div>
     </div>
     @endif
 

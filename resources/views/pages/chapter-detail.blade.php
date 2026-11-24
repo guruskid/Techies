@@ -22,7 +22,11 @@
   <div class="md:col-span-2 space-y-6">
     <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
       <h2 class="text-2xl font-bold text-[#101E33] mb-3">About this Chapter</h2>
-      <p class="text-slate-600 leading-relaxed text-lg">{{ $c->description ?? 'No description provided.' }}</p>
+      @if($c->description)
+        <div class="text-slate-600 leading-relaxed text-lg article-body">{!! \App\Support\RichText::render($c->description) !!}</div>
+      @else
+        <p class="text-slate-500">No description provided.</p>
+      @endif
     </div>
     <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
       <h2 class="text-2xl font-bold text-[#101E33] mb-3">Recent Events</h2>

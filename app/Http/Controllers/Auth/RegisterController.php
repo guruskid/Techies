@@ -33,6 +33,7 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
             'role' => 'member',
             'status' => 'active',
+            'membership_status' => 'unpaid',
         ]);
         $user->forceFill(['email_verified_at' => null])->save();
         Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);

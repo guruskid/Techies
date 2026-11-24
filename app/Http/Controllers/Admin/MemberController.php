@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\MembershipActivated;
 use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 
@@ -22,7 +23,10 @@ class MemberController extends Controller
         if ($request->filled('status')) {
             $q->where('status', $request->status);
         }
-        $members = $q->latest()->paginate(20);
+        if ($request->filled('membership')) {
+            $q->where('membership_status', $request->membership);
+        }
+        $members = $q->latest()->paginate(20)->withQueryString();
 
         return view('admin.members.index', compact('members'));
     }
@@ -54,5 +58,35 @@ class MemberController extends Controller
         AuditLogger::log('member.restored', $user, ['name' => $user->name]);
 
         return back()->with('success', 'Member restored.');
+    }
+
+    public function confirmMembership(User $user)
+    {
+        $user->update([
+            'membership_status' => 'active',
+            'membership_paid_at' => now(),
+            'membership_confirmed_by' => auth()->id(),
+        ]);
+
+        AuditLogger::log('membership.confirmed', $user, ['name' => $user->name]);
+
+        $user->notify(new MembershipActivated($user));
+
+        return back()->with('success', 'Membership confirmed. The member has been emailed their welcome guide.');
+    }
+
+    public function waiveMembership(User $user)
+    {
+        $user->update([
+            'membership_status' => 'exempt',
+            'membership_paid_at' => now(),
+            'membership_confirmed_by' => auth()->id(),
+        ]);
+
+        AuditLogger::log('membership.waived', $user, ['name' => $user->name]);
+
+        $user->notify(new MembershipActivated($user));
+
+        return back()->with('success', 'Membership fee waived. The member has been emailed their welcome guide.');
     }
 }

@@ -146,39 +146,52 @@
     @if(!$isOwner)
       <section class="{{ $card }}" aria-labelledby="contact-h">
         <h2 id="contact-h" class="{{ $h2 }}">Contact {{ \Illuminate\Support\Str::of($user->name)->before(' ') }}</h2>
-        @auth
-          @if($errors->any())
-            <div class="mb-3 rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-700" role="alert">
-              <ul class="list-disc list-inside">
-                @foreach($errors->all() as $error)
-                  <li>{{ $error }}</li>
-                @endforeach
-              </ul>
-            </div>
-          @endif
-          <form method="POST" action="{{ route('members.contact', $profile->username) }}" class="space-y-3">
-            @csrf
-            <div class="hidden" aria-hidden="true">
-              <label for="contact-website">Website</label>
-              <input id="contact-website" type="text" name="website" tabindex="-1" autocomplete="off">
-            </div>
+        @if($errors->any())
+          <div class="mb-3 rounded-lg bg-red-50 border border-red-100 p-3 text-sm text-red-700" role="alert">
+            <ul class="list-disc list-inside">
+              @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+        <form method="POST" action="{{ route('members.contact', $profile->username) }}" class="space-y-3">
+          @csrf
+          <div class="hidden" aria-hidden="true">
+            <label for="contact-website">Website</label>
+            <input id="contact-website" type="text" name="website" tabindex="-1" autocomplete="off">
+          </div>
+          @guest
             <div>
-              <label for="contact-subject" class="block text-sm font-medium text-slate-700 mb-1">Subject</label>
-              <input id="contact-subject" name="subject" value="{{ old('subject') }}" required maxlength="150"
+              <label for="contact-name" class="block text-sm font-medium text-slate-700 mb-1">Your name</label>
+              <input id="contact-name" name="name" value="{{ old('name') }}" required maxlength="120"
                      class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
             </div>
             <div>
-              <label for="contact-message" class="block text-sm font-medium text-slate-700 mb-1">Message</label>
-              <textarea id="contact-message" name="message" rows="4" required maxlength="2000"
-                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">{{ old('message') }}</textarea>
+              <label for="contact-email" class="block text-sm font-medium text-slate-700 mb-1">Your email</label>
+              <input id="contact-email" type="email" name="email" value="{{ old('email') }}" required maxlength="255"
+                     class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
             </div>
-            <button class="w-full px-4 py-2.5 bg-[#FF5C3D] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition">Send message</button>
-            <p class="text-xs text-slate-500">This emails {{ \Illuminate\Support\Str::of($user->name)->before(' ') }} directly. Your email address is included so they can reply.</p>
-          </form>
-        @else
-          <p class="text-sm text-slate-600">Log in to send {{ \Illuminate\Support\Str::of($user->name)->before(' ') }} a message.</p>
-          <a href="{{ route('login') }}" class="mt-3 block w-full text-center px-4 py-2.5 bg-[#FF5C3D] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition">Log in to contact</a>
-        @endauth
+          @endguest
+          <div>
+            <label for="contact-subject" class="block text-sm font-medium text-slate-700 mb-1">Subject</label>
+            <input id="contact-subject" name="subject" value="{{ old('subject') }}" required maxlength="150"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+          </div>
+          <div>
+            <label for="contact-message" class="block text-sm font-medium text-slate-700 mb-1">Message</label>
+            <textarea id="contact-message" name="message" rows="4" required maxlength="2000"
+                      class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">{{ old('message') }}</textarea>
+          </div>
+          <button class="w-full px-4 py-2.5 bg-[#FF5C3D] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition">Send message</button>
+          <p class="text-xs text-slate-500">
+            @auth
+              This emails {{ \Illuminate\Support\Str::of($user->name)->before(' ') }} directly. Your email address is included so they can reply.
+            @else
+              This emails {{ \Illuminate\Support\Str::of($user->name)->before(' ') }} directly. Your email address is included so they can reply.
+            @endauth
+          </p>
+        </form>
       </section>
     @endif
 

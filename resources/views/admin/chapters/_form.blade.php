@@ -61,6 +61,13 @@
   </div>
 
   <div>
+    <label for="city" class="{{ $labelClass }}">City / LGA</label>
+    <input id="city" name="city" value="{{ old('city', $chapter->city) }}" placeholder="e.g. Ikeja, Lagos" class="{{ $inputClass }}">
+    <p class="mt-1 text-xs text-slate-400">Optional. Helps members find a chapter near them.</p>
+    @error('city')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+  </div>
+
+  <div>
     <label for="status" class="{{ $labelClass }}">Status</label>
     <select id="status" name="status" required class="{{ $inputClass }}">
       <option value="active" @selected(old('status', $chapter->status ?? 'active') === 'active')>Active</option>
@@ -107,8 +114,20 @@
   </div>
 
   <div>
+    <label for="second_coordinator_id" class="{{ $labelClass }}">Second coordinator <span class="text-slate-400 font-normal">(optional)</span></label>
+    <select id="second_coordinator_id" name="second_coordinator_id" class="{{ $inputClass }}">
+      <option value="">No second coordinator</option>
+      @foreach(($coordinators ?? collect()) as $user)
+        <option value="{{ $user->id }}" @selected((int) old('second_coordinator_id', $chapter->second_coordinator_id) === $user->id)>{{ $user->name }} ({{ $user->email }})</option>
+      @endforeach
+    </select>
+    <p class="mt-1 text-xs text-slate-400">A chapter can have up to two coordinators. Both receive join and leave notifications.</p>
+    @error('second_coordinator_id')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+  </div>
+
+  <div>
     <label for="description" class="{{ $labelClass }}">Description</label>
-    <textarea id="description" name="description" rows="5" class="{{ $inputClass }}">{{ old('description', $chapter->description) }}</textarea>
+    <textarea id="description" name="description" rows="5" data-wysiwyg class="{{ $inputClass }}">{{ old('description', $chapter->description) }}</textarea>
     @error('description')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
   </div>
 
@@ -127,3 +146,5 @@
     <a href="{{ route('admin.chapters.index') }}" class="px-5 py-2.5 text-slate-500 hover:text-slate-700">Cancel</a>
   </div>
 </form>
+
+@include('partials.wysiwyg')

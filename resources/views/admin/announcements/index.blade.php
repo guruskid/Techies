@@ -44,7 +44,7 @@
           <tr class="border-t border-slate-100 align-top">
             <td class="p-3">
               <div class="font-medium text-[#101E33]">{{ $announcement->title }}</div>
-              <div class="mt-0.5 text-xs text-slate-500">{{ \Illuminate\Support\Str::limit($announcement->body, 110) }}</div>
+              <div class="mt-0.5 text-xs text-slate-500">{{ \Illuminate\Support\Str::limit(strip_tags((string) $announcement->body), 110) }}</div>
               <div class="mt-1 text-[11px] text-slate-400">By {{ $announcement->author?->name ?? 'Deleted user' }}</div>
             </td>
             <td class="p-3 text-slate-600">{{ $announcement->chapter?->name ?? 'All members' }}</td>

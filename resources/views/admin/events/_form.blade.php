@@ -1,6 +1,7 @@
 <style>[x-cloak]{display:none !important}</style>
 @php
   $editing = $event->exists;
+  $isStaff = auth()->user()->isAdmin() || auth()->user()->isSuperAdmin();
   $inputClass = 'w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]';
   $labelClass = 'block text-sm font-medium text-slate-700 mb-1';
   $hintClass  = 'mt-1 text-xs text-slate-500';
@@ -52,12 +53,12 @@
 
     <div>
       <label for="description" class="{{ $labelClass }}">Description</label>
-      <textarea id="description" name="description" rows="6" class="{{ $inputClass }}">{{ old('description', $event->description) }}</textarea>
+      <textarea id="description" name="description" rows="6" data-wysiwyg class="{{ $inputClass }}">{{ old('description', $event->description) }}</textarea>
       {!! $err('description') !!}
     </div>
 
     <div>
-      <label for="cover_image" class="{{ $labelClass }}">Event banner</label>
+      <label for="cover_image" class="{{ $labelClass }}">Event banner <span class="font-normal text-slate-400">(optional)</span></label>
       <input id="cover_image" name="cover_image" type="file" accept="image/*"
              class="block w-full text-sm text-slate-600 border border-slate-200 rounded-lg file:mr-4 file:py-2.5 file:px-4 file:border-0 file:bg-slate-100 file:text-slate-700 file:font-medium hover:file:bg-slate-200">
       <p class="{{ $hintClass }}">Upload a wide image (JPG, PNG or WebP). Recommended size: 1600×600 pixels.</p>
@@ -94,6 +95,49 @@
       <textarea id="key_speakers" name="key_speakers" rows="3" class="{{ $inputClass }}" placeholder="One speaker per line">{{ old('key_speakers', $event->key_speakers) }}</textarea>
       {!! $err('key_speakers') !!}
     </div>
+
+    <div x-data="speakerPhotos()" @dragover.prevent @drop.prevent="drop($event)">
+      <label for="speaker_images" class="{{ $labelClass }}">Speaker photos <span class="font-normal text-slate-400">(optional)</span></label>
+      <input id="speaker_images" name="speaker_images[]" type="file" accept="image/*" multiple x-ref="input" @change="add($event)"
+             class="block w-full text-sm text-slate-600 border border-slate-200 rounded-lg file:mr-4 file:py-2.5 file:px-4 file:border-0 file:bg-slate-100 file:text-slate-700 file:font-medium hover:file:bg-slate-200">
+      <p class="{{ $hintClass }}">
+        Click <strong>Choose files</strong> as many times as you like — each click adds more photos, no need to hold Ctrl.
+        You can also drag photos here. One photo per speaker (JPG, PNG or WebP, up to 12).
+      </p>
+      <p class="mt-1 text-xs font-medium text-[#FF5C3D]" x-show="files.length" x-cloak>
+        <span x-text="files.length"></span> photo<span x-show="files.length !== 1">s</span> ready to upload. Use the file picker again to add more.
+      </p>
+      {!! $err('speaker_images') !!}
+      {!! $err('speaker_images.*') !!}
+
+      <div class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3" x-show="files.length" x-cloak>
+        <template x-for="(item, index) in files" :key="item.key">
+          <div class="relative rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
+            <img :src="item.url" alt="" class="w-full h-28 object-cover">
+            <button type="button" @click="remove(index)"
+                    class="absolute top-1.5 right-1.5 px-2 py-1 rounded-md bg-white/95 text-xs font-semibold text-red-600 border border-slate-200 hover:bg-red-50"
+                    :aria-label="'Remove ' + item.file.name">Remove</button>
+          </div>
+        </template>
+      </div>
+
+      @if($editing && ! empty($event->speaker_images))
+        <div class="mt-4">
+          <p class="text-xs text-slate-600 mb-2">Current speaker photos. Tick any you want to remove.</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            @foreach($event->speaker_images as $image)
+              <label class="block rounded-lg border border-slate-200 overflow-hidden cursor-pointer group">
+                <img src="{{ $image }}" alt="" class="w-full h-28 object-cover">
+                <span class="flex items-center gap-2 px-2 py-1.5 text-xs text-slate-700 bg-slate-50 group-hover:bg-slate-100">
+                  <input type="checkbox" name="remove_speaker_images[]" value="{{ $image }}" class="rounded border-slate-300 text-[#FF5C3D] focus:ring-[#FF5C3D]">
+                  Remove this photo
+                </span>
+              </label>
+            @endforeach
+          </div>
+        </div>
+      @endif
+    </div>
   </section>
 
   {{-- 2. When --}}
@@ -126,7 +170,7 @@
 
     <div>
       <label for="agenda" class="{{ $labelClass }}">Agenda</label>
-      <textarea id="agenda" name="agenda" rows="4" class="{{ $inputClass }}" placeholder="Outline the sessions or schedule">{{ old('agenda', $event->agenda) }}</textarea>
+      <textarea id="agenda" name="agenda" rows="4" data-wysiwyg class="{{ $inputClass }}" placeholder="Outline the sessions or schedule">{{ old('agenda', $event->agenda) }}</textarea>
       {!! $err('agenda') !!}
     </div>
   </section>
@@ -250,7 +294,7 @@
 
     <div>
       <label for="requirements" class="{{ $labelClass }}">Requirements</label>
-      <textarea id="requirements" name="requirements" rows="3" class="{{ $inputClass }}" placeholder="What attendees should bring or know">{{ old('requirements', $event->requirements) }}</textarea>
+      <textarea id="requirements" name="requirements" rows="3" data-wysiwyg class="{{ $inputClass }}" placeholder="What attendees should bring or know">{{ old('requirements', $event->requirements) }}</textarea>
       {!! $err('requirements') !!}
     </div>
   </section>
@@ -272,7 +316,8 @@
     </div>
   </section>
 
-  {{-- 6. Publishing --}}
+  {{-- 6. Publishing (staff only — members submit for approval) --}}
+  @if($isStaff)
   <section class="space-y-5" aria-labelledby="sec-publish">
     <h2 id="sec-publish" class="text-lg font-bold text-[#101E33]">Publishing</h2>
 
@@ -297,6 +342,15 @@
       </div>
     </details>
   </section>
+  @else
+  <section class="rounded-xl bg-slate-50 border border-slate-200 p-5" aria-label="Review process">
+    <p class="text-sm text-slate-600">
+      <strong class="text-[#101E33]">Approval:</strong> your event is saved as a draft.
+      An admin reviews it and publishes it for the community — you do not need to choose a status.
+    </p>
+    <input type="hidden" name="status" value="{{ $currentStatus }}">
+  </section>
+  @endif
 
   {{-- Sticky action bar --}}
   <div class="sticky bottom-0 -mx-6 sm:-mx-8 -mb-6 sm:-mb-8 px-6 sm:px-8 py-4 bg-white/95 backdrop-blur border-t border-slate-100 rounded-b-2xl flex flex-wrap items-center gap-3">
@@ -305,7 +359,49 @@
   </div>
 </form>
 
+@include('partials.wysiwyg')
+
 <script>
+// Speaker gallery: every pick appends to the list so nobody has to hold Ctrl/Cmd.
+function speakerPhotos() {
+  return {
+    files: [],
+    add(event) {
+      this.append(event.target.files);
+      event.target.value = '';
+    },
+    drop(event) {
+      this.append(event.dataTransfer.files);
+    },
+    append(fileList) {
+      const room = 12 - this.files.length;
+      Array.from(fileList).slice(0, Math.max(room, 0)).forEach(file => {
+        if (! file.type.startsWith('image/')) return;
+        this.files.push({
+          file,
+          url: URL.createObjectURL(file),
+          key: file.name + '-' + file.size + '-' + Math.random(),
+        });
+      });
+      this.sync();
+    },
+    remove(index) {
+      const removed = this.files.splice(index, 1)[0];
+      if (removed) URL.revokeObjectURL(removed.url);
+      this.sync();
+    },
+    sync() {
+      const transfer = new DataTransfer();
+      this.files.forEach(item => transfer.items.add(item.file));
+      try {
+        this.$refs.input.files = transfer.files;
+      } catch (error) {
+        // Older browsers: keep whatever the native input already holds.
+      }
+    },
+  };
+}
+
 function hostPicker(cfg) {
   return {
     open: false,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Event;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventRegistration;
+use App\Models\SpeakerCall;
 use App\Notifications\EventRegistered;
 use App\Notifications\EventRegistrationPromoted;
 use App\Notifications\EventWaitlisted;
@@ -26,7 +27,18 @@ class EventController extends Controller
         $spotsLeft = $event->max_attendees ? max(0, $event->max_attendees - $registeredCount) : null;
         $canViewMeetingLink = $event->canAccessMeetingLink(auth()->user());
 
-        return view('pages.event-detail', compact('event', 'registration', 'registeredCount', 'spotsLeft', 'canViewMeetingLink'));
+        $speakerCalls = SpeakerCall::where('event_id', $event->id)
+            ->where('status', SpeakerCall::STATUS_OPEN)
+            ->where(function ($query): void {
+                $query->whereNull('opens_at')->orWhereDate('opens_at', '<=', today());
+            })
+            ->where(function ($query): void {
+                $query->whereNull('closes_at')->orWhereDate('closes_at', '>=', today());
+            })
+            ->latest()
+            ->get();
+
+        return view('pages.event-detail', compact('event', 'registration', 'registeredCount', 'spotsLeft', 'canViewMeetingLink', 'speakerCalls'));
     }
 
     public function register(Event $event)

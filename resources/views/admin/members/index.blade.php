@@ -7,6 +7,12 @@
     'active'    => 'bg-green-50 text-green-700',
     'suspended' => 'bg-red-50 text-red-700',
   ];
+  $membershipBadge = [
+    'active'  => 'bg-green-50 text-green-700',
+    'pending' => 'bg-amber-50 text-amber-700',
+    'unpaid'  => 'bg-red-50 text-red-700',
+    'exempt'  => 'bg-[#101E33]/10 text-[#101E33]',
+  ];
   $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-1';
   $field = 'border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]';
   $btn = 'inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold border transition '.$focus;
@@ -37,14 +43,23 @@
       <label for="search" class="block text-sm font-medium text-slate-700 mb-1">Search members</label>
       <input id="search" type="search" name="search" value="{{ request('search') }}" placeholder="Name or email" class="{{ $field }} w-72 max-w-full">
     </div>
+    <div>
+      <label for="membership" class="block text-sm font-medium text-slate-700 mb-1">Membership</label>
+      <select id="membership" name="membership" class="{{ $field }}">
+        <option value="">All</option>
+        @foreach(['active' => 'Active', 'pending' => 'Pending confirmation', 'unpaid' => 'Unpaid', 'exempt' => 'Waived'] as $value => $label)
+          <option value="{{ $value }}" @selected(request('membership') === $value)>{{ $label }}</option>
+        @endforeach
+      </select>
+    </div>
     <button type="submit" class="px-4 py-2 bg-[#FF5C3D] text-white rounded-lg font-medium hover:opacity-90 transition {{ $focus }}">Search</button>
-    @if(request()->hasAny(['search', 'status']))
+    @if(request()->hasAny(['search', 'status', 'membership']))
       <a href="{{ route('admin.members.index') }}" class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 {{ $focus }}">Clear</a>
     @endif
   </form>
 
   <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-x-auto">
-    <table class="w-full min-w-[1000px] text-sm">
+    <table class="w-full min-w-[1150px] text-sm">
       <caption class="sr-only">Members with email, role, location, profile details, join date and status</caption>
       <thead class="bg-slate-50 text-slate-600">
         <tr>
@@ -54,6 +69,7 @@
           <th scope="col" class="text-left p-3 font-medium">Location</th>
           <th scope="col" class="text-left p-3 font-medium">Profile</th>
           <th scope="col" class="text-left p-3 font-medium">Joined</th>
+          <th scope="col" class="text-left p-3 font-medium">Membership</th>
           <th scope="col" class="text-left p-3 font-medium">Status</th>
           <th scope="col" class="text-left p-3 font-medium">Actions</th>
         </tr>
@@ -114,6 +130,16 @@
               @endif
             </td>
 
+            {{-- Membership --}}
+            <td class="p-3">
+              <span class="px-2 py-1 rounded-full text-xs font-medium {{ $membershipBadge[$m->membership_status] ?? 'bg-slate-100 text-slate-700' }}">
+                {{ ['active' => 'Active', 'pending' => 'Pending', 'unpaid' => 'Unpaid', 'exempt' => 'Waived'][$m->membership_status] ?? ucfirst($m->membership_status) }}
+              </span>
+              @if($m->membership_paid_at)
+                <div class="mt-1 text-[11px] text-slate-500">{{ $m->membership_paid_at->format('M j, Y') }}</div>
+              @endif
+            </td>
+
             {{-- Status --}}
             <td class="p-3">
               <span class="px-2 py-1 rounded-full text-xs font-medium {{ $badge[$m->status] ?? 'bg-slate-100 text-slate-700' }}">{{ ucfirst($m->status) }}</span>
@@ -141,9 +167,9 @@
             </td>
           </tr>
         @empty
-          <tr><td colspan="8" class="p-8 text-center text-slate-500">
+          <tr><td colspan="9" class="p-8 text-center text-slate-500">
             No members match your filters.
-            @if(request()->hasAny(['search', 'status']))<a href="{{ route('admin.members.index') }}" class="text-[#FF5C3D] hover:underline">Clear filters</a>@endif
+            @if(request()->hasAny(['search', 'status', 'membership']))<a href="{{ route('admin.members.index') }}" class="text-[#FF5C3D] hover:underline">Clear filters</a>@endif
           </td></tr>
         @endforelse
       </tbody>

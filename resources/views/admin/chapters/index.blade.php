@@ -42,7 +42,13 @@
               <div class="text-xs text-slate-500 mt-0.5">{{ $chapter->slug }}</div>
             </td>
             <td class="p-3 text-slate-600">{{ $chapter->state ?? '—' }}</td>
-            <td class="p-3 text-slate-600">{{ $chapter->coordinator?->name ?? '—' }}</td>
+            <td class="p-3 text-slate-600">
+              {{ $chapter->coordinator?->name ?? '—' }}
+              @if($chapter->secondCoordinator)
+                <div class="text-xs text-slate-500">{{ $chapter->secondCoordinator->name }}</div>
+              @endif
+            </td>
+            <td class="p-3 text-slate-600">{{ collect([$chapter->city, $chapter->state])->filter()->implode(', ') ?: '—' }}</td>
             <td class="p-3">
               <span class="px-2 py-0.5 rounded-full text-xs {{ $chapter->status === 'active' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600' }}">{{ ucfirst($chapter->status) }}</span>
             </td>

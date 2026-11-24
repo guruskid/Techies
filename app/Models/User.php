@@ -16,7 +16,9 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'status',
+        'name', 'email', 'password', 'role', 'status', 'membership_status',
+        'membership_reference', 'membership_paid_at', 'membership_confirmed_by',
+        'membership_notes',
     ];
 
     protected $hidden = [
@@ -27,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'membership_paid_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -37,11 +40,40 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Staff always have access. Members need a paid or waived membership.
+     */
+    public function hasActiveMembership(): bool
+    {
+        if ($this->isAdmin() || $this->isSuperAdmin()) {
+            return true;
+        }
+
+        return in_array($this->membership_status, ['active', 'exempt'], true);
+    }
+
+    public function needsMembershipPayment(): bool
+    {
+        return ! $this->hasActiveMembership();
+    }
+
+    public function membershipIsPending(): bool
+    {
+        return $this->membership_status === 'pending';
+    }
+
+    /**
      * Return this user's member profile, creating one if it is missing.
      *
      * Admins and super admins are community members too, so every account
      * can own a public profile.
      */
+    public function coordinatesChapter(): bool
+    {
+        return Chapter::where('coordinator_id', $this->id)
+            ->orWhere('second_coordinator_id', $this->id)
+            ->exists();
+    }
+
     public function ensureProfile(): UserProfile
     {
         $profile = $this->profile()->firstOrCreate(

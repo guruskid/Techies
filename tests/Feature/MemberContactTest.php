@@ -32,7 +32,7 @@ class MemberContactTest extends TestCase
         Notification::assertSentTo($recipient, MemberContactMessage::class);
     }
 
-    public function test_guests_are_asked_to_log_in_before_contacting_a_member(): void
+    public function test_guests_can_contact_a_member_with_their_name_and_email(): void
     {
         Notification::fake();
 
@@ -40,11 +40,14 @@ class MemberContactTest extends TestCase
         $recipient->ensureProfile()->update(['username' => 'ada-lovelace', 'is_public' => true]);
 
         $this->post(route('members.contact', 'ada-lovelace'), [
+            'name' => 'Guest Sender',
+            'email' => 'guest@example.org',
             'subject' => 'Hello',
             'message' => 'Just saying hello.',
-        ])->assertRedirect(route('login'));
+        ])->assertRedirect()
+            ->assertSessionHas('success');
 
-        Notification::assertNothingSent();
+        Notification::assertSentTo($recipient, MemberContactMessage::class);
     }
 
     public function test_members_cannot_message_themselves(): void

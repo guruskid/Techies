@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\Chapter;
 use App\Support\AuditLogger;
+use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -109,12 +110,14 @@ class AnnouncementController extends Controller
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:200'],
-            'body' => ['required', 'string', 'max:10000'],
+            'body' => ['required', 'string', 'max:50000'],
             'chapter_id' => ['nullable', Rule::exists('chapters', 'id')],
             'is_published' => ['nullable', 'boolean'],
         ]);
 
         unset($data['is_published']);
+
+        $data['body'] = RichText::clean($data['body']);
 
         return $data;
     }

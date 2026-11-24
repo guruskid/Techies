@@ -8,10 +8,13 @@ use App\Models\EventCategory;
 use App\Models\EventRegistration;
 use App\Models\Hub;
 use App\Models\User;
+use App\Notifications\EventPublished;
 use App\Support\AuditLogger;
+use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -38,6 +41,19 @@ class EventController extends Controller
             });
         }
 
+        $user = $request->user();
+        if (! $user->isAdmin() && ! $user->isSuperAdmin()) {
+            $hubId = $user->hub?->id;
+
+            $query->where(function ($builder) use ($user, $hubId): void {
+                $builder->where('organizer_id', $user->id);
+
+                if ($hubId) {
+                    $builder->orWhere('hub_id', $hubId);
+                }
+            });
+        }
+
         return view('admin.events.index', [
             'events' => $query->withCount([
                 'registrations',
@@ -53,6 +69,8 @@ class EventController extends Controller
      */
     public function registrations(Request $request, Event $event): View
     {
+        $this->ensureCanManage($event);
+
         $status = $request->query('status');
         $search = trim((string) $request->query('search'));
 
@@ -94,6 +112,7 @@ class EventController extends Controller
      */
     public function updatePayment(Request $request, Event $event, EventRegistration $registration): RedirectResponse
     {
+        $this->ensureCanManage($event);
         abort_unless($registration->event_id === $event->id, 404);
 
         $data = $request->validate([
@@ -126,6 +145,7 @@ class EventController extends Controller
      */
     public function checkIn(Event $event, EventRegistration $registration): RedirectResponse
     {
+        $this->ensureCanManage($event);
         abort_unless($registration->event_id === $event->id, 404);
         abort_unless($registration->status === EventRegistration::STATUS_REGISTERED, 422, 'Only confirmed attendees can be checked in.');
 
@@ -148,6 +168,8 @@ class EventController extends Controller
      */
     public function exportRegistrations(Event $event): StreamedResponse
     {
+        $this->ensureCanManage($event);
+
         $registrations = $event->registrations()->with('user.profile')->orderBy('created_at')->get();
 
         AuditLogger::log('event.registrations.exported', $event, ['event' => $event->title]);
@@ -194,6 +216,21 @@ class EventController extends Controller
             $coverImage = '/storage/'.$request->file('cover_image')->store('events', 'public');
         }
 
+        $speakerImages = [];
+        if ($request->hasFile('speaker_images')) {
+            foreach ($request->file('speaker_images') as $image) {
+                $speakerImages[] = '/storage/'.$image->store('events/speakers', 'public');
+            }
+        }
+
+        $user = auth()->user();
+        if (! $user->isAdmin() && ! $user->isSuperAdmin()) {
+            $data['status'] = 'draft';
+            if ($user->hasRole('hub_owner')) {
+                $data['hub_id'] = $user->hub?->id;
+            }
+        }
+
         $event = Event::create([
             'title' => $data['title'],
             'slug' => $this->uniqueSlug($data['slug'] ?? null, $data['title']),
@@ -201,6 +238,7 @@ class EventController extends Controller
             'category_id' => $data['category_id'] ?? null,
             'host' => $data['host'] ?? null,
             'key_speakers' => $data['key_speakers'] ?? null,
+            'speaker_images' => $speakerImages,
             'agenda' => $data['agenda'] ?? null,
             'requirements' => $data['requirements'] ?? null,
             'contact_email' => $data['contact_email'] ?? null,
@@ -224,15 +262,22 @@ class EventController extends Controller
             'payment_instructions' => $data['payment_instructions'] ?? null,
             'status' => $data['status'],
             'organizer_id' => auth()->id(),
+            'hub_id' => $data['hub_id'] ?? null,
         ]);
 
         AuditLogger::log('event.created', $event, ['title' => $event->title]);
+
+        if ($event->status === 'published' && $event->hub_id) {
+            $this->notifyMembers($event);
+        }
 
         return redirect()->route('admin.events.index')->with('success', 'Event created.');
     }
 
     public function edit(Event $event): View
     {
+        $this->ensureCanManage($event);
+
         return view('admin.events.edit', [
             'event' => $event,
             'categories' => EventCategory::orderBy('name')->get(),
@@ -242,11 +287,36 @@ class EventController extends Controller
 
     public function update(Request $request, Event $event): RedirectResponse
     {
+        $this->ensureCanManage($event);
+
         $data = $this->validated($request);
+
+        $user = $request->user();
+        if (! $user->isAdmin() && ! $user->isSuperAdmin()) {
+            // Publishing stays an admin decision; keep live events live on edit.
+            $data['status'] = $event->status === 'published' ? 'published' : 'draft';
+        }
 
         $coverImage = $event->cover_image;
         if ($request->hasFile('cover_image')) {
             $coverImage = '/storage/'.$request->file('cover_image')->store('events', 'public');
+        }
+
+        $speakerImages = $event->speaker_images ?? [];
+
+        $removed = array_filter((array) $request->input('remove_speaker_images', []));
+        if ($removed !== []) {
+            foreach ($removed as $path) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $path));
+            }
+
+            $speakerImages = array_values(array_diff($speakerImages, $removed));
+        }
+
+        if ($request->hasFile('speaker_images')) {
+            foreach ($request->file('speaker_images') as $image) {
+                $speakerImages[] = '/storage/'.$image->store('events/speakers', 'public');
+            }
         }
 
         $event->update([
@@ -256,6 +326,7 @@ class EventController extends Controller
             'category_id' => $data['category_id'] ?? null,
             'host' => $data['host'] ?? null,
             'key_speakers' => $data['key_speakers'] ?? null,
+            'speaker_images' => $speakerImages,
             'agenda' => $data['agenda'] ?? null,
             'requirements' => $data['requirements'] ?? null,
             'contact_email' => $data['contact_email'] ?? null,
@@ -282,11 +353,17 @@ class EventController extends Controller
 
         AuditLogger::log('event.updated', $event, ['title' => $event->title]);
 
+        if ($event->status === 'published' && $event->hub_id && $event->wasChanged('status')) {
+            $this->notifyMembers($event);
+        }
+
         return redirect()->route('admin.events.index')->with('success', 'Event updated.');
     }
 
     public function destroy(Event $event): RedirectResponse
     {
+        $this->ensureCanManage($event);
+
         $event->delete();
 
         AuditLogger::log('event.deleted', $event, ['title' => $event->title]);
@@ -299,18 +376,22 @@ class EventController extends Controller
      */
     private function validated(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'title' => ['required', 'string', 'max:200'],
             'slug' => ['nullable', 'alpha_dash', 'max:180'],
-            'description' => ['nullable', 'string', 'max:5000'],
+            'description' => ['nullable', 'string', 'max:20000'],
             'category_id' => ['nullable', 'exists:event_categories,id'],
             'host' => ['nullable', 'string', 'max:200'],
             'key_speakers' => ['nullable', 'string', 'max:5000'],
-            'agenda' => ['nullable', 'string', 'max:10000'],
-            'requirements' => ['nullable', 'string', 'max:5000'],
+            'agenda' => ['nullable', 'string', 'max:30000'],
+            'requirements' => ['nullable', 'string', 'max:20000'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
             'cover_image' => ['nullable', 'image', 'max:4096'],
+            'speaker_images' => ['nullable', 'array', 'max:12'],
+            'speaker_images.*' => ['image', 'max:4096'],
+            'remove_speaker_images' => ['nullable', 'array'],
+            'remove_speaker_images.*' => ['string'],
             'start_date' => ['required', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'start_time' => ['nullable', 'date_format:H:i'],
@@ -329,6 +410,12 @@ class EventController extends Controller
             'payment_instructions' => ['nullable', 'string', 'max:2000'],
             'status' => ['required', Rule::in(['draft', 'published', 'cancelled'])],
         ]);
+
+        foreach (['description', 'agenda', 'requirements'] as $field) {
+            $data[$field] = RichText::clean($data[$field] ?? null);
+        }
+
+        return $data;
     }
 
     private function hosts(): Collection
@@ -354,6 +441,49 @@ class EventController extends Controller
             ]);
 
         return $users->concat($hubs)->sortBy('label')->values();
+    }
+
+    /**
+     * Only staff, the creator and the owning hub may work with an event.
+     */
+    private function ensureCanManage(Event $event): void
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            abort(403);
+        }
+
+        if ($user->isAdmin() || $user->isSuperAdmin()) {
+            return;
+        }
+
+        if ((int) $event->organizer_id === (int) $user->id) {
+            return;
+        }
+
+        if ($event->hub_id && (int) $event->hub_id === (int) $user->hub?->id) {
+            return;
+        }
+
+        abort(403);
+    }
+
+    private function notifyMembers(Event $event): void
+    {
+        $state = $event->state ?: $event->hub?->state;
+
+        $members = User::where('status', 'active')
+            ->whereHas('profile', function ($query) use ($state): void {
+                if ($state) {
+                    $query->where('state', $state);
+                }
+            })
+            ->get();
+
+        foreach ($members as $member) {
+            $member->notify(new EventPublished($event));
+        }
     }
 
     private function uniqueSlug(?string $slug, string $name, ?int $ignoreId = null): string

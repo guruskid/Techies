@@ -33,6 +33,7 @@
     <div class="p-6 sm:p-10">
       <h1 class="text-2xl font-bold text-[#101E33]">Create your account</h1>
       <p class="mt-1 text-slate-600 text-sm">Join MWTT in less than a minute.</p>
+      <p class="mt-2 text-xs text-slate-500">Membership is a one-time fee. <a href="{{ route('membership.show') }}" class="text-[#FF5C3D] font-semibold hover:underline">See what is included</a>.</p>
 
       <form method="POST" action="{{ route('register') }}" class="mt-6 space-y-4"
             x-data="{ show: false }"

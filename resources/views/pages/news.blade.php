@@ -23,7 +23,7 @@
         @php
           $date = ($announcement->published_at ?? $announcement->created_at);
           $meta = array_filter([$date?->format('M j, Y'), $announcement->chapter?->name]);
-          $body = trim((string) $announcement->body);
+          $body = trim(strip_tags((string) $announcement->body));
           $long = mb_strlen($body) > 220;
         @endphp
         <li>
@@ -44,10 +44,10 @@
                   <span class="mt-2 inline-block text-sm {{ $link }} group-open:hidden">Read more</span>
                   <span class="mt-2 hidden text-sm {{ $link }} group-open:inline-block">Show less</span>
                 </summary>
-                <p class="mt-2 text-sm text-slate-700 leading-relaxed whitespace-pre-line">{{ $body }}</p>
+                <div class="mt-2 text-sm text-slate-700 leading-relaxed article-body">{!! \App\Support\RichText::render($announcement->body) !!}</div>
               </details>
             @else
-              <p class="mt-2 text-sm text-slate-700 leading-relaxed whitespace-pre-line">{{ $body }}</p>
+              <div class="mt-2 text-sm text-slate-700 leading-relaxed article-body">{!! \App\Support\RichText::render($announcement->body) !!}</div>
             @endif
           </article>
         </li>

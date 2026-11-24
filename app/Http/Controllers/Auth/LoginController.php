@@ -10,6 +10,19 @@ class LoginController extends Controller
 {
     public function show()
     {
+        if (auth()->check()) {
+            $user = auth()->user();
+
+            if ($user->isSuperAdmin()) {
+                return redirect()->route('super-admin.dashboard');
+            }
+            if ($user->isAdmin()) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            return redirect()->route('dashboard');
+        }
+
         return view('auth.login');
     }
 
@@ -33,9 +46,6 @@ class LoginController extends Controller
             }
             if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
-            }
-            if ($user->hasRole('hub_owner') || $user->hub()->exists()) {
-                return redirect()->route('hub.dashboard');
             }
 
             return redirect()->route('dashboard');

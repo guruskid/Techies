@@ -49,8 +49,9 @@
   $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';
   $shareBtn = 'px-3 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 transition '.$focus;
 
-  // Plain-text body split into paragraphs on blank lines (still escaped by {{ }})
-  $paragraphs = array_values(array_filter(array_map('trim', preg_split('/\R{2,}/', (string) $article->body))));
+  // Body may be plain text (legacy) or HTML from the WYSIWYG editor.
+  $body = (string) $article->body;
+  $isHtml = $body !== strip_tags($body);
 @endphp
 
 <style>[x-cloak]{display:none !important}</style>
@@ -90,10 +91,14 @@
         <img src="{{ $article->cover_image }}" alt="" class="w-full max-h-96 object-cover">
       @endif
       <div class="p-6 sm:p-10">
-        <div class="text-slate-800 leading-relaxed text-lg max-w-[68ch]">
-          @foreach($paragraphs as $para)
-            <p class="mb-5 last:mb-0 whitespace-pre-line">{{ $para }}</p>
-          @endforeach
+        <div class="text-slate-800 leading-relaxed text-lg max-w-[68ch] article-body">
+          @if($isHtml)
+            {!! $body !!}
+          @else
+            @foreach(array_values(array_filter(array_map('trim', preg_split('/\R{2,}/', $body)))) as $para)
+              <p class="mb-5 last:mb-0 whitespace-pre-line">{{ $para }}</p>
+            @endforeach
+          @endif
         </div>
 
         <div class="mt-10 pt-6 border-t border-slate-100" x-data="{ copied: false }">

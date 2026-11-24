@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Member;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\Article;
+use App\Models\Chapter;
 use App\Models\Event;
 use App\Models\Hub;
 use App\Models\Opportunity;
@@ -36,6 +37,11 @@ class DashboardController extends Controller
         }
         $upcomingEvents = Event::where('status', 'published')->where('start_date', '>=', now()->toDateString())->latest()->take(5)->get();
         $recommendedHubs = Hub::where('is_verified', true)->latest()->take(4)->get();
+        $hub = $user->hub;
+        $coordinatedChapters = Chapter::where('coordinator_id', $user->id)
+            ->orWhere('second_coordinator_id', $user->id)
+            ->orderBy('name')
+            ->get();
         $recentMembers = User::where('status', 'active')
             ->whereHas('profile', fn ($q) => $q->where('is_public', true))
             ->where('id', '!=', $user->id)
@@ -57,6 +63,6 @@ class DashboardController extends Controller
         ];
         $latestArticles = $user->articles()->latest()->take(4)->get();
 
-        return view('member.dashboard', compact('user', 'profile', 'completion', 'missing', 'upcomingEvents', 'recommendedHubs', 'recentMembers', 'opportunities', 'announcements', 'registeredEvents', 'contentStats', 'latestArticles', 'applicationCount'));
+        return view('member.dashboard', compact('user', 'profile', 'completion', 'missing', 'upcomingEvents', 'recommendedHubs', 'recentMembers', 'opportunities', 'announcements', 'registeredEvents', 'contentStats', 'latestArticles', 'applicationCount', 'hub', 'coordinatedChapters'));
     }
 }

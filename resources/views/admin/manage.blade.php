@@ -20,9 +20,12 @@
       'title' => 'Community content',
       'items' => [
         ['key' => 'content',       'title' => 'Content review',  'description' => 'Review and approve member articles.',          'url' => route('admin.content.index'), 'badge' => 'to review'],
+        ['key' => 'write',         'title' => 'Write an article', 'description' => 'Create and submit an article as an admin or super admin.', 'url' => route('member.content.create')],
+        ['key' => 'my-articles',   'title' => 'My articles',     'description' => 'Drafts and submissions authored by you.',      'url' => route('member.content.index')],
         ['key' => 'announcements', 'title' => 'Announcements',   'description' => 'Publish community updates and news.',          'url' => route('admin.announcements.index')],
         ['key' => 'events',        'title' => 'Events',          'description' => 'Create and manage community events.',          'url' => route('admin.events.index')],
         ['key' => 'opportunities', 'title' => 'Opportunities',   'description' => 'Post and manage jobs and opportunities.',      'url' => route('admin.opportunities.index')],
+        ['key' => 'speaker-calls', 'title' => 'Call for speakers', 'description' => 'Open calls, review proposals and email speakers.', 'url' => route('admin.speaker-calls.index')],
         ['key' => 'categories',    'title' => 'Categories',      'description' => 'Manage event and opportunity categories.',     'url' => route('admin.categories.index')],
       ],
     ],

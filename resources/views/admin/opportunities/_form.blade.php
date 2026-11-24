@@ -2,6 +2,8 @@
   $editing = $opportunity->exists;
   $inputClass = 'w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]';
   $labelClass = 'block text-sm font-medium text-slate-700 mb-1';
+  $isStaff = auth()->user()->isAdmin() || auth()->user()->isSuperAdmin();
+  $currentStatus = old('status', $opportunity->status ?? 'draft');
 @endphp
 
 <form method="POST" action="{{ $editing ? route('admin.opportunities.update', $opportunity) : route('admin.opportunities.store') }}" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8 space-y-5">
@@ -73,22 +75,32 @@
 
   <div>
     <label for="eligibility" class="{{ $labelClass }}">Eligibility</label>
-    <textarea id="eligibility" name="eligibility" rows="3" class="{{ $inputClass }}">{{ old('eligibility', $opportunity->eligibility) }}</textarea>
+    <textarea id="eligibility" name="eligibility" rows="3" data-wysiwyg class="{{ $inputClass }}">{{ old('eligibility', $opportunity->eligibility) }}</textarea>
   </div>
 
   <div>
     <label for="description" class="{{ $labelClass }}">Description</label>
-    <textarea id="description" name="description" rows="6" class="{{ $inputClass }}">{{ old('description', $opportunity->description) }}</textarea>
+    <textarea id="description" name="description" rows="6" data-wysiwyg class="{{ $inputClass }}">{{ old('description', $opportunity->description) }}</textarea>
   </div>
 
-  <div>
-    <label for="status" class="{{ $labelClass }}">Status</label>
-    <select id="status" name="status" required class="{{ $inputClass }}">
-      <option value="draft" @selected(old('status', $opportunity->status ?? 'draft') === 'draft')>Draft</option>
-      <option value="published" @selected(old('status', $opportunity->status ?? 'draft') === 'published')>Published</option>
-    </select>
-    <p class="mt-1 text-xs text-slate-400">Publishing notifies all active members by email.</p>
-  </div>
+  @if($isStaff)
+    <div>
+      <label for="status" class="{{ $labelClass }}">Status</label>
+      <select id="status" name="status" required class="{{ $inputClass }}">
+        <option value="draft" @selected($currentStatus === 'draft')>Draft</option>
+        <option value="published" @selected($currentStatus === 'published')>Published</option>
+      </select>
+      <p class="mt-1 text-xs text-slate-400">Publishing notifies all active members by email.</p>
+    </div>
+  @else
+    <div class="rounded-xl bg-slate-50 border border-slate-200 p-5">
+      <p class="text-sm text-slate-600">
+        <strong class="text-[#101E33]">Approval:</strong> your opportunity is saved as a draft.
+        An admin reviews it and publishes it for the community — you do not need to choose a status.
+      </p>
+      <input type="hidden" name="status" value="{{ $currentStatus }}">
+    </div>
+  @endif
 
   @if($editing && $opportunity->applications->count())
     <div class="rounded-lg border border-slate-200 p-4">
@@ -140,3 +152,5 @@
     <a href="{{ route('admin.opportunities.index') }}" class="px-5 py-2.5 text-slate-500 hover:text-slate-700">Cancel</a>
   </div>
 </form>
+
+@include('partials.wysiwyg')

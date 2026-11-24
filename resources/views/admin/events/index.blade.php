@@ -17,19 +17,29 @@
   $tab = fn ($s) => route('admin.events.index', array_filter([
     'status' => $s, 'search' => request('search'), 'category' => request('category'),
   ]));
+  $user = auth()->user();
+  $isStaff = $user->isAdmin() || $user->isSuperAdmin();
+  $homeUrl = $isStaff ? route('admin.dashboard') : route('dashboard');
+  $homeLabel = $isStaff ? 'Back to admin dashboard' : 'Back to my dashboard';
 @endphp
 
 <div class="max-w-7xl mx-auto px-4 py-8 pb-12">
   <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
     <div>
-      <a href="{{ route('admin.dashboard') }}" class="text-sm text-[#FF5C3D] hover:underline {{ $focus }} rounded">Back to admin dashboard</a>
+      <a href="{{ $homeUrl }}" class="text-sm text-[#FF5C3D] hover:underline {{ $focus }} rounded">{{ $homeLabel }}</a>
       <h1 class="mt-2 text-2xl font-bold text-[#101E33]">Events</h1>
-      <p class="mt-1 text-sm text-slate-500">Create and manage community events.</p>
+      <p class="mt-1 text-sm text-slate-500">
+        {{ $isStaff ? 'Create and manage community events.' : 'Draft events for your community. An admin publishes them once reviewed.' }}
+      </p>
     </div>
-    <a href="{{ route('admin.events.create') }}" class="px-4 py-2 bg-[#FF5C3D] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition text-center {{ $focus }}">New event</a>
+    <div class="flex flex-wrap gap-2">
+      <a href="{{ route('admin.opportunities.index') }}" class="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition text-center {{ $focus }}">My opportunities</a>
+      <a href="{{ route('admin.events.create') }}" class="px-4 py-2 bg-[#FF5C3D] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition text-center {{ $focus }}">New event</a>
+    </div>
   </div>
 
-  {{-- Status tabs --}}
+  {{-- Status tabs (staff only — members submit for approval) --}}
+  @if($isStaff)
   <nav class="flex flex-wrap gap-2" aria-label="Filter by status">
     @foreach(['' => 'All'] + $statuses as $value => $label)
       @php $on = (string) $current === (string) $value; @endphp
@@ -37,6 +47,7 @@
          class="px-3 py-1.5 rounded-full text-sm border {{ $on ? 'bg-[#101E33] border-[#101E33] text-white' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300' }} {{ $focus }}">{{ $label }}</a>
     @endforeach
   </nav>
+  @endif
 
   {{-- Search and category --}}
   <form method="GET" action="{{ route('admin.events.index') }}" role="search" class="mt-4 mb-4 flex flex-wrap items-end gap-2">
@@ -127,7 +138,7 @@
 
             {{-- Status --}}
             <td class="p-3">
-              <span class="px-2 py-1 rounded-full text-xs font-medium {{ $badge[$event->status] ?? 'bg-slate-100 text-slate-700' }}">{{ ucfirst($event->status) }}</span>
+              <span class="px-2 py-1 rounded-full text-xs font-medium {{ $badge[$event->status] ?? 'bg-slate-100 text-slate-700' }}">{{ $isStaff ? ucfirst($event->status) : ($event->status === 'draft' ? 'Awaiting review' : ucfirst($event->status)) }}</span>
             </td>
 
             {{-- Actions --}}

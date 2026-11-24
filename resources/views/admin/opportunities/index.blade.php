@@ -1,22 +1,37 @@
 @extends('layouts.app')
 @section('content')
+@php
+  $user = auth()->user();
+  $isStaff = $user->isAdmin() || $user->isSuperAdmin();
+  $homeUrl = $isStaff ? route('admin.dashboard') : route('dashboard');
+  $homeLabel = $isStaff ? 'Back to admin dashboard' : 'Back to my dashboard';
+  $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-1';
+@endphp
+
 <div class="max-w-7xl mx-auto px-4 py-8">
   <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
     <div>
-      <a href="{{ route('admin.dashboard') }}" class="text-sm text-[#FF5C3D] hover:underline">← Admin dashboard</a>
+      <a href="{{ $homeUrl }}" class="text-sm text-[#FF5C3D] hover:underline {{ $focus }} rounded">{{ $homeLabel }}</a>
       <h1 class="mt-2 text-2xl font-bold text-[#101E33]">Opportunities</h1>
-      <p class="mt-1 text-sm text-slate-500">Post jobs, internships and opportunities for the community.</p>
+      <p class="mt-1 text-sm text-slate-500">
+        {{ $isStaff ? 'Post jobs, internships and opportunities for the community.' : 'Draft opportunities for your community. An admin publishes them once reviewed.' }}
+      </p>
     </div>
-    <a href="{{ route('admin.opportunities.create') }}" class="px-4 py-2 bg-[#FF5C3D] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition">New opportunity</a>
+    <div class="flex flex-wrap gap-2">
+      <a href="{{ route('admin.events.index') }}" class="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition {{ $focus }}">My events</a>
+      <a href="{{ route('admin.opportunities.create') }}" class="px-4 py-2 bg-[#FF5C3D] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition {{ $focus }}">New opportunity</a>
+    </div>
   </div>
 
   <form method="GET" class="mb-4 flex flex-wrap gap-2">
     <input name="search" value="{{ request('search') }}" placeholder="Search title or organization" class="border border-slate-200 rounded-lg px-3 py-2 text-sm">
-    <select name="status" class="border border-slate-200 rounded-lg px-3 py-2 text-sm">
-      <option value="">All statuses</option>
-      <option value="draft" @selected(request('status') === 'draft')>Draft</option>
-      <option value="published" @selected(request('status') === 'published')>Published</option>
-    </select>
+    @if($isStaff)
+      <select name="status" class="border border-slate-200 rounded-lg px-3 py-2 text-sm">
+        <option value="">All statuses</option>
+        <option value="draft" @selected(request('status') === 'draft')>Draft</option>
+        <option value="published" @selected(request('status') === 'published')>Published</option>
+      </select>
+    @endif
     <button class="px-4 py-2 bg-[#FF5C3D] text-white rounded-lg text-sm">Filter</button>
     @if(request()->hasAny(['search', 'status']))
       <a href="{{ route('admin.opportunities.index') }}" class="px-4 py-2 border border-slate-200 rounded-lg text-sm">Clear</a>
@@ -38,12 +53,16 @@
         @forelse($opportunities as $opportunity)
           <tr class="border-t border-slate-100">
             <td class="p-3">
-              <a href="{{ route('opportunities.show', $opportunity) }}" class="font-medium text-[#101E33] hover:text-[#FF5C3D]">{{ $opportunity->title }}</a>
+              @if($opportunity->status === 'published')
+                <a href="{{ route('opportunities.show', $opportunity->slug) }}" class="font-medium text-[#101E33] hover:text-[#FF5C3D]">{{ $opportunity->title }}</a>
+              @else
+                <span class="font-medium text-[#101E33]">{{ $opportunity->title }}</span>
+              @endif
               <div class="text-xs text-slate-500 mt-0.5">{{ $opportunity->category?->name }}</div>
             </td>
             <td class="p-3 text-slate-600">{{ $opportunity->organization ?? '—' }}</td>
             <td class="p-3">
-              <span class="px-2 py-0.5 rounded-full text-xs {{ $opportunity->status === 'published' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600' }}">{{ ucfirst($opportunity->status) }}</span>
+              <span class="px-2 py-0.5 rounded-full text-xs {{ $opportunity->status === 'published' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600' }}">{{ $isStaff ? ucfirst($opportunity->status) : ($opportunity->status === 'published' ? 'Published' : 'Awaiting review') }}</span>
             </td>
             <td class="p-3">
               @if($opportunity->is_member_only)
@@ -52,7 +71,7 @@
                 <span class="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600">Public</span>
               @endif
             </td>
-            <td class="p-3">
+            <td class="p-3 whitespace-nowrap">
               <a href="{{ route('admin.opportunities.edit', $opportunity) }}" class="text-[#FF5C3D] hover:underline">Edit</a>
               <form method="POST" action="{{ route('admin.opportunities.destroy', $opportunity) }}" class="inline ml-2" onsubmit="return confirm('Delete this opportunity?')">
                 @csrf

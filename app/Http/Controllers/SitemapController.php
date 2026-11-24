@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Chapter;
 use App\Models\Event;
 use App\Models\Hub;
+use App\Models\SpeakerCall;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
@@ -28,6 +29,7 @@ class SitemapController extends Controller
             ['url' => route('chapters'), 'changefreq' => 'weekly', 'priority' => '0.6'],
             ['url' => route('events'), 'changefreq' => 'daily', 'priority' => '0.9'],
             ['url' => route('opportunities'), 'changefreq' => 'daily', 'priority' => '0.9'],
+            ['url' => route('speaker-calls.index'), 'changefreq' => 'daily', 'priority' => '0.7'],
             ['url' => route('articles'), 'changefreq' => 'daily', 'priority' => '0.9'],
             ['url' => route('news'), 'changefreq' => 'weekly', 'priority' => '0.5'],
             ['url' => route('contact'), 'changefreq' => 'yearly', 'priority' => '0.3'],
@@ -56,6 +58,23 @@ class SitemapController extends Controller
                 'lastmod' => $event->updated_at,
                 'changefreq' => 'weekly',
                 'priority' => '0.7',
+            ]);
+
+        $speakerCalls = SpeakerCall::where('status', SpeakerCall::STATUS_OPEN)
+            ->where(function ($query): void {
+                $query->whereNull('opens_at')->orWhereDate('opens_at', '<=', today());
+            })
+            ->where(function ($query): void {
+                $query->whereNull('closes_at')->orWhereDate('closes_at', '>=', today());
+            })
+            ->orderBy('closes_at')
+            ->limit(200)
+            ->get(['slug', 'updated_at'])
+            ->map(fn (SpeakerCall $call) => [
+                'url' => route('speaker-calls.show', $call->slug),
+                'lastmod' => $call->updated_at,
+                'changefreq' => 'weekly',
+                'priority' => '0.6',
             ]);
 
         $hubs = Hub::where('is_public', true)
@@ -96,6 +115,7 @@ class SitemapController extends Controller
         $urls = collect($staticPages)
             ->merge($articles)
             ->merge($events)
+            ->merge($speakerCalls)
             ->merge($hubs)
             ->merge($chapters)
             ->merge($members);

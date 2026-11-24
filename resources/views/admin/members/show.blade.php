@@ -3,6 +3,12 @@
 @php
   $p = $user->profile;
   $badge = ['active' => 'bg-green-50 text-green-700', 'suspended' => 'bg-red-50 text-red-700'];
+  $membershipBadge = [
+    'active' => 'bg-green-50 text-green-700',
+    'pending' => 'bg-amber-50 text-amber-700',
+    'unpaid' => 'bg-red-50 text-red-700',
+    'exempt' => 'bg-[#101E33]/10 text-[#101E33]',
+  ];
   $card = 'bg-white rounded-2xl p-6 border border-slate-100 shadow-sm';
   $h2 = 'text-lg font-bold text-[#101E33] mb-4';
   $focus = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] focus-visible:ring-offset-2';
@@ -90,6 +96,37 @@
             <div><dt class="text-slate-600">Chapters</dt><dd class="font-medium text-[#101E33]">{{ $user->chapters->pluck('name')->implode(', ') }}</dd></div>
           @endif
         </dl>
+      </section>
+
+      <section class="{{ $card }}" aria-labelledby="membership-h">
+        <h2 id="membership-h" class="{{ $h2 }}">Membership</h2>
+        <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          <div>
+            <dt class="text-slate-600">Status</dt>
+            <dd class="mt-1">
+              <span class="px-2 py-1 rounded-full text-xs font-medium {{ $membershipBadge[$user->membership_status] ?? 'bg-slate-100 text-slate-700' }}">
+                {{ ['active' => 'Active', 'pending' => 'Pending confirmation', 'unpaid' => 'Unpaid', 'exempt' => 'Waived'][$user->membership_status] ?? ucfirst($user->membership_status) }}
+              </span>
+            </dd>
+          </div>
+          <div><dt class="text-slate-600">Reference</dt><dd class="font-medium text-[#101E33] break-all">{{ $user->membership_reference ?: 'Not provided' }}</dd></div>
+          <div><dt class="text-slate-600">Confirmed</dt><dd class="font-medium text-[#101E33]">{{ $user->membership_paid_at?->format('M j, Y g:i A') ?? 'Not yet' }}</dd></div>
+          <div><dt class="text-slate-600">Confirmed by</dt><dd class="font-medium text-[#101E33]">{{ $user->membership_confirmed_by ? (\App\Models\User::find($user->membership_confirmed_by)?->name ?? 'Staff') : '—' }}</dd></div>
+        </dl>
+
+        @if(! in_array($user->membership_status, ['active', 'exempt'], true))
+          <div class="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-5">
+            <form method="POST" action="{{ route('admin.members.membership.confirm', $user) }}" onsubmit="return confirm('Confirm membership payment for {{ $name }}?')">
+              @csrf
+              <button type="submit" class="{{ $btn }} border-green-600 bg-green-600 text-white hover:bg-green-700">Confirm payment</button>
+            </form>
+            <form method="POST" action="{{ route('admin.members.membership.waive', $user) }}" onsubmit="return confirm('Waive the membership fee for {{ $name }}?')">
+              @csrf
+              <button type="submit" class="{{ $btn }} border-slate-200 text-slate-700 bg-white hover:bg-slate-50">Waive fee</button>
+            </form>
+          </div>
+          <p class="mt-3 text-xs text-slate-500">Confirming or waiving activates the account and emails the welcome guide.</p>
+        @endif
       </section>
 
       @if($p)

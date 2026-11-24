@@ -33,6 +33,7 @@
   <div class="max-w-7xl mx-auto px-4">
     <h1 class="text-3xl font-bold">Events</h1>
     <p class="mt-2 text-slate-300">Discover meetups, workshops, conferences and more.</p>
+    <a href="{{ route('speaker-calls.index') }}" class="mt-4 inline-block px-4 py-2 bg-[#FF5C3D] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition">Call for speakers</a>
   </div>
 </section>
 

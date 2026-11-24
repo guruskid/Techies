@@ -55,7 +55,7 @@
             @endif
           </div>
           @if($c->description)
-            <p class="text-sm text-slate-600 flex-1">{{ \Illuminate\Support\Str::limit($c->description,120) }}</p>
+            <p class="text-sm text-slate-600 flex-1">{{ \Illuminate\Support\Str::limit(strip_tags((string) $c->description), 120) }}</p>
           @endif
           <span class="mt-4 text-sm font-medium text-[#FF5C3D]">View chapter</span>
         </a>

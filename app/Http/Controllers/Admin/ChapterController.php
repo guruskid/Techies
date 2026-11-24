@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Chapter;
 use App\Models\User;
+use App\Notifications\ChapterCoordinatorAssigned;
+use App\Notifications\ChapterCoordinatorRemoved;
 use App\Support\AuditLogger;
+use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ChapterController extends Controller
@@ -51,10 +53,14 @@ class ChapterController extends Controller
             'slug' => $this->uniqueSlug($data['slug'] ?? null, $data['name']),
             'country' => $data['country'] ?? null,
             'state' => $data['state'] ?? null,
+            'city' => $data['city'] ?? null,
             'description' => $data['description'] ?? null,
             'coordinator_id' => $data['coordinator_id'] ?? null,
+            'second_coordinator_id' => $data['second_coordinator_id'] ?? null,
             'status' => $data['status'],
         ]);
+
+        $this->notifyCoordinators($chapter, [], [$chapter->coordinator_id, $chapter->second_coordinator_id]);
 
         AuditLogger::log('chapter.created', $chapter, ['name' => $chapter->name]);
 
@@ -77,15 +83,26 @@ class ChapterController extends Controller
     {
         $data = $this->validated($request, $chapter);
 
+        $before = [$chapter->coordinator_id, $chapter->second_coordinator_id];
+
         $chapter->update([
             'name' => $data['name'],
             'slug' => $this->uniqueSlug($data['slug'] ?? null, $data['name'], $chapter->id),
             'country' => $data['country'] ?? null,
             'state' => $data['state'] ?? null,
+            'city' => $data['city'] ?? null,
             'description' => $data['description'] ?? null,
             'coordinator_id' => $data['coordinator_id'] ?? null,
+            'second_coordinator_id' => $data['second_coordinator_id'] ?? null,
             'status' => $data['status'],
         ]);
+
+        $after = [$chapter->coordinator_id, $chapter->second_coordinator_id];
+
+        $removed = array_diff($before, $after);
+        $added = array_diff($after, $before);
+
+        $this->notifyCoordinators($chapter, $removed, $added);
 
         AuditLogger::log('chapter.updated', $chapter, ['name' => $chapter->name]);
 
@@ -111,15 +128,40 @@ class ChapterController extends Controller
             $slugRule->ignore($chapter->id);
         }
 
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'alpha_dash', 'max:180', $slugRule],
             'country' => ['nullable', 'string', 'max:100'],
             'state' => ['nullable', 'string', 'max:100'],
-            'description' => ['nullable', 'string', 'max:2000'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'description' => ['nullable', 'string', 'max:20000'],
             'coordinator_id' => ['nullable', 'exists:users,id'],
+            'second_coordinator_id' => ['nullable', 'exists:users,id', 'different:coordinator_id'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
         ]);
+
+        $data['description'] = RichText::clean($data['description'] ?? null);
+
+        return $data;
+    }
+
+    private function notifyCoordinators(Chapter $chapter, array $removed, array $added): void
+    {
+        foreach (array_filter(array_unique($removed)) as $userId) {
+            $user = User::find($userId);
+
+            if ($user && $user->status === 'active') {
+                $user->notify(new ChapterCoordinatorRemoved($chapter, auth()->user()));
+            }
+        }
+
+        foreach (array_filter(array_unique($added)) as $userId) {
+            $user = User::find($userId);
+
+            if ($user && $user->status === 'active') {
+                $user->notify(new ChapterCoordinatorAssigned($chapter, auth()->user()));
+            }
+        }
     }
 
     private function uniqueSlug(?string $slug, string $name, ?int $ignoreId = null): string

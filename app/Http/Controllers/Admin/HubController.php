@@ -27,7 +27,7 @@ class HubController extends Controller
 
     public function show(Hub $hub)
     {
-        $hub->load('owner', 'technologyAreas', 'teamMembers');
+        $hub->load('owner', 'technologyAreas', 'teamMembers.user');
 
         return view('admin.hubs.show', compact('hub'));
     }

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\Mail\TemplateController as MailTemplateController
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\OpportunityCategoryController as AdminOpportunityCategoryController;
 use App\Http\Controllers\Admin\OpportunityController as AdminOpportunityController;
+use App\Http\Controllers\Admin\SpeakerCallController as AdminSpeakerCallController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -29,8 +30,10 @@ use App\Http\Controllers\Member\ContentController as MemberContentController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboard;
 use App\Http\Controllers\Member\MyProfileController;
 use App\Http\Controllers\Member\ProfileController;
+use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\Opportunity\OpportunityController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SpeakerCallController;
 use App\Http\Controllers\SuperAdmin\AuditLogController as SuperAdminAuditLogController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboard;
 use App\Http\Controllers\SuperAdmin\RoleController as SuperAdminRoleController;
@@ -144,21 +147,59 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
 Route::post('/register', [RegisterController::class, 'store']);
 
+Route::get('/membership', [MembershipController::class, 'show'])->name('membership.show');
+Route::post('/membership/payment', [MembershipController::class, 'submitPayment'])
+    ->middleware(['auth', 'verified'])
+    ->name('membership.payment.submit');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [MemberDashboard::class, 'index'])->name('dashboard');
     Route::get('/profile', [MyProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [MyProfileController::class, 'update'])->name('profile.update');
     Route::get('/profile/username-availability', [MyProfileController::class, 'checkUsername'])->name('profile.username.check')->middleware('throttle:30,1');
     Route::get('/hub/dashboard', [HubDashboardController::class, 'index'])->name('hub.dashboard');
+    Route::get('/hub/team', [HubDashboardController::class, 'team'])->name('hub.team');
 
     Route::prefix('member/content')->name('member.content.')->group(function () {
         Route::get('/', [MemberContentController::class, 'index'])->name('index');
-        Route::get('/create', [MemberContentController::class, 'create'])->name('create');
-        Route::post('/', [MemberContentController::class, 'store'])->name('store');
-        Route::get('/{article}/edit', [MemberContentController::class, 'edit'])->name('edit');
-        Route::patch('/{article}', [MemberContentController::class, 'update'])->name('update');
-        Route::post('/{article}/submit', [MemberContentController::class, 'submit'])->name('submit');
-        Route::delete('/{article}', [MemberContentController::class, 'destroy'])->name('destroy');
+        Route::get('/create', [MemberContentController::class, 'create'])->middleware('membership')->name('create');
+        Route::post('/upload-image', [MemberContentController::class, 'uploadImage'])->middleware('membership')->name('upload-image');
+        Route::post('/', [MemberContentController::class, 'store'])->middleware('membership')->name('store');
+        Route::get('/{article}/edit', [MemberContentController::class, 'edit'])->middleware('membership')->name('edit');
+        Route::patch('/{article}', [MemberContentController::class, 'update'])->middleware('membership')->name('update');
+        Route::post('/{article}/submit', [MemberContentController::class, 'submit'])->middleware('membership')->name('submit');
+        Route::delete('/{article}', [MemberContentController::class, 'destroy'])->middleware('membership')->name('destroy');
+    });
+
+    Route::middleware('event-opportunity')->group(function () {
+        Route::get('/manage/events', [AdminEventController::class, 'index'])->name('admin.events.index');
+        Route::get('/manage/events/create', [AdminEventController::class, 'create'])->name('admin.events.create');
+        Route::post('/manage/events', [AdminEventController::class, 'store'])->name('admin.events.store');
+        Route::get('/manage/events/{event}/edit', [AdminEventController::class, 'edit'])->name('admin.events.edit');
+        Route::get('/manage/events/{event}/registrations', [AdminEventController::class, 'registrations'])->name('admin.events.registrations');
+        Route::get('/manage/events/{event}/registrations/export', [AdminEventController::class, 'exportRegistrations'])->name('admin.events.registrations.export');
+        Route::post('/manage/events/{event}/registrations/{registration}/check-in', [AdminEventController::class, 'checkIn'])->name('admin.events.registrations.check-in');
+        Route::post('/manage/events/{event}/registrations/{registration}/payment', [AdminEventController::class, 'updatePayment'])->name('admin.events.registrations.payment');
+        Route::patch('/manage/events/{event}', [AdminEventController::class, 'update'])->name('admin.events.update');
+        Route::delete('/manage/events/{event}', [AdminEventController::class, 'destroy'])->name('admin.events.destroy');
+
+        Route::get('/manage/opportunities', [AdminOpportunityController::class, 'index'])->name('admin.opportunities.index');
+        Route::get('/manage/opportunities/create', [AdminOpportunityController::class, 'create'])->name('admin.opportunities.create');
+        Route::post('/manage/opportunities', [AdminOpportunityController::class, 'store'])->name('admin.opportunities.store');
+        Route::get('/manage/opportunities/{opportunity}/edit', [AdminOpportunityController::class, 'edit'])->name('admin.opportunities.edit');
+        Route::patch('/manage/opportunities/{opportunity}', [AdminOpportunityController::class, 'update'])->name('admin.opportunities.update');
+        Route::post('/manage/opportunities/{opportunity}/applications/{application}', [AdminOpportunityController::class, 'updateApplication'])->name('admin.opportunities.applications.update');
+        Route::get('/manage/opportunities/{opportunity}/applications/export', [AdminOpportunityController::class, 'exportApplications'])->name('admin.opportunities.applications.export');
+        Route::delete('/manage/opportunities/{opportunity}', [AdminOpportunityController::class, 'destroy'])->name('admin.opportunities.destroy');
+
+        Route::get('/manage/speaker-calls', [AdminSpeakerCallController::class, 'index'])->name('admin.speaker-calls.index');
+        Route::get('/manage/speaker-calls/create', [AdminSpeakerCallController::class, 'create'])->name('admin.speaker-calls.create');
+        Route::post('/manage/speaker-calls', [AdminSpeakerCallController::class, 'store'])->name('admin.speaker-calls.store');
+        Route::get('/manage/speaker-calls/{speakerCall}/edit', [AdminSpeakerCallController::class, 'edit'])->name('admin.speaker-calls.edit');
+        Route::patch('/manage/speaker-calls/{speakerCall}', [AdminSpeakerCallController::class, 'update'])->name('admin.speaker-calls.update');
+        Route::get('/manage/speaker-calls/{speakerCall}/submissions', [AdminSpeakerCallController::class, 'submissions'])->name('admin.speaker-calls.submissions');
+        Route::post('/manage/speaker-calls/{speakerCall}/submissions/{submission}', [AdminSpeakerCallController::class, 'review'])->name('admin.speaker-calls.submissions.review');
+        Route::delete('/manage/speaker-calls/{speakerCall}', [AdminSpeakerCallController::class, 'destroy'])->name('admin.speaker-calls.destroy');
     });
 
     Route::middleware('role:admin|super_admin')->group(function () {
@@ -210,6 +251,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/members/{user}', [MemberController::class, 'show'])->name('admin.members.show');
         Route::post('/admin/members/{user}/suspend', [MemberController::class, 'suspend'])->name('admin.members.suspend');
         Route::post('/admin/members/{user}/restore', [MemberController::class, 'restore'])->name('admin.members.restore');
+        Route::post('/admin/members/{user}/membership/confirm', [MemberController::class, 'confirmMembership'])->name('admin.members.membership.confirm');
+        Route::post('/admin/members/{user}/membership/waive', [MemberController::class, 'waiveMembership'])->name('admin.members.membership.waive');
         Route::get('/admin/hubs', [App\Http\Controllers\Admin\HubController::class, 'index'])->name('admin.hubs.index');
         Route::get('/admin/hubs/{hub}', [App\Http\Controllers\Admin\HubController::class, 'show'])->name('admin.hubs.show');
         Route::post('/admin/hubs/{hub}/approve', [App\Http\Controllers\Admin\HubController::class, 'approve'])->name('admin.hubs.approve');
@@ -218,17 +261,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/categories', function () {
             return view('admin.categories.index');
         })->name('admin.categories.index');
-
-        Route::get('/admin/events', [AdminEventController::class, 'index'])->name('admin.events.index');
-        Route::get('/admin/events/create', [AdminEventController::class, 'create'])->name('admin.events.create');
-        Route::post('/admin/events', [AdminEventController::class, 'store'])->name('admin.events.store');
-        Route::get('/admin/events/{event}/edit', [AdminEventController::class, 'edit'])->name('admin.events.edit');
-        Route::get('/admin/events/{event}/registrations', [AdminEventController::class, 'registrations'])->name('admin.events.registrations');
-        Route::get('/admin/events/{event}/registrations/export', [AdminEventController::class, 'exportRegistrations'])->name('admin.events.registrations.export');
-        Route::post('/admin/events/{event}/registrations/{registration}/check-in', [AdminEventController::class, 'checkIn'])->name('admin.events.registrations.check-in');
-        Route::post('/admin/events/{event}/registrations/{registration}/payment', [AdminEventController::class, 'updatePayment'])->name('admin.events.registrations.payment');
-        Route::patch('/admin/events/{event}', [AdminEventController::class, 'update'])->name('admin.events.update');
-        Route::delete('/admin/events/{event}', [AdminEventController::class, 'destroy'])->name('admin.events.destroy');
 
         Route::get('/admin/event-categories', [AdminEventCategoryController::class, 'index'])->name('admin.event-categories.index');
         Route::get('/admin/event-categories/create', [AdminEventCategoryController::class, 'create'])->name('admin.event-categories.create');
@@ -243,15 +275,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/opportunity-categories/{opportunityCategory}/edit', [AdminOpportunityCategoryController::class, 'edit'])->name('admin.opportunity-categories.edit');
         Route::patch('/admin/opportunity-categories/{opportunityCategory}', [AdminOpportunityCategoryController::class, 'update'])->name('admin.opportunity-categories.update');
         Route::delete('/admin/opportunity-categories/{opportunityCategory}', [AdminOpportunityCategoryController::class, 'destroy'])->name('admin.opportunity-categories.destroy');
-
-        Route::get('/admin/opportunities', [AdminOpportunityController::class, 'index'])->name('admin.opportunities.index');
-        Route::get('/admin/opportunities/create', [AdminOpportunityController::class, 'create'])->name('admin.opportunities.create');
-        Route::post('/admin/opportunities', [AdminOpportunityController::class, 'store'])->name('admin.opportunities.store');
-        Route::get('/admin/opportunities/{opportunity}/edit', [AdminOpportunityController::class, 'edit'])->name('admin.opportunities.edit');
-        Route::patch('/admin/opportunities/{opportunity}', [AdminOpportunityController::class, 'update'])->name('admin.opportunities.update');
-        Route::post('/admin/opportunities/{opportunity}/applications/{application}', [AdminOpportunityController::class, 'updateApplication'])->name('admin.opportunities.applications.update');
-        Route::get('/admin/opportunities/{opportunity}/applications/export', [AdminOpportunityController::class, 'exportApplications'])->name('admin.opportunities.applications.export');
-        Route::delete('/admin/opportunities/{opportunity}', [AdminOpportunityController::class, 'destroy'])->name('admin.opportunities.destroy');
 
         Route::get('/admin/chapters', [AdminChapterController::class, 'index'])->name('admin.chapters.index');
         Route::get('/admin/chapters/create', [AdminChapterController::class, 'create'])->name('admin.chapters.create');
@@ -378,7 +401,7 @@ Route::post('/hubs/register', function (Request $r) {
         ->each(fn (User $reviewer) => $reviewer->notify(new HubApplicationSubmitted($hub)));
 
     return redirect()->route('hub.dashboard')->with('success', 'Hub application submitted and pending review.');
-})->middleware('auth')->name('hubs.register.store');
+})->middleware(['auth', 'membership'])->name('hubs.register.store');
 Route::get('/hubs/{slug}', [HubController::class, 'show'])->name('hubs.show');
 Route::get('/hubs', function (Request $r) {
     $q = Hub::where('is_public', true)->where('status', 'approved');
@@ -403,7 +426,7 @@ Route::get('/hubs', function (Request $r) {
 })->name('hubs');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
 Route::get('/events/{event:slug}/calendar', [EventController::class, 'calendar'])->name('events.calendar');
-Route::post('/events/{event:slug}/register', [EventController::class, 'register'])->middleware(['auth', 'verified'])->name('events.register');
+Route::post('/events/{event:slug}/register', [EventController::class, 'register'])->middleware(['auth', 'verified', 'membership'])->name('events.register');
 Route::post('/events/{event:slug}/cancel', [EventController::class, 'cancel'])->middleware(['auth', 'verified'])->name('events.cancel');
 Route::get('/events', function (Request $r) {
     $q = Event::with('category')->where('status', 'published')->where('start_date', '>=', now()->toDateString());
@@ -434,8 +457,13 @@ Route::get('/events', function (Request $r) {
         'categories' => EventCategory::all(),
     ]);
 })->name('events');
+Route::get('/speaker-calls', [SpeakerCallController::class, 'index'])->name('speaker-calls.index');
+Route::get('/speaker-calls/{speakerCall:slug}', [SpeakerCallController::class, 'show'])->name('speaker-calls.show');
+Route::post('/speaker-calls/{speakerCall:slug}', [SpeakerCallController::class, 'submit'])
+    ->middleware(['auth', 'verified', 'membership'])
+    ->name('speaker-calls.submit');
 Route::get('/opportunities/{slug}', [OpportunityController::class, 'show'])->name('opportunities.show');
-Route::post('/opportunities/{opportunity:slug}/apply', [OpportunityController::class, 'apply'])->middleware(['auth', 'verified'])->name('opportunities.apply');
+Route::post('/opportunities/{opportunity:slug}/apply', [OpportunityController::class, 'apply'])->middleware(['auth', 'verified', 'membership'])->name('opportunities.apply');
 Route::get('/opportunities', function (Request $r) {
     $q = Opportunity::with('category')->where('status', 'published');
     if (! auth()->check()) {
@@ -467,10 +495,10 @@ Route::get('/opportunities', function (Request $r) {
 })->name('opportunities');
 Route::get('/members/{username}', [ProfileController::class, 'show'])->name('members.show');
 Route::post('/members/{username}/contact', [ProfileController::class, 'contact'])
-    ->middleware(['auth', 'verified', 'throttle:5,1'])
+    ->middleware('throttle:5,1')
     ->name('members.contact');
 Route::get('/chapters/{slug}', [ChapterController::class, 'show'])->name('chapters.show');
-Route::post('/chapters/{chapter}/join', [ChapterController::class, 'join'])->middleware(['auth', 'verified'])->name('chapters.join');
+Route::post('/chapters/{chapter}/join', [ChapterController::class, 'join'])->middleware(['auth', 'verified', 'membership'])->name('chapters.join');
 Route::post('/chapters/{chapter}/leave', [ChapterController::class, 'leave'])->middleware(['auth', 'verified'])->name('chapters.leave');
 Route::get('/chapters', function (Request $r) {
     $q = Chapter::where('status', 'active');

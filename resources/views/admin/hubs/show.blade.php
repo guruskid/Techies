@@ -129,6 +129,25 @@
           <p class="text-sm text-slate-500">No application on record for this hub.</p>
         @endif
       </section>
+
+      @if($hub->teamMembers->isNotEmpty())
+        <section class="{{ $card }}" aria-labelledby="team-h">
+          <h2 id="team-h" class="{{ $h2 }}">Team members</h2>
+          <ul class="divide-y divide-slate-100">
+            @foreach($hub->teamMembers as $member)
+              <li class="py-3 flex items-center justify-between gap-4">
+                <div class="min-w-0">
+                  <div class="font-medium text-[#101E33] truncate">{{ $member->user?->name ?? 'Removed user' }}</div>
+                  @if($member->user?->email)
+                    <div class="text-xs text-slate-500 break-all">{{ $member->user->email }}</div>
+                  @endif
+                </div>
+                <span class="shrink-0 px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">{{ ucfirst($member->role) }}</span>
+              </li>
+            @endforeach
+          </ul>
+        </section>
+      @endif
     </div>
 
     {{-- Sidebar --}}
