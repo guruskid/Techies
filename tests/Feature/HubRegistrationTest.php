@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Hub;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -41,5 +42,52 @@ class HubRegistrationTest extends TestCase
             ->assertRedirect(route('hub.dashboard'));
 
         $this->assertDatabaseCount('hubs', 1);
+    }
+
+    public function test_hub_directory_links_to_hub_registration(): void
+    {
+        $this->get(route('hubs'))
+            ->assertOk()
+            ->assertSee('Register your hub')
+            ->assertSee(route('hubs.register'), false);
+    }
+
+    public function test_guests_see_account_steps_instead_of_an_unavailable_application_form(): void
+    {
+        $this->get(route('hubs.register'))
+            ->assertOk()
+            ->assertSee('Create an account')
+            ->assertSee(route('login'), false)
+            ->assertDontSee('name="name"', false);
+    }
+
+    public function test_members_without_active_membership_see_the_membership_step(): void
+    {
+        $user = User::factory()->create(['membership_status' => 'pending']);
+
+        $this->actingAs($user)->get(route('hubs.register'))
+            ->assertOk()
+            ->assertSee('Activate your membership to apply.')
+            ->assertSee(route('membership.show'), false)
+            ->assertDontSee('name="name"', false);
+    }
+
+    public function test_existing_hub_owners_are_sent_to_their_workspace(): void
+    {
+        $user = User::factory()->create();
+        Hub::create([
+            'user_id' => $user->id,
+            'name' => 'Existing Hub',
+            'slug' => 'existing-hub',
+            'status' => 'pending',
+            'is_verified' => false,
+            'is_public' => false,
+        ]);
+
+        $this->actingAs($user)->get(route('hubs.register'))
+            ->assertOk()
+            ->assertSee('Your hub is already registered.')
+            ->assertSee(route('hub.dashboard'), false)
+            ->assertDontSee('name="name"', false);
     }
 }

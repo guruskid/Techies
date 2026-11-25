@@ -16,27 +16,32 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 @stack('head')
 </head>
-<body class="bg-[#F8FAFC] text-slate-800 antialiased">
+<body class="bg-[#F4F6F8] text-slate-800 antialiased">
 @php
   $user = auth()->user();
   $super = $user?->isSuperAdmin();
+  $workspaceDashboard = $super ? route('super-admin.dashboard') : route('admin.dashboard');
   $nav = [
-    'Main' => [
-      ['Dashboard', $super ? route('super-admin.dashboard') : route('admin.dashboard'), $super ? request()->is('super-admin') : request()->is('admin', 'admin/dashboard')],
+    'Overview' => [
+      ['Dashboard', $workspaceDashboard, $super ? request()->is('super-admin') : request()->is('admin', 'admin/dashboard')],
       ['Manage centre', route('admin.manage'), request()->is('admin/manage')],
     ],
-    'People' => [
+    'People and places' => [
       ['Members', route('admin.members.index'), request()->is('admin/members*')],
       ['Hubs', route('admin.hubs.index'), request()->is('admin/hubs*')],
       ['Chapters', route('admin.chapters.index'), request()->is('admin/chapters*')],
+    ],
+    'Network activity' => [
       ['Mentorship', route('admin.mentorship.index'), request()->is('admin/mentorship*')],
       ['Cohorts', route('admin.cohorts.index'), request()->is('admin/cohorts*')],
-      ['Showcase', route('admin.showcase.index'), request()->is('admin/showcase*')],
       ['Referrals', route('admin.referrals.index'), request()->is('admin/referrals*')],
+      ['Introductions', route('admin.introductions.index'), request()->is('admin/introductions*')],
+    ],
+    'Member programmes' => [
+      ['Showcase', route('admin.showcase.index'), request()->is('admin/showcase*')],
       ['Lounge', route('admin.lounge.index'), request()->is('admin/lounge*')],
       ['Grants', route('admin.grants.index'), request()->is('admin/grants*')],
       ['Spotlights', route('admin.spotlights.index'), request()->is('admin/spotlights*')],
-      ['Introductions', route('admin.introductions.index'), request()->is('admin/introductions*')],
       ['Feedback', route('admin.feedback.index'), request()->is('admin/feedback*')],
       ['Certificates', route('admin.certificates.index'), request()->is('admin/certificates*')],
     ],
@@ -63,20 +68,24 @@
   }
 @endphp
 
+<div x-data="{ mobileNavOpen: false }">
 <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
   <div class="flex h-16 items-center justify-between gap-4 px-4 lg:px-6">
     <div class="flex items-center gap-3">
-      <button type="button" x-data @click="$dispatch('toggle-admin-nav')" class="rounded-lg border border-slate-200 p-2 text-slate-700 lg:hidden" aria-label="Toggle navigation">
+      <button type="button" @click="mobileNavOpen = !mobileNavOpen" :aria-expanded="mobileNavOpen.toString()" aria-controls="mobile-workspace-navigation" class="rounded-lg border border-slate-200 p-2 text-slate-700 lg:hidden" aria-label="Toggle workspace navigation">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
       <a href="{{ route('home') }}" class="flex items-center gap-2">
         <img src="{{ asset('images/logo.svg') }}" alt="MWTT" class="h-8 w-auto">
       </a>
-      <span class="hidden rounded-full bg-[#101E33] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white sm:inline-block">{{ $super ? 'Super admin' : 'Admin' }}</span>
+      <div class="hidden sm:block">
+        <p class="text-sm font-semibold leading-tight text-[#101E33]">Meet with the Techies</p>
+        <p class="text-[11px] leading-tight text-slate-500">{{ $super ? 'Super admin workspace' : 'Admin workspace' }}</p>
+      </div>
     </div>
     <div class="flex items-center gap-2">
       <a href="{{ route('home') }}" class="hidden rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:inline-block">View site</a>
-      <a href="{{ route('dashboard') }}" class="rounded-lg bg-[#FF5C3D] px-3.5 py-1.5 text-sm font-semibold text-white hover:bg-[#e94f32]">Dashboard</a>
+      <a href="{{ $workspaceDashboard }}" class="rounded-lg bg-[#101E33] px-3.5 py-1.5 text-sm font-semibold text-white hover:bg-[#1a2f50]">Workspace home</a>
       <form method="POST" action="{{ route('logout') }}">
         @csrf
         <button class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Logout</button>
@@ -89,8 +98,13 @@
   <aside class="hidden w-64 shrink-0 border-r border-slate-200 bg-white lg:block">
     <nav class="sticky top-16 max-h-[calc(100vh-4rem)] overflow-y-auto p-4" aria-label="Workspace">
       @foreach($nav as $group => $items)
-        <p class="mb-2 mt-4 first:mt-0 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">{{ $group }}</p>
-        <ul class="space-y-0.5">
+        @php $groupActive = collect($items)->contains(fn ($item) => $item[2]); @endphp
+        <details class="workspace-nav-group" @if($groupActive) open @endif>
+          <summary class="mb-1 mt-3 first:mt-0 flex cursor-pointer list-none items-center justify-between rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500 hover:bg-slate-50">
+            {{ $group }}
+            <svg class="h-3.5 w-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <ul class="space-y-0.5">
           @foreach($items as [$label, $url, $active])
             <li>
               <a href="{{ $url }}" @if($active) aria-current="page" @endif
@@ -100,21 +114,28 @@
               </a>
             </li>
           @endforeach
-        </ul>
+          </ul>
+        </details>
       @endforeach
     </nav>
   </aside>
 
   <div class="min-w-0 flex-1">
-    <div x-data="{ open: false }" @toggle-admin-nav.window="open = !open" x-show="open" x-cloak class="border-b border-slate-200 bg-white lg:hidden">
+    <div id="mobile-workspace-navigation" x-show="mobileNavOpen" x-cloak class="border-b border-slate-200 bg-white lg:hidden">
       <nav class="max-h-[70vh] overflow-y-auto p-4" aria-label="Workspace mobile">
         @foreach($nav as $group => $items)
-          <p class="mb-1 mt-3 first:mt-0 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">{{ $group }}</p>
-          <ul class="space-y-0.5">
+          @php $groupActive = collect($items)->contains(fn ($item) => $item[2]); @endphp
+          <details class="workspace-nav-group" @if($groupActive) open @endif>
+            <summary class="mb-1 mt-3 first:mt-0 flex cursor-pointer list-none items-center justify-between rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500 hover:bg-slate-50">
+              {{ $group }}
+              <svg class="h-3.5 w-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <ul class="space-y-0.5">
             @foreach($items as [$label, $url, $active])
-              <li><a href="{{ $url }}" class="block rounded-lg px-3 py-2 text-sm {{ $active ? 'bg-[#FF5C3D]/10 font-semibold text-[#C23A1F]' : 'text-slate-600' }}">{{ $label }}</a></li>
+              <li><a href="{{ $url }}" @if($active) aria-current="page" @endif class="block rounded-lg px-3 py-2 text-sm {{ $active ? 'bg-[#FF5C3D]/10 font-semibold text-[#C23A1F]' : 'text-slate-600' }}">{{ $label }}</a></li>
             @endforeach
-          </ul>
+            </ul>
+          </details>
         @endforeach
       </nav>
     </div>
@@ -122,6 +143,7 @@
     @include('partials.flash')
     @yield('content')
   </div>
+</div>
 </div>
 </body>
 </html>

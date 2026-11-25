@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Hub;
 
 use App\Http\Controllers\Controller;
 use App\Models\Hub;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class HubController extends Controller
 {
-    public function show($slug)
+    public function show(string $slug): View
     {
         $hub = Hub::where('slug', $slug)->firstOrFail();
 
@@ -25,5 +27,19 @@ class HubController extends Controller
             ->get();
 
         return view('pages.hub-profile', compact('hub', 'events'));
+    }
+
+    public function register(Request $request): View
+    {
+        $applicant = $request->user();
+        $existingHub = $applicant?->hub()->first();
+
+        return view('pages.hub-register', [
+            'applicant' => $applicant,
+            'existingHub' => $existingHub,
+            'canRegisterHub' => $applicant !== null
+                && $applicant->hasActiveMembership()
+                && $existingHub === null,
+        ]);
     }
 }

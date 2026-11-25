@@ -4,7 +4,7 @@
   <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-0 bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
     <div class="hidden md:flex flex-col justify-between bg-[#101E33] text-white p-10">
       <div>
-        <div class="text-2xl font-bold">MWTT</div>
+        <img src="{{ asset('images/logo-light.svg') }}" alt="Meet with the Techies" class="h-9 w-auto">
         <h2 class="mt-8 text-3xl font-bold leading-tight">Register your technology hub.</h2>
         <p class="mt-4 text-slate-300">Join the MWTT network and connect your tech community with a wider ecosystem.</p>
         <ul class="mt-6 space-y-2 text-sm text-slate-300">
@@ -17,14 +17,33 @@
       </div>
       <div class="text-sm text-slate-400">© {{ date('Y') }} Meet with the Techies</div>
     </div>
-    <div class="p-10 max-h-[85vh] overflow-y-auto">
+    <div class="p-6 sm:p-10">
       <h1 class="text-2xl font-bold text-[#101E33]">Register Your Hub</h1>
-      <p class="mt-1 text-slate-500 text-sm">Fill out the form. Your application will be reviewed.</p>
-      @guest
-        <div class="mt-4 p-3 rounded-lg bg-yellow-50 text-yellow-700 text-sm">
-          You need an account before submitting a hub. <a href="{{ route('login') }}" class="font-medium underline">Log in</a> or <a href="{{ route('register') }}" class="font-medium underline">create one</a>.
-        </div>
-      @endguest
+      <p class="mt-1 text-slate-500 text-sm">{{ $canRegisterHub ? 'Tell us about your organisation. Applications are reviewed by the MWTT team.' : 'See the next step for your account below.' }}</p>
+      @if(! $canRegisterHub)
+        @if($existingHub)
+          <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+            <p class="font-semibold text-[#101E33]">Your hub is already registered.</p>
+            <p class="mt-1">Check its review status, update details, and manage your team from your hub workspace.</p>
+            <a href="{{ route('hub.dashboard') }}" class="mt-3 inline-flex font-semibold text-[#C23A1F] hover:underline">Open hub workspace</a>
+          </div>
+        @elseif($applicant)
+          <div class="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <p class="font-semibold">Activate your membership to apply.</p>
+            <p class="mt-1">Hub registration is available to active MWTT members. Once your one-time membership is confirmed, return here to submit your hub.</p>
+            <a href="{{ route('membership.show') }}" class="mt-3 inline-flex font-semibold underline">View membership options</a>
+          </div>
+        @else
+          <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+            <p class="font-semibold text-[#101E33]">Start with a member account.</p>
+            <p class="mt-1">Hub applications are reviewed and are open to active MWTT members.</p>
+            <div class="mt-3 flex flex-wrap gap-3">
+              <a href="{{ route('register') }}" class="font-semibold text-[#C23A1F] hover:underline">Create an account</a>
+              <a href="{{ route('login') }}" class="font-semibold text-slate-700 hover:underline">Log in</a>
+            </div>
+          </div>
+        @endif
+      @endif
       @if(session('status'))
         <div class="mt-4 p-3 rounded-lg bg-yellow-50 text-yellow-700 text-sm">{{ session('status') }}</div>
       @endif
@@ -35,93 +54,92 @@
           </ul>
         </div>
       @endif
+      @if($canRegisterHub)
       <form method="POST" action="{{ route('hubs.register.store') }}" class="mt-6 space-y-4">
         @csrf
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Official Hub Name *</label>
-          <input name="name" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
+          <label for="hub-name" class="block text-xs font-medium text-slate-500 mb-1">Official hub name *</label>
+          <input id="hub-name" name="name" value="{{ old('name') }}" autocomplete="organization" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Description</label>
-          <textarea name="description" rows="3" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]"></textarea>
+          <label for="hub-description" class="block text-xs font-medium text-slate-500 mb-1">Description</label>
+          <textarea id="hub-description" name="description" rows="3" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">{{ old('description') }}</textarea>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">Year Established</label>
-            <input name="year_established" type="number" min="1900" max="2030" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+            <label for="hub-year-established" class="block text-xs font-medium text-slate-500 mb-1">Year established</label>
+            <input id="hub-year-established" name="year_established" type="number" min="1900" max="2030" value="{{ old('year_established') }}" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">Organization Type</label>
-            <select name="organization_type" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+            <label for="hub-organization-type" class="block text-xs font-medium text-slate-500 mb-1">Organization type</label>
+            <select id="hub-organization-type" name="organization_type" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
               <option value="">Select</option>
-              <option value="Tech Hub">Tech Hub</option>
-              <option value="Innovation Centre">Innovation Centre</option>
-              <option value="Incubator">Incubator</option>
-              <option value="Accelerator">Accelerator</option>
-              <option value="University Community">University Community</option>
-              <option value="Developer Community">Developer Community</option>
-              <option value="Other">Other</option>
+              @foreach(['Tech Hub', 'Innovation Centre', 'Incubator', 'Accelerator', 'University Community', 'Developer Community', 'Other'] as $organizationType)
+                <option value="{{ $organizationType }}" @selected(old('organization_type') === $organizationType)>{{ $organizationType }}</option>
+              @endforeach
             </select>
           </div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Official Email</label>
-          <input name="email" type="email" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+          <label for="hub-email" class="block text-xs font-medium text-slate-500 mb-1">Official email</label>
+          <input id="hub-email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Phone Number</label>
-          <input name="phone" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+          <label for="hub-phone" class="block text-xs font-medium text-slate-500 mb-1">Phone number</label>
+          <input id="hub-phone" name="phone" type="tel" value="{{ old('phone') }}" autocomplete="tel" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Website</label>
-          <input name="website" type="url" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+          <label for="hub-website" class="block text-xs font-medium text-slate-500 mb-1">Website</label>
+          <input id="hub-website" name="website" type="url" value="{{ old('website') }}" autocomplete="url" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">Contact Person</label>
-            <input name="contact_person" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+            <label for="hub-contact-person" class="block text-xs font-medium text-slate-500 mb-1">Contact person</label>
+            <input id="hub-contact-person" name="contact_person" value="{{ old('contact_person') }}" autocomplete="name" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">Position</label>
-            <input name="contact_position" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+            <label for="hub-contact-position" class="block text-xs font-medium text-slate-500 mb-1">Position</label>
+            <input id="hub-contact-position" name="contact_position" value="{{ old('contact_position') }}" autocomplete="organization-title" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
           </div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Community Size</label>
-          <input name="community_size" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" placeholder="e.g. 50-100">
+          <label for="hub-community-size" class="block text-xs font-medium text-slate-500 mb-1">Community size</label>
+          <input id="hub-community-size" name="community_size" value="{{ old('community_size') }}" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" placeholder="e.g. 50–100">
         </div>
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">Country</label>
-            <input name="country" value="Nigeria" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+            <label for="hub-country" class="block text-xs font-medium text-slate-500 mb-1">Country</label>
+            <input id="hub-country" name="country" value="{{ old('country', 'Nigeria') }}" autocomplete="country-name" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">State</label>
-            <input name="state" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+            <label for="hub-state" class="block text-xs font-medium text-slate-500 mb-1">State</label>
+            <input id="hub-state" name="state" value="{{ old('state') }}" autocomplete="address-level1" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">City</label>
-            <input name="city" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+            <label for="hub-city" class="block text-xs font-medium text-slate-500 mb-1">City</label>
+            <input id="hub-city" name="city" value="{{ old('city') }}" autocomplete="address-level2" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
           </div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Full Address</label>
-          <input name="address" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+          <label for="hub-address" class="block text-xs font-medium text-slate-500 mb-1">Full address</label>
+          <input id="hub-address" name="address" value="{{ old('address') }}" autocomplete="street-address" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
         </div>
-        <div class="space-y-3">
-          <label class="block text-xs font-medium text-slate-500">Social Media (optional)</label>
-          <input name="linkedin" type="url" placeholder="LinkedIn URL" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
-          <input name="facebook" type="url" placeholder="Facebook URL" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
-          <input name="instagram" type="url" placeholder="Instagram URL" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
-          <input name="x" type="url" placeholder="X (Twitter) URL" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
-          <input name="youtube" type="url" placeholder="YouTube URL" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
-        </div>
+        <fieldset class="space-y-3">
+          <legend class="block text-xs font-medium text-slate-500">Social media <span class="font-normal">(optional)</span></legend>
+          @foreach(['linkedin' => 'LinkedIn', 'facebook' => 'Facebook', 'instagram' => 'Instagram', 'x' => 'X', 'youtube' => 'YouTube'] as $field => $label)
+            <div>
+              <label for="hub-{{ $field }}" class="mb-1 block text-xs font-medium text-slate-600">{{ $label }}</label>
+              <input id="hub-{{ $field }}" name="{{ $field }}" type="url" value="{{ old($field) }}" placeholder="https://" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]">
+            </div>
+          @endforeach
+        </fieldset>
         <div>
-          <label class="block text-xs font-medium text-slate-500 mb-1">Programs Offered</label>
-          <textarea name="programs_offered" rows="3" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" placeholder="Training, workshops, incubation, mentorship..."></textarea>
+          <label for="hub-programs" class="block text-xs font-medium text-slate-500 mb-1">Programs offered</label>
+          <textarea id="hub-programs" name="programs_offered" rows="3" class="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" placeholder="Training, workshops, incubation, mentorship...">{{ old('programs_offered') }}</textarea>
         </div>
         <button class="w-full px-6 py-3 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition">Submit Application</button>
       </form>
+      @endif
       <p class="mt-6 text-sm text-slate-500 text-center">Already registered? <a href="/hubs" class="text-[#FF5C3D] font-medium hover:underline">View hubs</a></p>
     </div>
   </div>

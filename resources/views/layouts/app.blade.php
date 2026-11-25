@@ -38,7 +38,7 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 @stack('head')
 </head>
-<body class="bg-[#F7F8FC] text-slate-800 antialiased overflow-x-clip">
+<body class="bg-[#F4F6F8] text-slate-800 antialiased overflow-x-clip">
 <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm">
   <div class="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between gap-5">
     <a href="{{ route('home') }}" class="font-bold text-xl text-[#101E33] flex items-center gap-2 shrink-0">
@@ -50,10 +50,11 @@
           ['label' => 'Home', 'url' => '/', 'active' => request()->is('/')],
           [
             'label' => 'Community',
-            'active' => request()->is('members', 'members/*', 'hubs*', 'chapters*', 'about*'),
+            'active' => request()->is('members', 'members/*', 'hubs*', 'chapters*', 'about*', 'projects*', 'grants*'),
             'items' => [
               ['Members', '/members', request()->is('members', 'members/*')],
               ['Hubs', '/hubs', request()->is('hubs*')],
+              ['Register a hub', route('hubs.register'), request()->is('hubs/register')],
               ['Chapters', '/chapters', request()->is('chapters*')],
               ['Project showcase', '/projects', request()->is('projects*')],
               ['Micro-grants', '/grants', request()->is('grants*')],
@@ -62,7 +63,7 @@
           ],
           [
             'label' => 'Events',
-            'active' => request()->is('events*', 'speaker-calls*'),
+            'active' => request()->is('events*', 'speaker-calls*', 'programmes*'),
             'items' => [
               ['Events', '/events', request()->is('events*')],
               ['Call for Speakers', '/speaker-calls', request()->is('speaker-calls*')],
@@ -72,7 +73,7 @@
           ['label' => 'Opportunities', 'url' => '/opportunities', 'active' => request()->is('opportunities*')],
           [
             'label' => 'Learn',
-            'active' => request()->is('articles*', 'news*'),
+            'active' => request()->is('articles*', 'news*', 'cohorts*', 'benefits*'),
             'items' => [
               ['Articles', '/articles', request()->is('articles*')],
               ['News', '/news', request()->is('news*')],
@@ -214,6 +215,7 @@
           <li><a href="/register" class="text-slate-400 hover:text-white transition">Join MWTT</a></li>
           <li><a href="/members" class="text-slate-400 hover:text-white transition">Members directory</a></li>
           <li><a href="/hubs" class="text-slate-400 hover:text-white transition">Technology hubs</a></li>
+          <li><a href="{{ route('hubs.register') }}" class="text-slate-400 hover:text-white transition">Register a hub</a></li>
           <li><a href="/chapters" class="text-slate-400 hover:text-white transition">Chapters</a></li>
           <li><a href="/membership" class="text-slate-400 hover:text-white transition">Membership</a></li>
           <li><a href="/benefits" class="text-slate-400 hover:text-white transition">Member benefits</a></li>

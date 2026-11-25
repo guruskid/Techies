@@ -223,6 +223,7 @@ class DummyDataSeeder extends Seeder
             'role' => 'member',
             'status' => 'active',
             'membership_status' => 'unpaid',
+            'is_founding_member' => false,
         ]);
 
         $user->forceFill(['email_verified_at' => now()])->save();

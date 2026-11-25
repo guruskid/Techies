@@ -2,9 +2,9 @@
 @section('content')
 <div class="min-h-[70vh] flex items-center justify-center py-12 px-4">
   <div class="max-w-5xl w-full grid md:grid-cols-2 gap-0 bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
-    <div class="hidden md:flex flex-col justify-between bg-[#101E33] text-white p-10">
+    <div class="auth-brand-panel hidden md:flex flex-col justify-between bg-[#101E33] text-white p-10">
       <div>
-        <div class="text-2xl font-bold">MWTT</div>
+        <img src="{{ asset('images/logo-light.svg') }}" alt="Meet with the Techies" class="h-9 w-auto">
         <h2 class="mt-8 text-3xl font-bold leading-tight">One more step to join the community.</h2>
         <p class="mt-4 text-slate-300">Verify your email address to activate your account and start connecting with techies, hubs and events.</p>
         <ul class="mt-6 space-y-2 text-sm text-slate-300">

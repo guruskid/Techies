@@ -16,8 +16,34 @@
   h1, h2, h3, h4, .font-display { font-family: Manrope, Inter, ui-sans-serif, sans-serif; letter-spacing: -.025em; }
   [x-cloak] { display: none !important; }
   :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea {
+    border-color: var(--line) !important;
+    border-radius: .65rem !important;
+    background-color: var(--surface);
+    color: #29394b;
+    transition: border-color .16s ease, box-shadow .16s ease;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
+  select:focus, textarea:focus {
+    border-color: #c47766 !important;
+    box-shadow: 0 0 0 3px rgb(200 78 53 / 12%);
+    outline: none;
+  }
+  input::placeholder, textarea::placeholder { color: #8b99a8; }
+  button, [role="button"] { transition-timing-function: ease; }
+  table { border-collapse: separate; border-spacing: 0; }
+  th { color: #536579; font-size: .7rem; letter-spacing: .09em; text-transform: uppercase; }
+  td, th { border-color: var(--line); }
+  tbody tr:hover { background-color: #f8fafb; }
 
   /* Keep the existing utility based pages, but give their shared surfaces one visual language. */
+  [class~="bg-[#FF5C3D]"] { background-color: #c84e35 !important; }
+  [class~="bg-[#101E33]"] { background-color: #172b43 !important; }
+  [class~="text-[#FF5C3D]"] { color: #c84e35 !important; }
+  [class~="text-[#C23A1F]"] { color: #a83b27 !important; }
+  [class~="text-[#101E33]"] { color: #172b43 !important; }
+  [class~="border-[#FF5C3D]"] { border-color: #c84e35 !important; }
+  [class~="hover:bg-[#e94f32]"]:hover { background-color: #a83b27 !important; }
   [class*="border-slate-100"], [class*="border-slate-200"] { border-color: var(--line) !important; }
   .bg-white.rounded-2xl, .bg-white.rounded-xl { box-shadow: var(--shadow-soft); }
   .card-lift { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
@@ -30,6 +56,15 @@
   main { min-height: 60vh; }
   footer { background: #172b43 !important; }
   footer a { transition: color .16s ease; }
+  .member-workspace-nav { position: relative; z-index: 30; }
+  .member-workspace-nav nav { min-height: 3.25rem; }
+  .member-workspace-toggle[aria-expanded="true"] svg,
+  .workspace-nav-group[open] > summary svg { transform: rotate(180deg); }
+  .member-workspace-toggle[aria-expanded="true"] { border-color: var(--brand); }
+  .workspace-nav-group > ul { padding-left: 0; }
+  .workspace-nav-group > summary { min-height: 2.25rem; }
+  .auth-brand-panel { background-image: radial-gradient(38rem 24rem at 90% 0%, rgb(255 92 61 / 16%), transparent 65%), linear-gradient(145deg, #101e33, #1c334c) !important; }
+  .auth-brand-panel img { max-width: 10rem; }
 
   /* Reading surfaces */
   .prose-tech { max-width: 70ch; color: #526477; line-height: 1.8; }
@@ -53,5 +88,10 @@
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+  @media (max-width: 640px) {
+    .member-workspace-nav nav { overflow: visible; flex-wrap: wrap; }
+    .member-workspace-menu { position: absolute; left: 0; right: auto; top: 100%; width: min(18rem, calc(100vw - 2rem)); min-width: 0; }
+    .member-workspace-group:last-child .member-workspace-menu { left: auto; right: 0; }
   }
 </style>

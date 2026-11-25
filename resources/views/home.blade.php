@@ -239,12 +239,17 @@
 <section class="max-w-7xl mx-auto px-4 py-16 md:py-20">
   <div class="grid lg:grid-cols-[1.4fr_0.6fr] gap-8 items-start">
     <div>
-      <div class="flex items-end justify-between gap-4 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
         <div>
           <p class="section-label">Where it happens</p>
           <h2 class="mt-2 font-display text-3xl md:text-4xl font-bold text-[#101E33]">Technology hubs</h2>
         </div>
-        <a href="{{ route('hubs') }}" class="text-sm font-semibold text-[#C23A1F] hover:underline {{ $focus }}">View all</a>
+        <div class="flex flex-wrap items-center gap-4">
+          <a href="{{ route('hubs') }}" class="text-sm font-semibold text-[#C23A1F] hover:underline {{ $focus }}">View all hubs</a>
+          <a href="{{ route('hubs.register') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#101E33] transition hover:border-[#FF5C3D] hover:text-[#C23A1F] {{ $focus }}">
+            Register your hub
+          </a>
+        </div>
       </div>
       <div class="grid sm:grid-cols-2 gap-4">
         @forelse($hubs->take(4) as $hub)

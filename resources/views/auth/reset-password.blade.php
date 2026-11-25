@@ -8,18 +8,18 @@
       @csrf
       <input type="hidden" name="token" value="{{ $token }}">
       <div>
-        <label class="block text-xs font-medium text-slate-500 mb-1">Email Address</label>
-        <input name="email" type="email" value="{{ $email ?? old('email') }}" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
+        <label for="email" class="block text-xs font-medium text-slate-500 mb-1">Email address</label>
+        <input id="email" name="email" type="email" autocomplete="email" value="{{ $email ?? old('email') }}" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
         @error('email')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-500 mb-1">New Password</label>
-        <input name="password" type="password" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
+        <label for="password" class="block text-xs font-medium text-slate-500 mb-1">New password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
         @error('password')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-500 mb-1">Confirm Password</label>
-        <input name="password_confirmation" type="password" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
+        <label for="password_confirmation" class="block text-xs font-medium text-slate-500 mb-1">Confirm password</label>
+        <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" class="w-full border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#FF5C3D]" required>
       </div>
       <button class="w-full px-6 py-3 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition">Reset Password</button>
     </form>

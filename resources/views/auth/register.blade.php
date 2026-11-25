@@ -12,9 +12,9 @@
   <div class="max-w-5xl w-full grid md:grid-cols-2 gap-0 bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
 
     {{-- Benefits panel --}}
-    <div class="hidden md:flex flex-col justify-between bg-[#101E33] text-white p-10">
+    <div class="auth-brand-panel hidden md:flex flex-col justify-between bg-[#101E33] text-white p-10">
       <div>
-        <div class="text-2xl font-bold">MWTT</div>
+        <img src="{{ asset('images/logo-light.svg') }}" alt="Meet with the Techies" class="h-9 w-auto">
         <h2 class="mt-8 text-3xl font-bold leading-tight">Join a growing tech community.</h2>
         <p class="mt-4 text-slate-300">Connect with developers, designers, founders, students and technology hubs across Nigeria.</p>
         <ul class="mt-6 space-y-3 text-sm text-slate-300">

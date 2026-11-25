@@ -47,6 +47,35 @@ class PublicAccessTest extends TestCase
         $this->get('/hubs/approved-hub')->assertOk();
     }
 
+    public function test_hub_directory_can_filter_by_organization_type(): void
+    {
+        $owner = User::factory()->create();
+
+        Hub::create([
+            'user_id' => $owner->id,
+            'name' => 'Enugu Incubator',
+            'slug' => 'enugu-incubator',
+            'organization_type' => 'Incubator',
+            'status' => 'approved',
+            'is_verified' => true,
+            'is_public' => true,
+        ]);
+        Hub::create([
+            'user_id' => User::factory()->create()->id,
+            'name' => 'Lagos Developer Hub',
+            'slug' => 'lagos-developer-hub',
+            'organization_type' => 'Developer Community',
+            'status' => 'approved',
+            'is_verified' => true,
+            'is_public' => true,
+        ]);
+
+        $this->get(route('hubs', ['organization_type' => 'Incubator']))
+            ->assertOk()
+            ->assertSee('Enugu Incubator')
+            ->assertDontSee('Lagos Developer Hub');
+    }
+
     public function test_suspended_members_and_private_profiles_are_not_public(): void
     {
         $suspended = User::factory()->create(['status' => 'suspended']);

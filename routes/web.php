@@ -469,7 +469,7 @@ Route::get('/members', function (Request $r) {
         'openTo' => $r->open_to,
     ]);
 })->name('members');
-Route::view('/hubs/register', 'pages.hub-register')->name('hubs.register');
+Route::get('/hubs/register', [HubController::class, 'register'])->name('hubs.register');
 Route::post('/hubs/register', function (Request $r) {
     $data = $r->validate([
         'name' => 'required|string|max:255',
@@ -533,11 +533,26 @@ Route::get('/hubs', function (Request $r) {
     if ($r->filled('state')) {
         $q->where('state', $r->state);
     }
+    $organizationType = $r->query('organization_type');
+    $organizationType = is_string($organizationType) ? $organizationType : '';
+    if ($organizationType !== '') {
+        $q->where('organization_type', $organizationType);
+    }
+    $organizationTypes = Hub::query()
+        ->where('is_public', true)
+        ->where('status', 'approved')
+        ->whereNotNull('organization_type')
+        ->where('organization_type', '!=', '')
+        ->distinct()
+        ->orderBy('organization_type')
+        ->pluck('organization_type');
 
     return view('pages.hubs', [
         'hubs' => $q->latest()->paginate(12)->withQueryString(),
         'search' => $r->search,
         'state' => $r->state,
+        'organizationType' => $organizationType,
+        'organizationTypes' => $organizationTypes,
     ]);
 })->name('hubs');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
