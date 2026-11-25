@@ -4,16 +4,25 @@ namespace App\Notifications;
 
 use App\Models\Grant;
 use App\Models\GrantApplication;
+use App\Notifications\Concerns\StoresNotificationSummary;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class GrantApplicationUpdated extends Notification
+class GrantApplicationUpdated extends Notification implements ShouldQueue
 {
-    public function __construct(public Grant $grant, public GrantApplication $application) {}
+    use Queueable;
+    use StoresNotificationSummary;
+
+    public function __construct(public Grant $grant, public GrantApplication $application)
+    {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage

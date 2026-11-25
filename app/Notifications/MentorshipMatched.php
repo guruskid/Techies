@@ -4,20 +4,28 @@ namespace App\Notifications;
 
 use App\Models\MentorshipRequest;
 use App\Models\User;
+use App\Notifications\Concerns\StoresNotificationSummary;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class MentorshipMatched extends Notification
+class MentorshipMatched extends Notification implements ShouldQueue
 {
+    use Queueable;
+    use StoresNotificationSummary;
+
     public function __construct(
         public MentorshipRequest $request,
         public User $counterpart,
         public string $role,
-    ) {}
+    ) {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage

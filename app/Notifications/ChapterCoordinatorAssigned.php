@@ -4,16 +4,25 @@ namespace App\Notifications;
 
 use App\Models\Chapter;
 use App\Models\User;
+use App\Notifications\Concerns\StoresNotificationSummary;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ChapterCoordinatorAssigned extends Notification
+class ChapterCoordinatorAssigned extends Notification implements ShouldQueue
 {
-    public function __construct(public Chapter $chapter, public User $assignedBy) {}
+    use Queueable;
+    use StoresNotificationSummary;
+
+    public function __construct(public Chapter $chapter, public User $assignedBy)
+    {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage

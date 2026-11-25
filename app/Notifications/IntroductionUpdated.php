@@ -3,16 +3,25 @@
 namespace App\Notifications;
 
 use App\Models\IntroRequest;
+use App\Notifications\Concerns\StoresNotificationSummary;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class IntroductionUpdated extends Notification
+class IntroductionUpdated extends Notification implements ShouldQueue
 {
-    public function __construct(public IntroRequest $introRequest) {}
+    use Queueable;
+    use StoresNotificationSummary;
+
+    public function __construct(public IntroRequest $introRequest)
+    {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage

@@ -3,18 +3,26 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use App\Notifications\Concerns\StoresNotificationSummary;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class MemberContactMessage extends Notification
+class MemberContactMessage extends Notification implements ShouldQueue
 {
+    use Queueable;
+    use StoresNotificationSummary;
+
     public function __construct(
         public ?User $senderUser = null,
         public ?string $senderName = null,
         public ?string $senderEmail = null,
         public string $subjectLine = '',
         public string $body = '',
-    ) {}
+    ) {
+        $this->afterCommit();
+    }
 
     public function senderName(): string
     {
@@ -28,7 +36,7 @@ class MemberContactMessage extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage

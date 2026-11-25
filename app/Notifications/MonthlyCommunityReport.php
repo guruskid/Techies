@@ -2,19 +2,28 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\StoresNotificationSummary;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class MonthlyCommunityReport extends Notification
+class MonthlyCommunityReport extends Notification implements ShouldQueue
 {
+    use Queueable;
+    use StoresNotificationSummary;
+
     /**
      * @param  array<string, int>  $stats
      */
-    public function __construct(public array $stats, public ?string $spotlight = null) {}
+    public function __construct(public array $stats, public ?string $spotlight = null)
+    {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage

@@ -3,20 +3,29 @@
 namespace App\Notifications;
 
 use App\Models\Opportunity;
+use App\Notifications\Concerns\StoresNotificationSummary;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 
-class OpportunityMatches extends Notification
+class OpportunityMatches extends Notification implements ShouldQueue
 {
+    use Queueable;
+    use StoresNotificationSummary;
+
     /**
      * @param  Collection<int, Opportunity>  $opportunities
      */
-    public function __construct(public Collection $opportunities) {}
+    public function __construct(public Collection $opportunities)
+    {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
