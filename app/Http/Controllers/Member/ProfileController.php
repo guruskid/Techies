@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
+use App\Models\ShowcaseProject;
 use App\Models\UserProfile;
 use App\Notifications\MemberContactMessage;
 use Illuminate\Http\RedirectResponse;
@@ -67,7 +68,11 @@ class ProfileController extends Controller
 
     private function render(UserProfile $profile, int $privateStatus): View
     {
-        $user = $profile->user;
+        $user = $profile->user()->with([
+            'showcaseProjects' => fn ($query) => $query
+                ->where('status', ShowcaseProject::STATUS_APPROVED)
+                ->latest(),
+        ])->first();
 
         if (! $user || $user->status !== 'active') {
             abort(404);

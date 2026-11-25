@@ -21,6 +21,7 @@ class MembershipController extends Controller
             'fee' => $fee,
             'currency' => $currency,
             'paymentUrl' => Setting::value('membership_payment_url'),
+            'hasPaystack' => filled(config('services.paystack.secret_key')),
             'instructions' => Setting::value('membership_payment_instructions'),
             'benefits' => $this->benefits(),
             'guarantee' => Setting::value('membership_guarantee'),

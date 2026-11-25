@@ -18,7 +18,7 @@
             'heading', '|',
             'bold', 'italic', 'link', '|',
             'bulletedList', 'numberedList', 'blockQuote', '|',
-            'removeFormat', 'undo', 'redo',
+            'undo', 'redo',
           ],
         }).catch(function (error) {
           console.error('CKEditor init failed:', error);

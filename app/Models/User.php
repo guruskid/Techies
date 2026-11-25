@@ -86,6 +86,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(ShowcaseProject::class);
     }
 
+    public function bookmarks()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
     public function introRequests()
     {
         return $this->hasMany(IntroRequest::class, 'requester_id');

@@ -8,7 +8,7 @@
 <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
-<script src="https://cdn.tailwindcss.com"></script>
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
@@ -25,6 +25,8 @@
     'Overview' => [
       ['Dashboard', $workspaceDashboard, $super ? request()->is('super-admin') : request()->is('admin', 'admin/dashboard')],
       ['Manage centre', route('admin.manage'), request()->is('admin/manage')],
+      ['Payments', route('admin.payments.index'), request()->is('admin/payments*')],
+      ['Operations', route('admin.operations.index'), request()->is('admin/operations*')],
     ],
     'People and places' => [
       ['Members', route('admin.members.index'), request()->is('admin/members*')],

@@ -62,6 +62,9 @@ class MyProfileController extends Controller
             'avatar' => 'nullable|image|max:2048',
             'is_public' => 'nullable|boolean',
             'weekly_digest' => 'nullable|boolean',
+            'notification_preferences_present' => ['nullable', 'boolean'],
+            'notification_preferences' => ['nullable', 'array:events,opportunities,applications,mentorship,membership,community'],
+            'notification_preferences.*' => ['boolean'],
             'chapter_id' => 'nullable|exists:chapters,id',
             'interests' => 'nullable|array',
             'interests.*' => 'exists:interests,id',
@@ -107,6 +110,11 @@ class MyProfileController extends Controller
 
         $profile->is_public = $request->boolean('is_public');
         $profile->weekly_digest = $request->boolean('weekly_digest');
+        if ($request->boolean('notification_preferences_present')) {
+            $profile->notification_preferences = collect(['events', 'opportunities', 'applications', 'mentorship', 'membership', 'community'])
+                ->mapWithKeys(fn (string $category): array => [$category => $request->boolean('notification_preferences.'.$category)])
+                ->all();
+        }
         foreach (['open_to_work', 'open_to_mentor', 'open_to_collaborate', 'available_for_speaking', 'hiring'] as $flag) {
             $profile->{$flag} = $request->boolean($flag);
         }

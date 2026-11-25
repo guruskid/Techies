@@ -19,8 +19,10 @@ use App\Http\Controllers\Admin\Mail\MessageController as MailMessageController;
 use App\Http\Controllers\Admin\Mail\TemplateController as MailTemplateController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\MentorshipController as AdminMentorshipController;
+use App\Http\Controllers\Admin\OperationsController;
 use App\Http\Controllers\Admin\OpportunityCategoryController as AdminOpportunityCategoryController;
 use App\Http\Controllers\Admin\OpportunityController as AdminOpportunityController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\ReferralController as AdminReferralController;
 use App\Http\Controllers\Admin\ShowcaseController as AdminShowcaseController;
 use App\Http\Controllers\Admin\SpeakerCallController as AdminSpeakerCallController;
@@ -39,6 +41,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Hub\HubController;
 use App\Http\Controllers\Hub\HubDashboardController;
 use App\Http\Controllers\InboundMailController;
+use App\Http\Controllers\Member\ApplicationTrackingController;
+use App\Http\Controllers\Member\BookmarkController;
 use App\Http\Controllers\Member\CohortController;
 use App\Http\Controllers\Member\ContentController as MemberContentController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboard;
@@ -48,13 +52,17 @@ use App\Http\Controllers\Member\IntroductionController;
 use App\Http\Controllers\Member\LoungeController;
 use App\Http\Controllers\Member\MentorshipController;
 use App\Http\Controllers\Member\MyProfileController;
+use App\Http\Controllers\Member\NotificationController;
 use App\Http\Controllers\Member\PassportController;
 use App\Http\Controllers\Member\ProfileController;
 use App\Http\Controllers\Member\ReferralController;
 use App\Http\Controllers\Member\ShowcaseController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\Opportunity\OpportunityController;
+use App\Http\Controllers\PaystackPaymentController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\PublicDirectoryController;
+use App\Http\Controllers\PublicSearchController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SpeakerCallController;
 use App\Http\Controllers\SuperAdmin\AuditLogController as SuperAdminAuditLogController;
@@ -62,25 +70,13 @@ use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboard;
 use App\Http\Controllers\SuperAdmin\RoleController as SuperAdminRoleController;
 use App\Http\Controllers\SuperAdmin\SettingController as SuperAdminSettingController;
 use App\Http\Controllers\SuperAdmin\UserController as SuperAdminUserController;
-use App\Models\Announcement;
-use App\Models\Article;
-use App\Models\Chapter;
-use App\Models\Event;
-use App\Models\EventCategory;
-use App\Models\Hub;
-use App\Models\HubApplication;
 use App\Models\NewsletterSubscriber;
-use App\Models\Opportunity;
-use App\Models\OpportunityCategory;
 use App\Models\Setting;
-use App\Models\User;
-use App\Notifications\HubApplicationSubmitted;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
-use Spatie\Permission\Models\Role;
 
 $profileDomains = collect([config('techies.profile_domain')])
     ->merge(config('techies.profile_extra_domains', []))
@@ -179,9 +175,29 @@ Route::get('/membership', [MembershipController::class, 'show'])->name('membersh
 Route::post('/membership/payment', [MembershipController::class, 'submitPayment'])
     ->middleware(['auth', 'verified'])
     ->name('membership.payment.submit');
+Route::post('/membership/payment/initialize', [PaystackPaymentController::class, 'initialize'])
+    ->middleware(['auth', 'verified', 'throttle:5,1'])
+    ->name('membership.payment.initialize');
+Route::get('/membership/payment/callback', [PaystackPaymentController::class, 'callback'])
+    ->middleware('throttle:10,1')
+    ->name('membership.payment.callback');
+Route::post('/payments/paystack/webhook', [PaystackPaymentController::class, 'webhook'])
+    ->withoutMiddleware([ValidateCsrfToken::class])
+    ->middleware('throttle:60,1')
+    ->name('payments.paystack.webhook');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [MemberDashboard::class, 'index'])->name('dashboard');
+    Route::get('/applications', [ApplicationTrackingController::class, 'index'])->name('applications.index');
+    Route::get('/saved', [BookmarkController::class, 'index'])->name('bookmarks.index');
+    Route::post('/saved/{type}/{id}', [BookmarkController::class, 'toggle'])->middleware('membership')
+        ->whereIn('type', ['event', 'opportunity'])
+        ->name('bookmarks.toggle');
+    Route::delete('/saved/{bookmarkId}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::get('/notifications/{notificationId}/open', [NotificationController::class, 'open'])->name('notifications.open');
+    Route::patch('/notifications/{notificationId}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::get('/passport', [PassportController::class, 'show'])->name('passport.show');
     Route::get('/feedback', [FeedbackController::class, 'show'])->name('feedback.show');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
@@ -263,6 +279,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:admin|super_admin')->group(function () {
         Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard.alt');
+        Route::get('/admin/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
+        Route::post('/admin/payments/{paymentTransaction}/refund', [AdminPaymentController::class, 'refund'])
+            ->middleware('throttle:10,1')
+            ->name('admin.payments.refund');
+        Route::get('/admin/operations', [OperationsController::class, 'index'])->name('admin.operations.index');
+        Route::post('/admin/operations/failed-jobs/{uuid}/retry', [OperationsController::class, 'retry'])
+            ->middleware('throttle:10,1')
+            ->name('admin.operations.jobs.retry');
         Route::get('/admin/manage', function () {
             return view('admin.manage');
         })->name('admin.manage');
@@ -429,166 +453,21 @@ Route::view('/about', 'pages.about')->name('about');
 Route::view('/mission-and-vision', 'pages.mission-and-vision')->name('mission_and_vision');
 Route::view('/leadership', 'pages.leadership')->name('leadership');
 Route::view('/community', 'pages.community')->name('community');
-Route::get('/members', function (Request $r) {
-    $q = User::where('status', 'active')
-        ->whereHas('profile', fn ($p) => $p->where('is_public', true))
-        ->with('profile');
-    if ($r->filled('search')) {
-        $s = $r->search;
-        $q->where(function ($w) use ($s) {
-            $w->where('name', 'like', "%$s%")
-                ->orWhereHas('profile', function ($p) use ($s) {
-                    $p->where('professional_title', 'like', "%$s%")
-                        ->orWhere('technology_category', 'like', "%$s%")
-                        ->orWhere('city', 'like', "%$s%")
-                        ->orWhere('state', 'like', "%$s%");
-                })
-                ->orWhereHas('skills', fn ($sk) => $sk->where('name', 'like', "%$s%"))
-                ->orWhereHas('interests', fn ($it) => $it->where('name', 'like', "%$s%"));
-        });
-    }
-    if ($r->filled('technology')) {
-        $q->whereHas('profile', fn ($p) => $p->where('technology_category', $r->technology));
-    }
-    if ($r->filled('state')) {
-        $q->whereHas('profile', fn ($p) => $p->where('state', $r->state));
-    }
-    if ($r->filled('experience')) {
-        $q->whereHas('profile', fn ($p) => $p->where('experience_level', $r->experience));
-    }
-    if ($r->filled('open_to') && in_array($r->open_to, ['open_to_work', 'open_to_mentor', 'open_to_collaborate', 'available_for_speaking', 'hiring'], true)) {
-        $q->whereHas('profile', fn ($p) => $p->where($r->open_to, true));
-    }
-
-    return view('pages.members', [
-        'members' => $q->latest()->paginate(12)->withQueryString(),
-        'search' => $r->search,
-        'technology' => $r->technology,
-        'state' => $r->state,
-        'experience' => $r->experience,
-        'openTo' => $r->open_to,
-    ]);
-})->name('members');
+Route::get('/search', [PublicSearchController::class, 'index'])->name('search');
+Route::get('/members', [PublicDirectoryController::class, 'members'])->name('members');
 Route::get('/hubs/register', [HubController::class, 'register'])->name('hubs.register');
-Route::post('/hubs/register', function (Request $r) {
-    $data = $r->validate([
-        'name' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'email' => 'nullable|email',
-        'phone' => 'nullable|string|max:30',
-        'website' => 'nullable|url',
-        'contact_person' => 'nullable|string|max:150',
-        'contact_position' => 'nullable|string|max:150',
-        'community_size' => 'nullable|string|max:50',
-        'year_established' => 'nullable|integer',
-        'organization_type' => 'nullable|string|max:100',
-        'country' => 'nullable|string|max:100',
-        'state' => 'nullable|string|max:100',
-        'city' => 'nullable|string|max:100',
-        'address' => 'nullable|string|max:500',
-        'linkedin' => 'nullable|url',
-        'facebook' => 'nullable|url',
-        'instagram' => 'nullable|url',
-        'x' => 'nullable|url',
-        'youtube' => 'nullable|url',
-        'programs_offered' => 'nullable|string',
-    ]);
-    $owner = auth()->user();
-    if (! $owner) {
-        return redirect()->route('register')->with('status', 'Please create an account first.');
-    }
-    if ($owner->hub()->exists()) {
-        return redirect()->route('hub.dashboard')->with('status', 'You already have a hub registered.');
-    }
-    $hub = Hub::create(array_merge($data, [
-        'user_id' => $owner->id,
-        'slug' => Str::slug($data['name']).'-'.uniqid(),
-        'status' => 'pending',
-        'is_verified' => false,
-        'is_public' => false,
-    ]));
-    HubApplication::create(['hub_id' => $hub->id, 'status' => 'pending']);
-    Role::findOrCreate('hub_owner', 'web');
-    $owner->assignRole('hub_owner');
-
-    User::reviewers()
-        ->whereKeyNot($owner->id)
-        ->get()
-        ->each(fn (User $reviewer) => $reviewer->notify(new HubApplicationSubmitted($hub)));
-
-    return redirect()->route('hub.dashboard')->with('success', 'Hub application submitted and pending review.');
-})->middleware(['auth', 'membership'])->name('hubs.register.store');
+Route::post('/hubs/register', [HubController::class, 'store'])->middleware(['auth', 'membership'])->name('hubs.register.store');
 Route::get('/hubs/{slug}', [HubController::class, 'show'])->name('hubs.show');
-Route::get('/hubs', function (Request $r) {
-    $q = Hub::where('is_public', true)->where('status', 'approved');
-    if ($r->filled('search')) {
-        $s = $r->search;
-        $q->where(function ($w) use ($s) {
-            $w->where('name', 'like', "%$s%")
-                ->orWhere('description', 'like', "%$s%")
-                ->orWhere('city', 'like', "%$s%")
-                ->orWhere('state', 'like', "%$s%");
-        });
-    }
-    if ($r->filled('state')) {
-        $q->where('state', $r->state);
-    }
-    $organizationType = $r->query('organization_type');
-    $organizationType = is_string($organizationType) ? $organizationType : '';
-    if ($organizationType !== '') {
-        $q->where('organization_type', $organizationType);
-    }
-    $organizationTypes = Hub::query()
-        ->where('is_public', true)
-        ->where('status', 'approved')
-        ->whereNotNull('organization_type')
-        ->where('organization_type', '!=', '')
-        ->distinct()
-        ->orderBy('organization_type')
-        ->pluck('organization_type');
-
-    return view('pages.hubs', [
-        'hubs' => $q->latest()->paginate(12)->withQueryString(),
-        'search' => $r->search,
-        'state' => $r->state,
-        'organizationType' => $organizationType,
-        'organizationTypes' => $organizationTypes,
-    ]);
-})->name('hubs');
+Route::get('/hubs', [PublicDirectoryController::class, 'hubs'])->name('hubs');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
 Route::get('/events/{event:slug}/calendar', [EventController::class, 'calendar'])->name('events.calendar');
 Route::post('/events/{event:slug}/register', [EventController::class, 'register'])->middleware(['auth', 'verified', 'membership'])->name('events.register');
+Route::post('/events/{event:slug}/payment', [PaystackPaymentController::class, 'initializeEvent'])
+    ->middleware(['auth', 'verified', 'membership', 'throttle:5,1'])
+    ->name('events.payment.initialize');
 Route::get('/events/{event:slug}/check-in/{token}', [EventController::class, 'checkIn'])->middleware(['auth', 'verified', 'membership'])->name('events.check-in');
 Route::post('/events/{event:slug}/cancel', [EventController::class, 'cancel'])->middleware(['auth', 'verified'])->name('events.cancel');
-Route::get('/events', function (Request $r) {
-    $q = Event::with('category')->where('status', 'published')->where('start_date', '>=', now()->toDateString());
-    if ($r->filled('search')) {
-        $s = $r->search;
-        $q->where(function ($w) use ($s) {
-            $w->where('title', 'like', "%$s%")
-                ->orWhere('description', 'like', "%$s%")
-                ->orWhere('city', 'like', "%$s%");
-        });
-    }
-    if ($r->filled('category')) {
-        $q->where('category_id', $r->category);
-    }
-    if ($r->filled('state')) {
-        $q->where('state', $r->state);
-    }
-    if ($r->filled('type')) {
-        $q->where('is_online', $r->type === 'online');
-    }
-
-    return view('pages.events', [
-        'events' => $q->orderBy('start_date')->paginate(12)->withQueryString(),
-        'search' => $r->search,
-        'category' => $r->category,
-        'state' => $r->state,
-        'type' => $r->type,
-        'categories' => EventCategory::all(),
-    ]);
-})->name('events');
+Route::get('/events', [PublicDirectoryController::class, 'events'])->name('events');
 Route::get('/speaker-calls', [SpeakerCallController::class, 'index'])->name('speaker-calls.index');
 Route::get('/speaker-calls/{speakerCall:slug}', [SpeakerCallController::class, 'show'])->name('speaker-calls.show');
 Route::post('/speaker-calls/{speakerCall:slug}', [SpeakerCallController::class, 'submit'])
@@ -596,35 +475,7 @@ Route::post('/speaker-calls/{speakerCall:slug}', [SpeakerCallController::class, 
     ->name('speaker-calls.submit');
 Route::get('/opportunities/{slug}', [OpportunityController::class, 'show'])->name('opportunities.show');
 Route::post('/opportunities/{opportunity:slug}/apply', [OpportunityController::class, 'apply'])->middleware(['auth', 'verified', 'membership'])->name('opportunities.apply');
-Route::get('/opportunities', function (Request $r) {
-    $q = Opportunity::with('category')->where('status', 'published');
-    if (! auth()->check()) {
-        $q->where('is_member_only', false);
-    }
-    if ($r->filled('search')) {
-        $s = $r->search;
-        $q->where(function ($w) use ($s) {
-            $w->where('title', 'like', "%$s%")
-                ->orWhere('description', 'like', "%$s%")
-                ->orWhere('organization', 'like', "%$s%")
-                ->orWhere('location', 'like', "%$s%");
-        });
-    }
-    if ($r->filled('category')) {
-        $q->where('category_id', $r->category);
-    }
-    if ($r->filled('remote')) {
-        $q->where('is_remote', $r->remote === '1');
-    }
-
-    return view('pages.opportunities', [
-        'opportunities' => $q->latest()->paginate(12)->withQueryString(),
-        'search' => $r->search,
-        'category' => $r->category,
-        'remote' => $r->remote,
-        'categories' => OpportunityCategory::all(),
-    ]);
-})->name('opportunities');
+Route::get('/opportunities', [PublicDirectoryController::class, 'opportunities'])->name('opportunities');
 Route::get('/members/{username}', [ProfileController::class, 'show'])->name('members.show');
 Route::post('/members/{username}/contact', [ProfileController::class, 'contact'])
     ->middleware('throttle:5,1')
@@ -632,37 +483,8 @@ Route::post('/members/{username}/contact', [ProfileController::class, 'contact']
 Route::get('/chapters/{slug}', [ChapterController::class, 'show'])->name('chapters.show');
 Route::post('/chapters/{chapter}/join', [ChapterController::class, 'join'])->middleware(['auth', 'verified', 'membership'])->name('chapters.join');
 Route::post('/chapters/{chapter}/leave', [ChapterController::class, 'leave'])->middleware(['auth', 'verified'])->name('chapters.leave');
-Route::get('/chapters', function (Request $r) {
-    $q = Chapter::where('status', 'active');
-    if ($r->filled('search')) {
-        $s = $r->search;
-        $q->where(function ($w) use ($s) {
-            $w->where('name', 'like', "%$s%")
-                ->orWhere('location', 'like', "%$s%")
-                ->orWhere('description', 'like', "%$s%");
-        });
-    }
-
-    return view('pages.chapters', [
-        'chapters' => $q->latest()->get(),
-        'search' => $r->search,
-    ]);
-})->name('chapters');
-Route::get('/news', function () {
-    $announcements = Announcement::where('is_published', true)
-        ->orderByDesc('published_at')
-        ->orderByDesc('created_at')
-        ->take(9)
-        ->get();
-
-    $articles = Article::approved()
-        ->with('author')
-        ->orderByDesc('published_at')
-        ->take(6)
-        ->get();
-
-    return view('pages.news', compact('announcements', 'articles'));
-})->name('news');
+Route::get('/chapters', [PublicDirectoryController::class, 'chapters'])->name('chapters');
+Route::get('/news', [PublicDirectoryController::class, 'news'])->name('news');
 Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles');
 Route::view('/contact', 'pages.contact')->name('contact');

@@ -70,6 +70,7 @@ class Event extends Model
         return $this->registrations()
             ->where('user_id', $user->id)
             ->where('status', EventRegistration::STATUS_REGISTERED)
+            ->when($this->requiresPayment(), fn ($query) => $query->where('payment_status', EventRegistration::PAYMENT_PAID))
             ->exists();
     }
 }

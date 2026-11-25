@@ -488,8 +488,25 @@
         </section>
 
         {{-- 10. Email preferences --}}
-        <section class="space-y-2" aria-labelledby="sec-email">
+        <section class="space-y-3" aria-labelledby="sec-email">
           <h2 id="sec-email" class="text-lg font-bold text-[#101E33]">Email preferences</h2>
+          <p class="text-sm text-slate-500">Choose which updates you also receive by email. In-app notifications remain enabled.</p>
+          <input type="hidden" name="notification_preferences_present" value="1">
+          <div class="grid gap-2 sm:grid-cols-2">
+            @foreach([
+              'events' => 'Events and registrations',
+              'opportunities' => 'Opportunities and matches',
+              'applications' => 'Application decisions',
+              'mentorship' => 'Mentorship and introductions',
+              'membership' => 'Membership and account',
+              'community' => 'Community activity',
+            ] as $category => $categoryLabel)
+              <label for="notification-{{ $category }}" class="flex items-start gap-3 rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
+                <input type="checkbox" name="notification_preferences[{{ $category }}]" id="notification-{{ $category }}" value="1" @checked(old('notification_preferences.'.$category, $profile->notification_preferences[$category] ?? true)) class="mt-0.5 rounded text-[#FF5C3D] focus:ring-[#FF5C3D]">
+                <span>{{ $categoryLabel }}</span>
+              </label>
+            @endforeach
+          </div>
           <label for="weekly_digest" class="flex items-start gap-3 text-sm text-slate-700">
             <input type="checkbox" name="weekly_digest" id="weekly_digest" value="1" @checked(old('weekly_digest', $profile->weekly_digest)) class="mt-0.5 rounded text-[#FF5C3D] focus:ring-[#FF5C3D]">
             <span>Send me the weekly community digest

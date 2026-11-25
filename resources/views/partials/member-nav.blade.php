@@ -4,8 +4,11 @@
     ['Passport', route('passport.show'), request()->routeIs('passport.*')],
     ['Profile', route('profile.edit'), request()->routeIs('profile.*')],
     ['Membership', route('membership.show'), request()->routeIs('membership.*')],
+    ['Saved items', route('bookmarks.index'), request()->routeIs('bookmarks.*')],
+    ['Notifications', route('notifications.index'), request()->routeIs('notifications.*')],
   ];
   $careerLinks = [
+    ['My applications', route('applications.index'), request()->routeIs('applications.*')],
     ['My articles', route('member.content.index'), request()->routeIs('member.content.*')],
     ['Mentorship', route('mentorship.index'), request()->routeIs('mentorship.*')],
     ['Cohorts', route('cohorts.index'), request()->routeIs('cohorts.*')],

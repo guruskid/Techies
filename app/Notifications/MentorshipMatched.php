@@ -25,7 +25,7 @@ class MentorshipMatched extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return $this->channelsFor($notifiable);
     }
 
     public function toMail(object $notifiable): MailMessage

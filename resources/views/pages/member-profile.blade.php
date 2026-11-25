@@ -126,6 +126,25 @@
       </section>
     @endif
 
+    @if($user->showcaseProjects->isNotEmpty())
+      <section class="{{ $card }}" aria-labelledby="showcase-h">
+        <h2 id="showcase-h" class="{{ $h2 }}">Community showcase</h2>
+        <ul class="grid gap-4 sm:grid-cols-2">
+          @foreach($user->showcaseProjects as $project)
+            <li class="rounded-xl border border-slate-100 p-4">
+              @if($project->image)<img src="{{ $project->image }}" alt="" loading="lazy" class="mb-3 h-36 w-full rounded-lg object-cover">@endif
+              <h3 class="font-semibold text-[#101E33]">{{ $project->title }}</h3>
+              @if($project->summary)<p class="mt-1 text-sm text-slate-600">{{ $project->summary }}</p>@endif
+              @if($project->stack)
+                <ul class="mt-3 flex flex-wrap gap-1">@foreach($project->stack as $technology)<li class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">{{ $technology }}</li>@endforeach</ul>
+              @endif
+              @if($project->url && $safeUrl($project->url))<a href="{{ $safeUrl($project->url) }}" target="_blank" rel="noopener noreferrer" class="mt-3 inline-block text-sm {{ $link }}">Visit project<span class="sr-only"> (opens in a new tab)</span></a>@endif
+            </li>
+          @endforeach
+        </ul>
+      </section>
+    @endif
+
     @if($education || $certifications)
       <section class="{{ $card }}" aria-labelledby="edu-h">
         <h2 id="edu-h" class="{{ $h2 }}">Education and certifications</h2>

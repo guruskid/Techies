@@ -84,7 +84,8 @@
         $soon = $deadline && ! $closed && now()->diffInDays($deadline) <= 7;
       @endphp
       <li>
-        <a href="/opportunities/{{ $o->slug }}" class="h-full flex flex-col bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition {{ $focus }} {{ $closed ? 'opacity-75' : '' }}">
+        <div class="h-full flex flex-col bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition {{ $focus }} {{ $closed ? 'opacity-75' : '' }}">
+          <a href="{{ route('opportunities.show', $o->slug) }}" class="focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] rounded">
           <span class="self-start text-xs px-2 py-1 rounded-full bg-[#FF5C3D]/10 text-[#C23A1F] font-medium">{{ $o->category?->name ?? 'Opportunity' }}</span>
           <h2 class="mt-3 font-semibold text-[#101E33]">{{ $o->title }}</h2>
           @if($o->organization)<p class="mt-1 text-sm text-slate-600">{{ $o->organization }}</p>@endif
@@ -106,7 +107,16 @@
               @endif
             </div>
           @endif
-        </a>
+          </a>
+          @auth
+            @if(auth()->user()->hasActiveMembership())
+              <form method="POST" action="{{ route('bookmarks.toggle', ['type' => 'opportunity', 'id' => $o->id]) }}" class="mt-4">
+                @csrf
+                <button class="text-sm font-semibold text-[#C23A1F] hover:underline">{{ in_array($o->id, $bookmarkedOpportunityIds ?? [], true) ? 'Remove saved opportunity' : 'Save opportunity' }}</button>
+              </form>
+            @endif
+          @endauth
+        </div>
       </li>
     @empty
       <li class="sm:col-span-2 lg:col-span-3 bg-white rounded-2xl border border-slate-100 p-10 text-center">

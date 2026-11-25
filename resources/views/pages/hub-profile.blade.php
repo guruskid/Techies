@@ -47,6 +47,9 @@
       <h1 class="font-display text-3xl font-bold">{{ $h->name }}</h1>
       @if($location)<p class="text-slate-300 mt-1">{{ $location }}</p>@endif
       <div class="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-3">
+        @if($location)
+          <a href="https://www.openstreetmap.org/search?query={{ urlencode($location) }}" target="_blank" rel="noopener noreferrer" class="text-sm px-3 py-1.5 rounded-lg border border-white/20 text-white font-medium hover:bg-white/10 transition">Find on map<span class="sr-only"> (opens in a new tab)</span></a>
+        @endif
         @if($h->is_verified)<span class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-200">Verified hub</span>@endif
         @if($website)
           <a href="{{ $website }}" target="_blank" rel="noopener noreferrer"

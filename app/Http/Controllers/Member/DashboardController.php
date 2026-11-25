@@ -12,10 +12,12 @@ use App\Models\Opportunity;
 use App\Models\SpeakerSubmission;
 use App\Models\User;
 use App\Models\UserProfile;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(): RedirectResponse|View
     {
         $user = auth()->user();
 
@@ -36,8 +38,13 @@ class DashboardController extends Controller
         } else {
             $missing = array_values(UserProfile::completionFields());
         }
-        $upcomingEvents = Event::where('status', 'published')->where('start_date', '>=', now()->toDateString())->latest()->take(5)->get();
-        $recommendedHubs = Hub::where('is_verified', true)->latest()->take(4)->get();
+        $upcomingEvents = Event::with('category')->where('status', 'published')->where('start_date', '>=', now()->toDateString())->orderBy('start_date')->take(5)->get();
+        $recommendedHubs = Hub::where('is_verified', true)
+            ->where('is_public', true)
+            ->where('status', 'approved')
+            ->latest()
+            ->take(4)
+            ->get();
         $hub = $user->hub;
         $coordinatedChapters = Chapter::where('coordinator_id', $user->id)
             ->orWhere('second_coordinator_id', $user->id)
@@ -47,9 +54,10 @@ class DashboardController extends Controller
             ->whereHas('profile', fn ($q) => $q->where('is_public', true))
             ->where('id', '!=', $user->id)
             ->latest()
+            ->with('profile')
             ->take(5)
             ->get();
-        $opportunities = Opportunity::where('status', 'published')->latest()->take(5)->get();
+        $opportunities = Opportunity::with('category')->where('status', 'published')->latest()->take(5)->get();
         $announcements = Announcement::where('is_published', true)->latest()->take(5)->get();
         $registeredEvents = $user->eventRegistrations()->where('status', 'registered')->count();
 
@@ -72,6 +80,9 @@ class DashboardController extends Controller
             ['Request a mentor or become one', $user->mentorshipRequest()->exists(), route('mentorship.index')],
         ];
 
-        return view('member.dashboard', compact('user', 'profile', 'completion', 'missing', 'upcomingEvents', 'recommendedHubs', 'recentMembers', 'opportunities', 'announcements', 'registeredEvents', 'contentStats', 'latestArticles', 'applicationCount', 'hub', 'coordinatedChapters', 'onboarding'));
+        $unreadNotifications = $user->unreadNotifications()->latest()->take(5)->get();
+        $unreadNotificationCount = $user->unreadNotifications()->count();
+
+        return view('member.dashboard', compact('user', 'profile', 'completion', 'missing', 'upcomingEvents', 'recommendedHubs', 'recentMembers', 'opportunities', 'announcements', 'registeredEvents', 'contentStats', 'latestArticles', 'applicationCount', 'hub', 'coordinatedChapters', 'onboarding', 'unreadNotifications', 'unreadNotificationCount'));
     }
 }

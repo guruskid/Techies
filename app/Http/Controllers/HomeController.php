@@ -10,10 +10,11 @@ use App\Models\MemberSpotlight;
 use App\Models\Opportunity;
 use App\Models\SpeakerCall;
 use App\Models\User;
+use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $stats = [
             'members' => User::where('status', 'active')->count(),
@@ -23,12 +24,13 @@ class HomeController extends Controller
         ];
         $members = User::where('status', 'active')
             ->whereHas('profile', fn ($q) => $q->where('is_public', true))
+            ->with('profile')
             ->latest()
             ->take(6)
             ->get();
         $hubs = Hub::where('status', 'approved')->where('is_verified', true)->latest()->take(6)->get();
-        $events = Event::where('status', 'published')->where('start_date', '>=', now()->toDateString())->orderBy('start_date')->take(6)->get();
-        $opportunities = Opportunity::where('status', 'published')->latest()->take(6)->get();
+        $events = Event::with('category')->where('status', 'published')->where('start_date', '>=', now()->toDateString())->orderBy('start_date')->take(6)->get();
+        $opportunities = Opportunity::with('category')->where('status', 'published')->latest()->take(6)->get();
         $chapters = Chapter::where('status', 'active')->latest()->take(8)->get();
         $articles = Article::approved()
             ->with('author')

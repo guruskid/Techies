@@ -66,5 +66,25 @@
       <p class="mt-4 text-xs text-slate-500">Mentorship is a member benefit. Keep your profile and availability up to date.</p>
     </aside>
   </div>
+
+  @if($recommendedMentors->isNotEmpty())
+    <section class="mt-8" aria-labelledby="mentor-matches-heading">
+      <div class="mb-4">
+        <p class="text-xs font-bold uppercase tracking-widest text-[#C23A1F]">Suggested people</p>
+        <h2 id="mentor-matches-heading" class="mt-1 font-display text-xl font-bold text-[#101E33]">Mentors to explore</h2>
+        <p class="mt-1 text-sm text-slate-600">Suggestions use your focus area and members’ public profiles.</p>
+      </div>
+      <ul class="grid gap-4 sm:grid-cols-2">
+        @foreach($recommendedMentors as $mentor)
+          <li class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="font-semibold text-[#101E33]">{{ $mentor->name }}</h3>
+            <p class="mt-1 text-sm text-slate-600">{{ $mentor->profile?->professional_title ?? 'Community mentor' }}</p>
+            @if($mentor->mentorshipRequest?->expertise)<p class="mt-2 text-sm text-slate-700">Focus: {{ $mentor->mentorshipRequest->expertise }}</p>@endif
+            @if($mentor->profile?->username)<a href="{{ $mentor->profile->publicUrl() }}" class="mt-3 inline-block text-sm font-semibold text-[#C23A1F] hover:underline">View profile</a>@endif
+          </li>
+        @endforeach
+      </ul>
+    </section>
+  @endif
 </div>
 @endsection

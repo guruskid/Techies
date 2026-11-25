@@ -157,6 +157,13 @@
       </p>
 
       @if(in_array($registration->payment_status, ['unpaid', 'not_required'], true))
+        @if(filled(config('services.paystack.secret_key')))
+          <form method="POST" action="{{ route('events.payment.initialize', $e) }}" class="mt-4">
+            @csrf
+            <button class="px-5 py-2.5 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition">Pay securely with Paystack</button>
+          </form>
+          @error('payment')<p class="mt-2 text-sm text-red-700">{{ $message }}</p>@enderror
+        @else
         @if($e->payment_url)
           <a href="{{ $e->payment_url }}" target="_blank" rel="noopener" class="mt-4 inline-block px-5 py-2.5 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition">Pay now</a>
         @endif
@@ -164,6 +171,7 @@
           <div class="mt-4 text-sm text-slate-600 whitespace-pre-line">{{ $e->payment_instructions }}</div>
         @endif
         <p class="mt-3 text-xs text-slate-500">After paying, keep your receipt. An admin confirms payments and the status above updates.</p>
+        @endif
       @endif
     </div>
     @endif

@@ -24,6 +24,26 @@
     @endif
   </div>
 
+  <section class="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" aria-labelledby="updates-heading">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 id="updates-heading" class="font-semibold text-[#101E33]">Your updates</h2>
+        <p class="mt-1 text-sm text-slate-600">{{ $unreadNotificationCount }} unread notification{{ $unreadNotificationCount === 1 ? '' : 's' }}</p>
+      </div>
+      <div class="flex gap-3 text-sm font-semibold">
+        <a href="{{ route('notifications.index') }}" class="text-[#C23A1F] hover:underline">Open notifications</a>
+        <a href="{{ route('bookmarks.index') }}" class="text-[#C23A1F] hover:underline">Saved items</a>
+      </div>
+    </div>
+    @if($unreadNotifications->isNotEmpty())
+      <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+        @foreach($unreadNotifications as $notification)
+          <li class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700"><a href="{{ route('notifications.open', $notification->id) }}" class="hover:text-[#C23A1F] hover:underline">{{ $notification->data['title'] ?? \Illuminate\Support\Str::headline(class_basename($notification->type)) }}</a></li>
+        @endforeach
+      </ul>
+    @endif
+  </section>
+
   @if($user->needsMembershipPayment())
     @php
       $membershipFee = (int) \App\Models\Setting::value('membership_fee', '15000');

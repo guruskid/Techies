@@ -15,6 +15,9 @@
     <div>
       <h1 class="font-display text-3xl font-bold">{{ $c->name }}</h1>
       <p class="text-slate-300 mt-1">{{ collect([$c->state, $c->country])->filter()->implode(', ') ?: 'Chapter' }}</p>
+      @if($c->location || $c->city || $c->state)
+        <a href="https://www.openstreetmap.org/search?query={{ urlencode(collect([$c->location, $c->city, $c->state, $c->country])->filter()->implode(', ')) }}" target="_blank" rel="noopener noreferrer" class="mt-3 inline-block text-sm font-semibold text-white underline underline-offset-4">Find chapter on map<span class="sr-only"> (opens in a new tab)</span></a>
+      @endif
       <span class="inline-block mt-2 text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-300">{{ ucfirst($c->status) }}</span>
     </div>
   </div>

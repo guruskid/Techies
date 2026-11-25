@@ -51,6 +51,13 @@
         <a href="{{ route('contact') }}" class="mt-4 block w-full text-center px-5 py-3 border border-slate-200 rounded-lg font-semibold hover:bg-slate-50 transition {{ $focus }}">Contact the team</a>
       @else
         <div class="mt-6 space-y-4">
+          @if($hasPaystack)
+            <form method="POST" action="{{ route('membership.payment.initialize') }}">
+              @csrf
+              <button class="w-full px-5 py-3 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition {{ $focus }}">Pay {{ $price }} securely</button>
+              <p class="mt-2 text-xs text-slate-500">Your membership activates after the payment provider confirms your transaction.</p>
+            </form>
+          @else
           @if($paymentUrl)
             <a href="{{ $paymentUrl }}" target="_blank" rel="noopener noreferrer" class="block w-full text-center px-5 py-3 bg-[#FF5C3D] text-white rounded-lg font-semibold hover:opacity-90 transition {{ $focus }}">Pay {{ $price }} securely</a>
           @endif
@@ -75,6 +82,8 @@
             <button class="w-full px-5 py-2.5 bg-[#101E33] text-white rounded-lg font-semibold hover:opacity-90 transition {{ $focus }}">I have paid</button>
             <p class="text-xs text-slate-500">Submitting a reference does not activate the membership automatically. The team verifies it first.</p>
           </form>
+          @endif
+          @error('payment')<p class="rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-700">{{ $message }}</p>@enderror
         </div>
       @endif
     </div>
@@ -100,8 +109,8 @@
       <ol class="mt-5 space-y-4">
         @foreach([
           'Create your account and verify your email.',
-          'Pay the one-time membership fee using the payment details on this page.',
-          'Submit your payment reference so the team can confirm it.',
+          $hasPaystack ? 'Complete the secure payment on this page.' : 'Pay using the details shown and submit your reference for review.',
+          $hasPaystack ? 'Your membership activates automatically when the payment is verified.' : 'The team confirms your payment reference and activates your membership.',
           'Receive your welcome email and onboarding checklist.',
         ] as $index => $step)
           <li class="flex items-start gap-4">

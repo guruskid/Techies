@@ -104,15 +104,17 @@
         $where = $e->is_online ? 'Online' : ($e->city ?: null);
       @endphp
       <li>
-        <a href="/events/{{ $e->slug }}" class="h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition {{ $focus }}">
+        <div class="h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition {{ $focus }}">
           @if($e->cover_image)
             <img src="{{ $e->cover_image }}" alt="" loading="lazy" class="h-36 w-full object-cover">
           @else
             <div class="h-36 bg-gradient-to-br from-[#101E33] to-[#FF5C3D] flex items-center justify-center text-white text-4xl font-bold" aria-hidden="true">{{ strtoupper(substr($e->title,0,1)) }}</div>
           @endif
           <div class="p-5 flex flex-col flex-1">
+            <a href="{{ route('events.show', $e->slug) }}" class="focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C3D] rounded">
             <div class="text-xs text-[#C23A1F] font-medium">{{ $when }}</div>
             <h2 class="mt-2 font-semibold text-[#101E33]">{{ $e->title }}</h2>
+            </a>
             <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-600">
               @if($where)<span>{{ $where }}</span>@endif
               @if($e->category)<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">{{ $e->category->name }}</span>@endif
@@ -123,7 +125,15 @@
               @endif
             </div>
           </div>
-        </a>
+          @auth
+            @if(auth()->user()->hasActiveMembership())
+              <form method="POST" action="{{ route('bookmarks.toggle', ['type' => 'event', 'id' => $e->id]) }}" class="px-5 pb-4">
+                @csrf
+                <button class="text-sm font-semibold text-[#C23A1F] hover:underline">{{ in_array($e->id, $bookmarkedEventIds ?? [], true) ? 'Remove saved event' : 'Save event' }}</button>
+              </form>
+            @endif
+          @endauth
+        </div>
       </li>
     @empty
       <li class="sm:col-span-2 lg:col-span-3 bg-white rounded-2xl border border-slate-100 p-10 text-center">

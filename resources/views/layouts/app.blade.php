@@ -30,7 +30,7 @@
 <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
-<script src="https://cdn.tailwindcss.com"></script>
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
@@ -48,6 +48,7 @@
       @php
         $navGroups = [
           ['label' => 'Home', 'url' => '/', 'active' => request()->is('/')],
+          ['label' => 'Search', 'url' => route('search'), 'active' => request()->is('search')],
           [
             'label' => 'Community',
             'active' => request()->is('members', 'members/*', 'hubs*', 'chapters*', 'about*', 'projects*', 'grants*'),
