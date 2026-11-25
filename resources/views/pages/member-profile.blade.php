@@ -59,6 +59,19 @@
       @if($p)
         <div class="mt-3">@include('partials.member-badges', ['profile' => $p])</div>
       @endif
+
+      @if($user->connectedAccounts->isNotEmpty())
+        <div class="mt-3 flex flex-wrap gap-2">
+          @foreach($user->connectedAccounts as $account)
+            @php $accountUrl = $account->profileUrl(); @endphp
+            @if($accountUrl)
+              <a href="{{ $accountUrl }}" target="_blank" rel="noopener noreferrer" class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/15">{{ $account->label() }}<span class="sr-only"> (opens in a new tab)</span></a>
+            @else
+              <span class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-xs font-medium text-white">{{ $account->label() }}</span>
+            @endif
+          @endforeach
+        </div>
+      @endif
       <p class="text-slate-200 mt-1">{{ $p->professional_title ?? 'Member' }}@if($p->current_organization), {{ $p->current_organization }}@endif</p>
       @if($p->headline)<p class="text-slate-300 text-sm mt-2 max-w-2xl">{{ $p->headline }}</p>@endif
       @if($location)<p class="text-sm text-slate-300 mt-2">{{ $location }}</p>@endif

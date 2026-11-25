@@ -72,6 +72,7 @@ class ProfileController extends Controller
             'showcaseProjects' => fn ($query) => $query
                 ->where('status', ShowcaseProject::STATUS_APPROVED)
                 ->latest(),
+            'connectedAccounts',
         ])->first();
 
         if (! $user || $user->status !== 'active') {

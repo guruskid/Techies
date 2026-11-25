@@ -44,6 +44,7 @@ use App\Http\Controllers\InboundMailController;
 use App\Http\Controllers\Member\ApplicationTrackingController;
 use App\Http\Controllers\Member\BookmarkController;
 use App\Http\Controllers\Member\CohortController;
+use App\Http\Controllers\Member\ConnectedAccountController;
 use App\Http\Controllers\Member\ContentController as MemberContentController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboard;
 use App\Http\Controllers\Member\FeedbackController;
@@ -198,6 +199,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::get('/notifications/{notificationId}/open', [NotificationController::class, 'open'])->name('notifications.open');
     Route::patch('/notifications/{notificationId}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::get('/connections/{provider}', [ConnectedAccountController::class, 'redirect'])
+        ->whereIn('provider', ['github', 'google', 'facebook', 'figma'])
+        ->middleware('throttle:20,1')
+        ->name('connections.redirect');
+    Route::get('/connections/{provider}/callback', [ConnectedAccountController::class, 'callback'])
+        ->whereIn('provider', ['github', 'google', 'facebook', 'figma'])
+        ->name('connections.callback');
+    Route::delete('/connections/{provider}', [ConnectedAccountController::class, 'destroy'])
+        ->whereIn('provider', ['github', 'google', 'facebook', 'figma'])
+        ->middleware('throttle:20,1')
+        ->name('connections.destroy');
     Route::get('/passport', [PassportController::class, 'show'])->name('passport.show');
     Route::get('/feedback', [FeedbackController::class, 'show'])->name('feedback.show');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');

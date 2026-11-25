@@ -338,6 +338,43 @@ Every account receives a **member number** (`MWTT-YYYY-00000`), a **referral cod
 
 **Birthday wishes** — members can add a private date of birth on their profile. `members:send-birthday-wishes` emails active members on their birthday at 07:30, skips anyone who opted out of community email, and sends at most once per year. People born on 29 February are greeted on 28 February in non-leap years. The date is never shown on the public profile.
 
+### 4.11 Connected member accounts
+
+Members can optionally connect GitHub, Google/Gmail, Facebook and Figma from **Profile → Connected accounts**. Each connection is independent; a member can connect any combination or none.
+
+The flow uses OAuth. After the provider confirms the account, the platform stores:
+
+- provider account ID and username
+- email and avatar from the provider
+- encrypted access and refresh tokens
+- granted scopes and expiry
+
+Access tokens are encrypted at rest and hidden from serialized output. A provider account cannot be linked to two members. Members can disconnect any account at any time. Connected GitHub, Facebook and Figma profiles appear as links on the public profile; Google/Gmail shows as a connected badge only.
+
+Configure each provider in `.env`:
+
+```env
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+FACEBOOK_CLIENT_ID=
+FACEBOOK_CLIENT_SECRET=
+FIGMA_CLIENT_ID=
+FIGMA_CLIENT_SECRET=
+```
+
+Set the callback URL in each provider's developer console:
+
+```text
+https://your-domain.com/connections/github/callback
+https://your-domain.com/connections/google/callback
+https://your-domain.com/connections/facebook/callback
+https://your-domain.com/connections/figma/callback
+```
+
+The Google connection links the member's Google/Gmail identity. It does not read or send Gmail. Gmail sending and receiving remains in the mail centre using SMTP/IMAP credentials.
+
 ---
 
 ## 5. Member profiles and profile subdomains

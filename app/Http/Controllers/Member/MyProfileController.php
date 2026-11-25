@@ -7,6 +7,7 @@ use App\Models\Chapter;
 use App\Models\Project;
 use App\Models\UserProfile;
 use App\Models\WorkExperience;
+use App\Services\OAuthAccountService;
 use App\Support\Username;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,8 +20,16 @@ class MyProfileController extends Controller
         $profile = $user->ensureProfile();
         $chapters = Chapter::orderBy('name')->get();
         $selectedChapter = $user->chapters()->first();
+        $oauth = app(OAuthAccountService::class);
+        $oauthProviders = $oauth->providers();
+        $oauthConfigured = collect(array_keys($oauthProviders))
+            ->mapWithKeys(fn (string $provider): array => [$provider => $oauth->isConfigured($provider)])
+            ->all();
+        $connectedAccounts = $user->connectedAccounts()->get()->keyBy('provider');
 
-        return view('member.profile', compact('user', 'profile', 'chapters', 'selectedChapter'));
+        return view('member.profile', compact(
+            'user', 'profile', 'chapters', 'selectedChapter', 'oauthProviders', 'oauthConfigured', 'connectedAccounts'
+        ));
     }
 
     public function checkUsername(Request $request): JsonResponse

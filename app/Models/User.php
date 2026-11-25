@@ -117,6 +117,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(BenefitRedemption::class);
     }
 
+    public function connectedAccounts()
+    {
+        return $this->hasMany(ConnectedAccount::class);
+    }
+
     /**
      * Staff always have access. Members need a paid or waived membership.
      */

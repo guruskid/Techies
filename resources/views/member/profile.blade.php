@@ -463,6 +463,52 @@
           <template x-for="key in removed" :key="'r' + key"><input type="hidden" :name="key" value=""></template>
         </section>
 
+        {{-- 8b. Connected accounts --}}
+        <section id="connections" class="space-y-3 scroll-mt-24" aria-labelledby="sec-connections">
+          <div class="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 id="sec-connections" class="text-lg font-bold text-[#101E33]">Connected accounts</h2>
+              <p class="text-sm text-slate-500">Optional. Link the accounts you use so your profile reflects your work.</p>
+            </div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            @foreach($oauthProviders as $provider => $providerConfig)
+              @php $account = $connectedAccounts[$provider] ?? null; @endphp
+              <div class="rounded-xl border border-slate-200 p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="font-semibold text-[#101E33]">{{ $providerConfig['label'] }}</p>
+                    @if($account)
+                      <p class="mt-1 truncate text-sm text-slate-600">
+                        {{ $account->username ? '@'.$account->username : ($account->email ?: $account->name ?: 'Connected') }}
+                      </p>
+                    @else
+                      <p class="mt-1 text-sm text-slate-500">Not connected</p>
+                    @endif
+                  </div>
+                  @if($account?->avatar)
+                    <img src="{{ $account->avatar }}" alt="" class="h-9 w-9 rounded-full object-cover border border-slate-100">
+                  @endif
+                </div>
+
+                <div class="mt-3">
+                  @if(! ($oauthConfigured[$provider] ?? false))
+                    <span class="text-xs text-slate-400">Not available yet</span>
+                  @elseif($account)
+                    <form method="POST" action="{{ route('connections.destroy', $provider) }}">
+                      @csrf
+                      @method('DELETE')
+                      <button class="text-sm font-semibold text-red-600 hover:underline">Disconnect</button>
+                    </form>
+                  @else
+                    <a href="{{ route('connections.redirect', $provider) }}" class="inline-flex rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Connect {{ $providerConfig['label'] }}</a>
+                  @endif
+                </div>
+              </div>
+            @endforeach
+          </div>
+        </section>
+
         {{-- 9. Visibility --}}
         <section class="space-y-2" aria-labelledby="sec-visibility">
           <h2 id="sec-visibility" class="text-lg font-bold text-[#101E33]">Visibility</h2>
