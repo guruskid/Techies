@@ -148,6 +148,13 @@
             </div>
           </div>
 
+          <div class="max-w-sm">
+            <label for="date_of_birth" class="{{ $labelClass }}">Date of birth</label>
+            <input id="date_of_birth" type="date" name="date_of_birth" value="{{ old('date_of_birth', $profile->date_of_birth?->toDateString()) }}" max="{{ now()->subDay()->toDateString() }}" min="1900-01-01" class="{{ $inputClass }}">
+            <p class="{{ $hintClass }}">Used only to send you a birthday message. It is never shown on your public profile.</p>
+            {!! $err('date_of_birth') !!}
+          </div>
+
           {{-- Public profile address --}}
           <div x-data='{
               username: @json(old("username", $profile->username) ?? ""),

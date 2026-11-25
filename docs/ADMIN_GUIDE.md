@@ -336,6 +336,8 @@ Every account receives a **member number** (`MWTT-YYYY-00000`), a **referral cod
 
 **Monthly report** — `community:send-monthly-report` emails active members a short monthly summary and the current spotlight. It runs on the first day of each month at 08:00.
 
+**Birthday wishes** — members can add a private date of birth on their profile. `members:send-birthday-wishes` emails active members on their birthday at 07:30, skips anyone who opted out of community email, and sends at most once per year. People born on 29 February are greeted on 28 February in non-leap years. The date is never shown on the public profile.
+
 ---
 
 ## 5. Member profiles and profile subdomains
@@ -1156,6 +1158,7 @@ All of these are sent through the system mailer (Section 14.9), not the mail cen
 | Introduction update | Admin completes or declines an introduction | Requester and target |
 | Grant application update | Admin approves or rejects a grant application | Applicant |
 | Monthly community report | First day of each month | Active members |
+| Birthday greeting | Member's birthday, once per year | The member |
 | New event | An event is first published | Active members in the event's state (or all active members when no state is recorded) |
 | New opportunity | An opportunity is first published | Active members in the hub's state (or all active members when there is no hub state) |
 | Hub application submitted | A hub is registered | Admins and super admins, excluding the owner |
@@ -1183,6 +1186,7 @@ Operational note: publishing mail is broad by design. An event or opportunity wi
 | Daily 09:00 | `members:request-feedback` | Ask members for feedback after 30 days |
 | Mondays 09:00 | `opportunities:send-matches` | Email matched opportunities to opted-in members |
 | 1st of month 08:00 | `community:send-monthly-report` | Email a monthly community report to active members |
+| Daily 07:30 | `members:send-birthday-wishes` | Email members on their birthday |
 
 The scheduler requires the server cron entry shown in Section 2.
 

@@ -20,7 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name', 'email', 'password', 'role', 'status', 'membership_status',
         'membership_reference', 'membership_paid_at', 'membership_confirmed_by',
         'membership_notes', 'member_number', 'referral_code', 'referred_by',
-        'is_founding_member', 'feedback_requested_at', 'opportunity_match_sent_at',
+        'is_founding_member', 'feedback_requested_at', 'opportunity_match_sent_at', 'birthday_wished_at',
     ];
 
     protected $hidden = [
@@ -34,6 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'membership_paid_at' => 'datetime',
             'feedback_requested_at' => 'datetime',
             'opportunity_match_sent_at' => 'datetime',
+            'birthday_wished_at' => 'datetime',
             'is_founding_member' => 'boolean',
             'password' => 'hashed',
         ];

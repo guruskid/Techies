@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserProfile extends Model
 {
     protected $fillable = [
-        'user_id', 'username', 'first_name', 'last_name', 'phone', 'avatar',
+        'user_id', 'username', 'first_name', 'last_name', 'phone', 'date_of_birth', 'avatar',
         'country', 'state', 'city', 'professional_title', 'technology_category',
         'experience_level', 'current_organization', 'education', 'bio', 'headline',
         'linkedin', 'github', 'facebook', 'twitter', 'tiktok',
@@ -20,6 +20,7 @@ class UserProfile extends Model
 
     protected $casts = [
         'areas_of_interest' => 'array', 'is_public' => 'boolean', 'weekly_digest' => 'boolean',
+        'date_of_birth' => 'date',
         'open_to_work' => 'boolean', 'open_to_mentor' => 'boolean', 'open_to_collaborate' => 'boolean',
         'available_for_speaking' => 'boolean', 'hiring' => 'boolean',
         'notification_preferences' => 'array',

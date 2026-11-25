@@ -44,6 +44,7 @@ class MyProfileController extends Controller
             'first_name' => 'nullable|string|max:100',
             'last_name' => 'nullable|string|max:100',
             'phone' => 'nullable|string|max:30',
+            'date_of_birth' => ['nullable', 'date', 'before:today', 'after:1900-01-01'],
             'headline' => 'nullable|string|max:200',
             'professional_title' => 'nullable|string|max:150',
             'technology_category' => 'nullable|string|max:100',

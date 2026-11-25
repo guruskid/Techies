@@ -84,6 +84,7 @@
           <div><dt class="text-slate-600">Phone</dt><dd class="font-medium text-[#101E33]">
             @if($p?->phone)<a href="tel:{{ preg_replace('/[^\d+]/', '', $p->phone) }}" class="{{ $link }}">{{ $p->phone }}</a>@else Not set @endif
           </dd></div>
+          <div><dt class="text-slate-600">Date of birth</dt><dd class="font-medium text-[#101E33]">{{ $p?->date_of_birth?->format('M j, Y') ?? 'Not set' }} <span class="text-xs font-normal text-slate-500">(private)</span></dd></div>
           <div>
             <dt class="text-slate-600">Joined</dt>
             <dd class="font-medium text-[#101E33]">
