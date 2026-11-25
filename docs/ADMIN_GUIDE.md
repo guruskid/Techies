@@ -244,13 +244,25 @@ New members pay a one-time membership fee before using member-only features. The
 - `membership_benefits` — one benefit per line, shown on `/membership`.
 - `membership_guarantee` — the member promise shown on the page and in the FAQ.
 
-The member lifecycle is:
+When `PAYSTACK_SECRET_KEY` is configured, `/membership` shows a **Pay securely** button that starts Paystack Checkout. After Paystack confirms the transaction, the callback and webhook verify it and activate the membership automatically. The member receives the welcome email. Manual reference submission is hidden in this mode.
+
+If Paystack is not configured, the manual flow is used:
 
 1. The member registers and verifies their email. Membership status is `unpaid`.
 2. They open `/membership`, pay using the link or instructions, and submit their payment reference. Status becomes `pending`.
 3. Admins and super admins are emailed that a payment reference was submitted.
 4. Staff open the member from **Members management** and choose **Confirm payment**. Status becomes `active` and the member is emailed a welcome guide with an onboarding checklist.
 5. **Waive fee** sets the status to `exempt` for comped or staff-approved accounts.
+
+Paystack configuration lives in `.env`:
+
+```env
+PAYSTACK_SECRET_KEY=sk_live_...
+PAYSTACK_PUBLIC_KEY=pk_live_...
+PAYSTACK_WEBHOOK_SECRET=...
+```
+
+Set the Paystack webhook URL to `https://your-domain.com/payments/paystack/webhook`. The webhook verifies the signature and the transaction amount before activating anything.
 
 Until the membership is `active` or `exempt`, the member can browse and edit their profile but cannot register for events, apply to opportunities, submit speaker proposals, join chapters, register a hub or publish member content. Those actions redirect to `/membership`.
 
@@ -591,7 +603,9 @@ Payment statuses are `not_required`, `unpaid`, `paid` and `refunded`. Free event
 
 The payment-link and instructions fields are disabled in the event form while the registration type is free, so they cannot be set accidentally.
 
-**What the platform does not do:** it does not talk to a payment provider, verify a transaction, or move money. Confirming a payment is a human decision based on the reference you record. If you need automatic confirmation, connect a provider webhook separately.
+When Paystack is configured, registered attendees can pay through Paystack Checkout from the event page. The callback and webhook verify the transaction and mark the registration **paid** automatically. Admins can still confirm or refund manually from the attendee screen, and refunds can be initiated from **Admin → Payments**.
+
+Without Paystack, confirming a payment is a human decision based on the reference you record.
 
 ### 7.8 Call for speakers
 
@@ -1343,7 +1357,7 @@ Then ask the person to refresh; their session will end and they will sign in wit
 
 These are deliberate or current-state limitations, not hidden bugs. They should be understood before promising a capability.
 
-1. **No card processing.** Paid events record a fee and show an external payment link or instructions. Attendees pay outside the platform and an admin confirms the status. There is no provider webhook, automatic reconciliation or receipt generation.
+1. **Card processing requires Paystack keys.** With `PAYSTACK_SECRET_KEY` set, membership and paid-event checkout use Paystack and activate automatically after verification. Without keys, the platform falls back to external payment links/instructions and manual confirmation.
 2. **Most platform email is synchronous.** Verification, review alerts, event mail, chapter mail, digests and individual compose send during the request. Only scheduled broadcasts are queued. A slow SMTP host slows the request that triggers it.
 3. **IMAP is a custom socket client.** PHP's IMAP extension is not required. It supports the common path (SSL/TLS, login, inbox, search, fetch) but has not yet been proven against every live provider. Use **Test IMAP connection** with the target provider before relying on it.
 4. **Webhook signature verification is optional per mailbox.** Turn it on and configure the provider to sign; otherwise the URL token is the only protection.
@@ -1351,7 +1365,7 @@ These are deliberate or current-state limitations, not hidden bugs. They should 
 6. **Capability roles do not grant admin access.** Only the primary role does. The one exception is the `/manage` event and opportunity area, which also accepts hub owners and chapter coordinators and still restricts them to their own records and to drafts.
 7. **Changing a chapter on the profile only adds.** Memberships are never removed from the profile screen; leave a chapter from the chapter page.
 8. **Role changes in the console preserve capability roles but replace the primary-role tag.** `users.role` remains the authority.
-9. **No in-app notification centre, saved items, global search or activity feed.** These were removed on purpose; email is the channel.
+9. **Email remains the primary channel.** In-app notifications, saved items and search are available as convenience tools, but decisions and reminders are still delivered by email.
 10. **No personal website or portfolio fields.** Removed on purpose.
 11. **Software-deleted records remain in the database.** "Delete" in the admin interface is a soft delete.
 12. **Mail-centre credentials are only as safe as the admin accounts.** Protect staff accounts, use mailbox sharing instead of a shared login, and rotate credentials when someone leaves.
